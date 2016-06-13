@@ -1,0 +1,97 @@
+\documentclass[../ClassicThesis.tex]{subfiles}
+\begin{document}
+
+%************************************************
+\chapter{Plates}\label{ch:plates}
+%************************************************
+
+\section{Overview of approaches for finding plates}
+
+There are multiple approaches for finding plates contained in a 3D-mesh. The first, called inherent plates, requires the plates to be actually modeled in the mesh with both a top and a bottom side. The second approach, extruded plates, uses the mesh surface to extrude plates into the object. While this method works on more meshes then the inherent approach, it can produce doubled plates if they are modeled in the mesh. The third approach is to stack plates, creating a filled approximation of the mesh.
+
+\section{Prerequisites for finding plates}
+
+coplanar / shapesfinder / holedetection
+
+\subsection{Coplanar Faces}
+
+fvdfsjkldf
+
+\subsection{Shape Finder / Deus}
+
+öösdfjfsdkf
+
+\subsection{Hole Detection / Dimitri}
+
+sdfjkljklsdfsdfjkl
+
+\section{Finding inherent plates}
+
+In order to find inherent plates in a mesh, the first step is to find all shapes which are parallel and check if the distance between them fits one of the given plate thicknesses.
+
+\begin{center}Listing XYZ: Plate candidate pseudo code
+\begin{lstlisting}
+candidates = []
+  for shape1, index1 in shapes
+    for shape2, index2 in shapes when index1 < index2
+      if normals parallel and surfaces facing apart
+        if distance between shape1, shape2 in plate thicknesses
+          candidates.push { shape1, shape2 }
+return candidates
+\end{lstlisting}
+\end{center}
+
+While the testing for normal parallelism is done with built-in vector functions, the check if the surfaces are facing apart uses a vertex of each of the surfaces and calculates the angle of the resulting vector to one of the normals. If this angle is smaller than 90\textdegree, the surfaces are indeed facing apart. The distance between the surfaces is calculated by creating a three.js plane from one of the shapes and computing the plane-to-point distance towards one of the other shape's points.
+
+After finding these plate candidates, the shapes which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate. Now, the intersection of both shapes is calculated. This is done by using the already calculated mapping of vertices into the x-y-plane. The resulting intersection is transformed back into 3D-space using the rotation matrix of the base shape. With the resulting shapes, plates are created.
+
+\begin{center}Listing XYZ: Plate creation
+\begin{lstlisting}
+shape2CloserToOrigin = abs(shape2.zValue) < abs(shape1.zValue)
+polygon1 = create2DPolygon(shape1)
+polygon2 = create2DPolygon(shape2)
+intersection = polygon1.intersect polygon2
+shapes = parseToShapes(intersection)
+plates = parseToPlates(shapes)
+return plates
+\end{lstlisting}
+\end{center}
+
+This step uses the jsclipper library for intersecting the shapes. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
+
+\section{Extruding plates}
+
+blabla
+
+\section{Removing contained plates / Dimitri}
+
+\section{Stacking plates}
+
+blablabla
+
+% Hey Lukas hier ist Klara, habe eine alternative methode für algorithms darstellen, die finde ich persönlich übersichtlicher.
+% HIer ein Beispiel:
+% \begin{algorithm}[H]
+% \DontPrintSemicolon
+% 	\KwData{this text}
+% 	\KwResult{how to write algorithm with \LaTeX2e }
+% 	initialization\;
+% 	\While{not at end of this document}{
+% 	read current\;
+% 	\eIf{understand}{
+% 	go to next section\;
+% 	current section becomes this one\;
+% 	}{
+% 	go back to the beginning of current section\;
+% 	}
+%      \For{all I know}{
+%      look at this link to learn more about \LaTeX2e:\;
+%      http://ctan.space-pro.be/tex-archive/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf\;
+%      }
+% 	}
+%    \caption{How to write algorithms}
+% Kannst ja mal überlegen, wir sollten uns aber auf eins von beiden einigen
+
+% \end{algorithm}
+
+\end{document}

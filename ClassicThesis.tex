@@ -1,0 +1,223 @@
+% **************************************************************************************************************
+% A Classic Thesis Style
+% An Homage to The Elements of Typographic Style
+%
+% Copyright (C) 2012 Andr\'e Miede http://www.miede.de
+%
+% If you like the style then I would appreciate a postcard. My address 
+% can be found in the file ClassicThesis.pdf. A collection of the 
+% postcards I received so far is available online at 
+% http://postcards.miede.de
+%
+% License:
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; see the file COPYING.  If not, write to
+% the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+% Boston, MA 02111-1307, USA.
+%
+% **************************************************************************************************************
+% Note:
+%    * You must not use "u etc. in strings/commands that will be spaced out (use \"u or real umlauts instead)
+%    * New enumeration (small caps): \begin{aenumerate} \end{aenumerate}
+%    * For margin notes: \marginpar or \graffito{}
+%    * Do not use bold fonts in this style, it is designed around them
+%    * Use tables as in the examples
+%    * See classicthesis-preamble.sty for useful commands
+% **************************************************************************************************************
+% To Do:
+%                * [high] Check this out: http://www.golatex.de/koma-script-warnung-in-verbindung-mit-listings-package-t2058.html
+%    * [medium] mathbb in section-titles/chapter-titles => disappears somehow in headlines!!!
+% **************************************************************************************************************
+\documentclass[ twoside,openright,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
+                footinclude=true,cleardoublepage=empty,abstractoff, % <--- obsolete, remove (todo)
+                BCOR=5mm,paper=a4,fontsize=11pt,%11pt,a4paper,%
+                american,%draft%
+                ]{scrreprt}
+                
+% TODO: Remove draft option!!
+
+%********************************************************************
+% Note: Make all your adjustments in here
+%*******************************************************
+\input{classicthesis-config}
+
+\newcommand*{\pixel}{\ensuremath{pixel}}
+\newcommand*{\bit}{\ensuremath{bit}}
+\newcommand*{\byte}{\ensuremath{byte}}
+\newcommand*{\bitperpixel}{\ensuremath{bit/pixel}}
+\usepackage[squaren,Gray]{SIunits}
+\usepackage{todonotes}
+\usepackage{listings}
+\usepackage[justification=centering]{caption}
+\usepackage[ruled, vlined]{algorithm2e} %other option: linesnumbered
+\usepackage{subfiles}
+\usepackage{svg}
+% \usepackage{amsmath}
+
+% custom platener specific terminology
+\include{Terminology}
+
+%********************************************************************
+% Hyphenation
+%*******************************************************
+%\hyphenation{put special hyphenation here}
+
+% ********************************************************************
+% GO!GO!GO! MOVE IT!
+%*******************************************************
+\begin{document}
+
+\frenchspacing
+\raggedbottom
+\selectlanguage{american} % american ngerman
+%\renewcommand*{\bibname}{new name}
+%\setbibpreamble{}
+\pagenumbering{roman}
+\pagestyle{plain}
+%********************************************************************
+% Frontmatter
+%*******************************************************
+\include{FrontBackmatter/DirtyTitlepage}
+\include{FrontBackmatter/Titlepage}
+\include{FrontBackmatter/Titleback}
+\cleardoublepage\include{FrontBackmatter/Dedication}
+%\cleardoublepage\include{FrontBackmatter/Foreword}
+\cleardoublepage\include{FrontBackmatter/Abstract}
+\cleardoublepage\include{FrontBackmatter/Publication}
+\cleardoublepage\include{FrontBackmatter/Acknowledgments}
+\pagestyle{scrheadings}
+\cleardoublepage\include{FrontBackmatter/Contents}
+\setlength{\parskip}{2mm}
+%********************************************************************
+% Mainmatter
+%*******************************************************
+\pagenumbering{arabic}
+%\setcounter{page}{90}
+% use \cleardoublepage here to avoid problems with pdfbookmark
+\cleardoublepage
+
+%\part{Introduction}
+\subfile{Chapters/01-Introduction}
+%\include{Chapters/01-Introduction}
+\cleardoublepage
+
+%\part{User Interaction}
+\subfile{Chapters/02-Userinteraction}
+%\include{Chapters/02-Userinteraction}
+\cleardoublepage
+
+%\part{Architecture}
+% Sven
+\subfile{Chapters/03-Architecture}
+%\include{Chapters/03-Architecture}
+\cleardoublepage
+
+%\part{Architecture}
+% Sven or Dimitri
+\subfile{Chapters/03.2-Processing_Pipeline}
+%\include{Chapters/03.2-Processing_Pipeline}
+\cleardoublepage
+
+%\part{Approximation}
+% Dimitri
+\subfile{Chapters/04-Approximation}
+%\include{Chapters/04-Approximation}
+\cleardoublepage
+
+%\part{Plates}
+\subfile{Chapters/05-Plates}
+%\include{Chapters/05-Plates}
+\cleardoublepage
+
+%\part{Graph}
+\subfile{Chapters/06.1-Graph}
+%\include{Chapters/06.1-Graph}
+\cleardoublepage
+
+%\part{Joints}
+\subfile{Chapters/06.2-Joints}
+%\include{Chapters/06.2-Joints}
+\cleardoublepage
+
+%\part{Curves}
+\subfile{Chapters/07-Curves}
+%\include{Chapters/07-Curves}
+\cleardoublepage
+
+%\part{Assembly}
+\subfile{Chapters/08-Assembly}
+%\include{Chapters/08-Assembly}
+\cleardoublepage
+
+%\part{Benchmark}
+\subfile{Chapters/09-Benchmark}
+%\include{Chapters/09-Benchmark}
+\cleardoublepage
+
+%\part{Benchmark}
+\subfile{Chapters/10-Classifiers}
+%\include{Chapters/10-Classifiers}
+\cleardoublepage
+
+%\part{Future Work}
+\subfile{Chapters/11-FutureWork}
+%\include{Chapters/11-FutureWork}
+\cleardoublepage
+
+%\part{Conclusion}
+\subfile{Chapters/12-Conclusion}
+%\include{Chapters/12-Conclusion}
+\cleardoublepage
+
+% %\part{Introduction}
+% \include{Chapters/Chapter01}
+% \cleardoublepage
+% %\ctparttext{Introductory text for chapter}
+
+% %\part{Related Work}
+% \include{Chapters/Chapter02}
+% \cleardoublepage
+
+% %\part{The MultiToe Framework}
+% \include{Chapters/Chapter03}
+% \cleardoublepage
+
+% %\part{User Recognition and Tracking}
+% \include{Chapters/Chapter04}
+% \cleardoublepage
+
+% %\part{Evaluation}
+% %\include{Chapters/Chapter05}
+% %\cleardoublepage
+
+% %\part{Conclusion}
+% \include{Chapters/Chapter06}
+% \cleardoublepage
+
+% ********************************************************************
+% Backmatter
+%*******************************************************
+%\appendix
+%\cleardoublepage
+%\part{Appendix}
+%\include{Chapters/Chapter0A}
+%********************************************************************
+% Other Stuff in the Back
+%*******************************************************
+\cleardoublepage\include{FrontBackmatter/Bibliography}
+\cleardoublepage\include{FrontBackmatter/Declaration}
+% ********************************************************************
+% Game Over: Restore, Restart, or Quit?
+%*******************************************************
+\end{document}
+% ********************************************************************

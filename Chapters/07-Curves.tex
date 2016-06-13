@@ -1,0 +1,38 @@
+\documentclass[../ClassicThesis.tex]{subfiles}
+\begin{document}
+
+%************************************************
+\chapter{Curves/Deus}\label{ch:curves}
+%************************************************
+
+\section{Cutting curved shapes}
+
+Approximating curved shapes with parts created by the laser cutter is a special challenge because only 2d shapes can be cut. Nevertheless, there are several approaches to make the cut material bendable, for example, paper can already be bent, acrylic if it is heated and wood with the help of living hinges.
+
+Theoretically, this only enables the possibility to create shapes from developable surfaces (like cylinders) but no doubly curved ones (like spheres). Practically this problem is not important for us because the 3d models we use are triangle meshes so only flat surfaces are used to represent the surface wich makes it always developable.
+
+\section{General approach}
+
+In our implementation, we use bends as joint type as an alternative to, for example, finger joints. Therefore, it is based like the finger joint generation on the plate graph. Furthermore, it is separated into two important steps. The first one annotates each connection between plates if this should be a bending joint or not and the second creates a flatted shape from the plates that are connected with bends.
+
+\section{Setting the joint type}
+
+In this step, we try to find out wich connections between two plates could be a bending joint so that the resulting shape of the connected plates is flattable without overlaps.
+
+To do so we start with one plate and check for all the connections it has:
+\begin{itemize}
+\item Is this connection not set already?
+\item Is the connection angle near enougth to 180\textdegree so bending the material this far is possible? (What near enougth means depands on the used material)
+\item Is it possible to add the shape of the connected plate without overlapping the already existing shape?
+\end{itemize}
+If so, the connected plate is added to this plate and they form a bent plate. This is repeated for all the connections of the bent plate until thy are all set to be a bending or a finger joint.
+If after this all plates are not assigned to a bent plate the process is repeated for one of these until no one is left.
+
+To check if a plate could be added to an existing bent plate we merge all the finger joint shapes of the outer connections of the bent plate and those of the probably added plate to the corresponding shape except for the ones that are from the connection between the bent plate and the new one. Then we calculate the intersection of this two. If the result is empty there are no overlaps, the plate can be safely added to the bent plate and the connection annotated as a bending joint
+
+If one of the conditions is not fulfilled the connection can't be a bend and is annotated as finger joint.
+
+\section{Building the bent plates}
+\section{Alternative solutions}
+
+\end{document}
