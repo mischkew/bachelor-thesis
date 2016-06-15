@@ -16,7 +16,7 @@
 \label{fig:architectureOverviewCurrent}
 \end{figure}
 
-Platener is designed to enabled web-based manipulation and rendering of {\threedmodel}s. Figure \ref{fig:architectureOverviewCurrent} shows the major packages \emph{Convertify}, \emph{Client}, \emph{Server} and \emph{Plugins}. The arrows indicate dependencies between the packages. The architecture emphasizes a uni-directional data and event flow. Similar to mobile application design, lifecycle events and the concept of delegation\footnote{\url{https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html}} establish clear communication among packages. 
+Platener is designed to enabled web-based manipulation and rendering of {\threedmodel}s. Figure \ref{fig:architectureOverviewCurrent} shows the major packages \emph{Convertify}, \emph{Client}, \emph{Server} and \emph{Plugins}. The arrows indicate dependencies between the packages. The architecture emphasizes a uni-directional data and event flow. Similar to mobile application design, lifecycle events and the concept of delegation\footnote{\url{https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html}} establish clear communication among packages.
 
 % begin block comment
 \iffalse
@@ -26,7 +26,7 @@ Platener is designed to enabled web-based manipulation and rendering of {\threed
 \item optimized towards: working with 3d-models in webgl environment
 \item plugin-based: allow interchangeable computation logic/ conversion methods
 \item combination of lifecycle-based communication and explicit calls via dispatchers (related work: mobile application design, mediator pattern)
-\item explicit communication between packages
+\ritem explicit communication between packages
 \end{itemize}
 \fi
 % end block comment
@@ -35,13 +35,26 @@ Platener is designed to enabled web-based manipulation and rendering of {\threed
 
 Each package takes over a set of distinct responsibilities ensuring decoupled components. Thus a flexible, maintainable system is created.
 
-\emph{Convertify} provides generic tools which support plugins in manipulating {\threedmodel}s. This includes utilities for vector analysis as well as rendering routines and scene management. The application lifecycle can be initiated and observed via a \emph{Bundle}. A Bundle represents an instance of the application's computation unit. The Client and Server packages run a Bundle.
+\emph{Convertify} provides generic tools which support plugins in manipulating {\threedmodel}s. This includes utilities
+for vector analysis as well as rendering routines and scene management. The application lifecycle can be initiated and
+observed via a \emph{Bundle}. A Bundle represents an instance of the application's computation unit. The Client and
+Server packages run a Bundle.
 
-The \emph{Client} package gives the look and feel of the application. Where Convertify can be reused as-is for many different purposes, the Client package has to be rewritten from scratch. This package contains frontend components. The developer can choose any template engine\footnote{\url{http://www.sitepoint.com/overview-javascript-templating-engines/}} which serves the application's purpose. So the Client actually wires up the {\userinterface} and the computation logic.
+The \emph{Client} package gives the look and feel of the application. Where Convertify can be reused as-is for many
+different purposes, the Client package has to be rewritten from scratch. This package contains frontend components. The
+developer can choose any template
+engine\footnote{\url{http://www.sitepoint.com/overview-javascript-templating-engines/}} which serves the application's
+purpose. So the Client actually wires up the {\userinterface} and the computation logic.
 
-The \emph{Server} package is the headless counterpart to the Client package. A Command Line Interface enables the user to run the application without a browser. The Server also satisfies requests from the Client, such as caching and loading models in a RESTful interaction\footnote{\url{http://www.drdobbs.com/web-development/restful-web-services-a-tutorial/240169069}}. Again, the Server package has to be rewritten for a custom application.
+The \emph{Server} package is the headless counterpart to the Client package. A Command Line Interface enables the user
+to run the application without a browser. The Server also satisfies requests from the Client, such as caching and
+loading models in a RESTful
+interaction\footnote{\url{http://www.drdobbs.com/web-development/restful-web-services-a-tutorial/240169069}}. Again, the
+Server package has to be rewritten for a custom application.
 
-\emph{Plugins} provide an exchangeable set of features which are used by the Client and Server package. A Plugin interacts with the Scene and its {\threedmodel}s via lifecycle events. E.g. a concrete conversion strategy provided by Platener is implemented by a single Plugin. Plugin features can be enabled for Client, Server or both. 
+\emph{Plugins} provide an exchangeable set of features which are used by the Client and Server package. A Plugin
+interacts with the Scene and its {\threedmodel}s via lifecycle events. E.g. a concrete conversion strategy provided by
+Platener is implemented by a single Plugin. Plugin features can be enabled for Client, Server or both.
 
 % block comment
 \iffalse
@@ -86,11 +99,11 @@ The \emph{Server} package is the headless counterpart to the Client package. A C
 \item less interfacing because frontend <> logic tightly coupled
 \end{itemize}
 
-\textbf{cons} 
+\textbf{cons}
 \begin{itemize}
 \item vendor lock: jade and express
 \item logic and views interweaved: high coupling --> hard testing, hard maintainability, hard to change things
-\item implicit plugin communication 
+\item implicit plugin communication
 \item complex management of custom 3d manipulation tools would require a lot of rewrites because of view/ logic mix
 \end{itemize}
 
@@ -105,21 +118,27 @@ The \emph{Server} package is the headless counterpart to the Client package. A C
 \begin{itemize}
 \item entry points
 \item headless startup
-\item basic logic for 3dmodel manipulation (import, meshconversion)
-\item scenegraph and rendering (nodes, refs for syncobjects in brickify)
+\item basic logic for 3dmodel manipulation (import, mesh-conversion)
+\item scenegraph and rendering (nodes, refs for sync objects in Brickify)
 \item plugin interaction (hooks)
 \item application helpers (threeHelper, renderHelper, commons (we should move commons to convertify))
 \end{itemize}
 
-\subsection{Platener's Plugins}
+\subsection{Plugin Overview}
 
-%The Client package provides the look and feel of Platener. The Server package manages communication between frontend and data storage.
+% The Client package provides the look and feel of Platener. The Server package
+% manages communication between frontend and data storage.
 
-The plugins composed into Platener provides its computations logic and WebgGL scene rendering. We will give a brief introduction of each plugin in the following paragraphs.
+The plugins composed into Platener provides its computation logic and WebgGL
+scene rendering. We will give a brief introduction of each plugin in the
+following paragraphs.
 
 \subsubsection{Coordinate System}
 
-This plugin provides orientation enhancements for the WebGL scene. Rendering xyz-axes and a an axis-aligned grid, users can grasp alignment and dimensions of {\threedmodel}s. Figure \ref{fig:architecture_overview_coordinate_system} shows the coordinate system in the WebGL view.
+This plugin provides orientation enhancements for the WebGL scene. Rendering
+xyz-axes and a an axis-aligned grid, users can grasp alignment and dimensions of
+{\threedmodel}s. Figure \ref{fig:architecture_overview_coordinate_system} shows
+the coordinate system in the WebGL view.
 
 \begin{figure}
 \label{fig:architecture_overview_coordinate_system}
@@ -129,59 +148,174 @@ This plugin provides orientation enhancements for the WebGL scene. Rendering xyz
 
 \subsubsection{Platener Pipeline}
 
-The Platener Pipeline plugin is the main computation unit. The plugin defines multiple {\fabmethod}s. A {\fabmethod} is a conversion approach of a \threedmodel. Multiple components, which can manipulate the input model, are chained after another to produce 2D- or 3D-output. For example construction plans for the original input model as {\svgfile}s. 
+The Platener Pipeline plugin is the main computation unit. The plugin defines
+multiple {\fabmethod}s. A {\fabmethod} is a conversion approach of a
+\threedmodel. Multiple components, which can manipulate the input model, are
+chained after another to produce 2D- or 3D-output. For example construction
+plans for the original input model as {\svgfile}s.
 
 \subsubsection{Node Visualizer}
 
-We visualize the results of the Platener Pipeline plugin in the WebGL view. The Node Visualizer plugin renders the results of each component of each {\fabmethod} respectively.
+We visualize the results of the Platener Pipeline plugin in the WebGL view. The
+Node Visualizer plugin renders the results of each component of each
+{\fabmethod} respectively.
 
 \subsubsection{Scoring}
 
-When multiple {\fabmethod}s are run, we want to choose the best fitted conversion as output. Thus each {\fabmethod} is scored by a method-specific scoring algorithm. This plugin provides these scoring algorithms.
+When multiple {\fabmethod}s are run, we want to choose the best fitted
+conversion as output. Thus each {\fabmethod} is scored by a method-specific
+scoring algorithm. This plugin provides these scoring algorithms.
 
 \subsubsection{Solution Selection}
 
-This plugin utilizes the Platener Pipeline plugin and the Scoring plugin to run and evaluate all {\fabmethod}s. It outputs the result of the {\fabmethod} with the best score and notifies the Dispatcher.
+This plugin utilizes the Platener Pipeline plugin and the Scoring plugin to run
+and evaluate all {\fabmethod}s. It outputs the result of the {\fabmethod} with
+the best score and notifies the Dispatcher.
 
 \subsubsection{Isolated Testing}
 
-While we worked at different stages of a linearly executed {\fabmethod} in parallel, we needed a mechanism to test each component of the {\fabmethod} before its preceeding or succeeding components were finished. The Isolated Testing plugin provides an isolated environment, which allows to execute a single component of a {\fabmethod} with pre-defined input.
+While we worked at different stages of a linearly executed {\fabmethod} in
+parallel, we needed a mechanism to test each component of the {\fabmethod}
+before its preceeding or succeeding components were finished. The Isolated
+Testing plugin provides an isolated environment, which allows to execute a
+single component of a {\fabmethod} with pre-defined input.
 
 %- working in parallel, while needing inputs of work in progress
 %- validate & visualize test scenarios for separate pipeline steps (components of a \fabmethod)
 %- provide input for a given step and compute/ render results for just that step
 
-\subsection{Control Flow via Dispatchers}
+\subsection{Lifecycle Events}
 
-As Platener is composed of multiple plugins, which either represent computation logic or render components, we have to know exactly when each of these plugins will interact with the system. We propose a Dispatcher component, behaving similar to the mediator pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
+WHAT?
+
+\begin{itemize}
+\item App Lifecycle: Model Loading
+\item Plugin Init
+\item Scene Refreshes
+\item Scene Graph Interactions
+\item refer to Brickify
+\end{itemize}
+
+WHY?
+
+\begin{itemize}
+\item Gain control for computation units (plugins)
+\item interact with the system
+\end{itemize}
+
+HOW?
+
+\begin{itemize}
+\item plugin hooks
+\item called on each plugin
+\item allow plugin to handle the event (e.g do some manipulation to the scene)
+\end{itemize}
+
+
+\subsection{Control Flow and Plugin Communication}
+
+As Platener is composed of multiple plugins, which either represent computation
+logic or render components, we have to know exactly when each of these plugins
+will interact with the system. We propose a Dispatcher component, behaving
+similar to the mediator
+pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
 
 \subsubsection{Dispatcher}
 
-The Dispatcher organizes the communication between plugins and client, plugins and server and plugins and plugins in a single place. 
+WHAT?
 
-\myNotes{TODO: diagrams}
+The Dispatcher is the entry point for any client or server code. The Dispatcher
+loads and initializes a set of configured plugins. It organizes the
+communication between plugins and client, plugins and server and plugins and
+plugins in a single place.
 
-\subsubsection{Control Flow}
+% \begin{itemize}
+% \item dispatcher is entry point for client -> logic, server -> logic application
+% \item loads and init given list of plugins via pluginloader
+% \item implements each plugin hook and decides how to dispatch each call to the plugins dependent on application state
+% \end{itemize}
+
+\textbf{events}
+Convertify fires lifecycle events on which the
+plugins can react. The mediator knows an explicit execution order for each
+plugin when a lifecycle event is fired.
+
+\textbf{protocols}
+\begin{itemize}
+\item communication between packages (no lifecycle)
+\item use protocols (explicit definition of what will happen)
+\item protocol embodies a set of feature for the application
+\end{itemize}
+
+WHY?
+
+\begin{itemize}
+\item one guy who pulls all the strings (one source of truth)
+\item similar designs in known application frameworks (android, ios)
+\item javascript, non-type language --> protocols ensure correct interfaces
+\end{itemize}
+
+HOW?
+
+\begin{itemize}
+\item refer to Brickify, PluginLoader
+\item explain plugins.yaml shortly
+\item implements plugin hooks itself (show code snippets, hooks property)
+
+\item implements protocols for plugins (show code snippets)
+\item explain how plugins push state (control-flow information) back to the
+  dispatcher
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\columnwidth]{Images/03-architecture_overview_dispatcher.jpg}
+  \caption{Dispatcher manages inter-application communication during the lifecycle of the app.}
+  \label{fig:architecture_overview_dispatcher}
+\end{figure}
+
+
+\subsubsection{Control Flow vs Brickify only plugin hooks}
 
 \begin{itemize}
 \item wiring up plugins
-\item explictely calling plugin hooks
+\item explicitly calling plugin hooks
+\item highly customizable when adding in new plugins
+\item how is control flow achieved? -->
 \end{itemize}
-
-\subsubsection{vs Brickify only plugin hooks}
 
 \begin{itemize}
 \item ++ pros
 \item loading sequence control (impossible to repair)
+\item fine grained scheduling of communication
 \item explicit execution behavior
 \item ... (look at notes on desk)
-\item 
+\item
 \item -- cons
 \item boilerplate code
+\item custom integration for each plugin
 \end{itemize}
 
-\subsection{Platener Pipeline}
+\begin{itemize}
+\item ++ pros
+\item no further config needed
+\item
+\item -- cons
+\item implicit order
+\item in different use cases, different plugins have to interact first (order is not fixed)
+\item frontend often has to work on data which is not available before another plugin loaded
+\end{itemize}
 
+\myNotes{now plugins can...}
+
+\begin{itemize}
+\item push application state back to the dispatcher
+\item communication with each other by specifying a protocol which has to be implemented on the mediator
+\item mediator then can oversee the communication
+\end{itemize}
+
+
+\subsection{Platener Pipeline}
 
 \begin{enumerate}
 \item Overview/ Purpose/ Plugin Structure
@@ -304,3 +438,7 @@ Selecting the best estimated solution by default.
 \end{enumerate}
 
 \end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../ClassicThesis"
+%%% End:
