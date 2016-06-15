@@ -16,7 +16,7 @@
   \label{fig:architectureOverviewCurrent}
 \end{figure}
 
-Platener is designed to enabled web-based manipulation and rendering of
+Platener is designed to enable web-based manipulation and rendering of
 {\threedmodel}s. Figure \ref{fig:architectureOverviewCurrent} shows the major
 packages \emph{Convertify}, \emph{Client}, \emph{Server} and \emph{Plugins}. The
 arrows indicate dependencies between the packages. The architecture emphasizes a
@@ -62,10 +62,11 @@ engine\footnote{\url{http://www.sitepoint.com/overview-javascript-templating-eng
 which serves the application's purpose. So the Client wires up the
 {\userinterface} and the computation logic.
 
-The \emph{Server} package is the headless counterpart to the Client package. A
-Command Line Interface enables the user to run the application without a
-browser. The Server also satisfies requests from the Client, such as caching and
-loading models in a RESTful
+The \emph{Server} package is the headless\footnote{A headless web-application
+  runs without the graphical user interface of browsers.} counterpart to the
+Client package. A Command Line Interface enables the user to run the application
+without a browser. The Server also satisfies requests from the Client, such as
+caching and loading models in a RESTful
 interaction\footnote{\url{http://www.drdobbs.com/web-development/restful-web-services-a-tutorial/240169069}}.
 
 % \begin{itemize}
