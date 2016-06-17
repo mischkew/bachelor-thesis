@@ -260,28 +260,71 @@ applications built with Convertify.
 \subsubsection{Plugins Are Packages of Their Own}
 
 Each \emph{Plugin} resides in the Plugin Package. We define a
-\emph{package.json} file, which contains metadata of the package.
+\emph{package.json} file, which contains metadata of the package, see Listing
+\ref{lst:packagejson}. Conceptionally, a \emph{Plugin} can be a separate
+\emph{npm} package\footnote{Node Package Manager,
+  \url{https://docs.npmjs.com/getting-started/what-is-npm}}. This means plugins
+could be installed like any other typical dependency. For the sake of
+development speed, we do not use the \emph{npm} setup yet.
 
-\myNotes{NEXT TODO: brief description of Plugin as separate package, ref
-  Brickify, explain that we enhance with capabilities of protocols (ref to
-  dispatcher and control flow, explain bonus of protocols), show how protocols
-  are defined? -- here or in dispatcher?}
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{json}
+{
+  "name": "platener-pipeline",
+  "version": "1.0.0",
+  "description": "modifies model mesh to enable lasercuttable parts",
+  "browser": "./PlatenerPipeline.coffee",
+  "main": "./PlatenerPipeline.coffee"
+}
+\end{minted}
+\caption{\emph{package.json} file of \emph{PlatenerPipeline} plugin.}
+\label{lst:packagejson}
+\end{listing}
+
+To register a \emph{Plugin} with \emph{Convertify}, we have to add an entry in
+the \emph{PluginMap}. The \emph{PluginMap} is a static dictionary, enumerating
+all installed plugins and their filepaths. Because \emph{\nodejs} as well as
+\emph{\essix} do not support dynamic require statements\footnote{A dynamic
+  require statement can include and interpret source files into runtime where
+  file paths are generated during runtime.}, we have to list each package
+explicitly. In future systems we could alter the build system to include plugin
+files automatically before compilation step.
+
+The exposed main file of the package implements a set of \emph{PluginHooks}.
+These hooks are registered at the \emph{Dispatcher}, which is responsible for
+dispatching the lifecycle events to the plugins in a predefined order\myNotes{,
+  see chapter ??}. Beside \emph{PluginHooks}, a \emph{Plugin} can expose
+\emph{Protocols} to interact with the system. \emph{Protocols} are describe in
+\myNotes{chapter ??}. The plugin can implement any internal structure or
+complexity. The simplest form of a plugin is a single file. But it may provide a
+whole filetree. A list of plugins used in \emph{Platener} is describe in
+\myNotes{chapter ??}.
+
+% \myNotes{NEXT TODO: brief description of Plugin as separate package, ref
+
+% Brickify, explain that we enhance with capabilities of protocols (ref to
+%   dispatcher and control flow, explain bonus of protocols), show how protocols
+%   are defined? -- here or in dispatcher?}
 
 
-\begin{itemize}
-\item define with package.json (could conceptionally be another npm package) =
-  metadata
-\item add to PluginMap
-\item define hooks
-\item invoked by Dispatcher
-\item space of freedom is huge...
-\item make this very concrete, to show how to write your own plugins
-\end{itemize}
 
-\myNotes{see chapter ??, a list of plugins}
-\myNotes{see chapters ?? for more detail (nodevis, platenerpipeline, ...)}
-\myNotes{look into control flow to understand plugin invokations}
-\myNotes{maybe figure about lifecycle and hooks}
+% \begin{itemize}
+% \item define with package.json (could conceptionally be another npm package) =
+%   metadata
+% \item add to PluginMap
+% \item define hooks
+% \item invoked by Dispatcher
+% \item space of freedom is huge...
+% \item make this very concrete, to show how to write your own plugins
+% \end{itemize}
+
+% \myNotes{see chapter ??, a list of plugins}
+% \myNotes{see chapters ?? for more detail (nodevis, platenerpipeline, ...)}
+% \myNotes{look into control flow to understand plugin invokations}
+% \myNotes{maybe figure about lifecycle and hooks}
+
 
 \subsection{Control Flow and Plugin Communication}
 
@@ -293,14 +336,10 @@ pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
 
 \subsubsection{Dispatcher}
 
-WHAT?
-
 The Dispatcher is the entry point for any client or server code. The Dispatcher
 loads and initializes a set of configured plugins. It organizes the
 communication between plugins and client, plugins and server and plugins and
-plugins in a single place.
-
-\myNotes{reference figure}
+plugins in a single place, as shown in Figure~\ref{fig:architecture_overview_dispatcher}.
 
 % \begin{itemize}
 % \item dispatcher is entry point for client -> logic, server -> logic
@@ -583,4 +622,5 @@ Selecting the best estimated solution by default.
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
 %%% End:
