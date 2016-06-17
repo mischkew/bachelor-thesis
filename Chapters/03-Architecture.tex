@@ -81,17 +81,20 @@ interaction\footnote{\url{http://www.drdobbs.com/web-development/restful-web-ser
 % \end{itemize}
 
 
-\subsection{Decoupling the Framework into Packages}
+\subsection{Decoupling the Software into Packages}
 
 Decoupling the software into packages builds a robust system. Computation logic
 and UX components are kept apart, which allows isolated testing.
 
-The Convertify package is meant to be used as a white-box framework for building
+\subsubsection{Convertify Is a Framework}
+
+The \emph{Convertify} package is meant to be used as a white-box framework for building
 3D manipulation applications. Platener is such an application, supporting model
 imports, rendering, altering and export of geometries. Introducing a web
 framework makes sense, because WebGL gets more and more stable as of the year
 2016 \myNotes{TODO: reference!}. Thus graphics software can be brought to huge
-audience providing cross-platform web services.
+audience providing cross-platform web services. For example \emph{Brickify} or \emph{Laser
+Origami}\myNotes{ref} could be implemented with \emph{Convertify}.
 
 % \begin{itemize}
 % \item multpiple purpose:
@@ -104,15 +107,17 @@ audience providing cross-platform web services.
 %     comparison with Brickify}
 % \end{itemize}
 
+\subsubsection{Plugins Establish Focus on Graphic Problems}
+
 Plugins are self-contained units which mainly interact with the WebGL scene and
 its scene graph. Whole feature-sets can be switched on or off at once. They are
 loosely coupled but have high cohesion at the same time. This prevents spaghetti
 code and supports maintainability of each component. Furthermore, we use
 software hooks to integrate plugins with rendering of models and access to
-geometry data. This event-based approach allows developers to write a 3D
+geometry data. This event-based approach enables developers to write a 3D
 manipulation tool without having detailed domain knowledge about WebGL and
-web-services. This will allows developers from the Computer Graphics domain to
-concentrate on the graphics problem, rather than the web environment.
+web-services. This allows developers from the Computer Graphics domain to
+concentrate on the graphics problem, rather than the web-environment.
 
 % \begin{itemize}
 % \item dev improvements:
@@ -129,17 +134,23 @@ concentrate on the graphics problem, rather than the web environment.
 
 % \subsection{Discussion "vs Brickify"}
 
-The Convertify package was not present in the Brickify architecture, see Figure
-\ref{fig:architecture_overview_brickify}. This means Brickify provided a mix of
+\subsubsection{A Comparison with the Brickify Packages}
+\myNotes{maybe put statement, rather then description into headline}
+
+The Convertify package is not present in the Brickify architecture, see Figure
+\ref{fig:architecture_overview_brickify}. This means Brickify provides a mix of
 UX components, computation logic and interfacing code in the Client and Server
-packages. Plugin communication was hard to observe and only implicitly ordered.
-We introduced the new package to escape the vendor lock of previously used UX
-libraries and to create a thoroughly testable code base.
+packages. Plugin communication is hard to observe and only implicitly ordered.
+We introduce the new package to escape the vendor lock\myNotes{explain vendor
+  lock} of previously used UX libraries. Libraries like \myNotes{add refs}
+\emph{jQuery} and \emph{Jade} \myNotes{now pug} scatter code throughout the
+project. By removing UX dependencies from logic components we create a
+thoroughly testable code base.
 
 \begin{figure}
-\label{fig:architecture_overview_brickify}
   \includegraphics[width=1\columnwidth]{03-architecture_overview_brickify}
   \caption{Main Packages of the former Brickify Architecture}
+  \label{fig:architecture_overview_brickify}
 \end{figure}
 
 % \textbf{pros}
@@ -147,7 +158,6 @@ libraries and to create a thoroughly testable code base.
 % \item fast enhancements as only views/ routes have to be adapted
 % \item less interfacing because frontend <> logic tightly coupled
 % \end{itemize}
-
 % \textbf{cons}
 % \begin{itemize}
 % \item vendor lock: jade and express
@@ -160,77 +170,117 @@ libraries and to create a thoroughly testable code base.
 
 \section{Convertify Package and its Plugin Architecture}
 
+Platener uses the Convertify package as entry points to the {\threedmodel}
+processing. The package provides features for browser- and
+headless-environments.
 
-\subsection{Convertify Purpose - Application Helpers}
+It encapsulates basic logic for {\threedmodel} manipulation and model import.
+Additionally, we provide utilities to simplify working with \emph{\threejs} or
+rendering objects into scene.
+
+Convertify handles the scenegraph of the application. \emph{Nodes} are injected
+into the scene \myNotes{ref brickify} and lifecycle events are emitted, e.g. on
+load, on draw or on touch interactions with the \emph{Node}.
+
+% \begin{itemize}
+% \item entry points
+% \item headless startup
+% \item basic logic for 3dmodel manipulation (import, mesh-conversion)
+% \item scenegraph and rendering (nodes, refs for sync objects in Brickify)
+% \item plugin interaction (hooks)
+% \item application helpers (threeHelper, renderHelper, commons (we should move
+%   commons to convertify))
+% \end{itemize}
+
+\subsection{Lifecycle Events with Plugin Hooks}
+
+\subsubsection{The Internal System Emits Lifecycle Events}
+
+Similar to other applications\myNotes{what applications?} \emph{Convertify}
+dispatches events from the internal system during the application's lifecycle.
+The internal system refers to framework features, which all applications built
+with \emph{Convertify} share. Such features are model import, scenegraph
+manipulation or render updates. The lifecycle of \emph{Platener} is depicted in
+Figure \myNotes{add figure for platener lifecycle}.
+
+% \begin{itemize}
+% \item App Lifecycle: Model Loading
+% \item Plugin Init
+% \item Scene Refreshes
+% \item Scene Graph Interactions
+% \item refer to Brickify
+% \end{itemize}
+
+\subsubsection{Plugins Interact with the Internal System via Lifecycle Events}
+
+The subscribers to lifecycle events are \emph{Plugins}. Each event type exposes
+a \emph{PluginHook}. Each \emph{Plugin} registers a callback on an arbitrary
+number of events. These callbacks get called when the event is dispatched by the
+system. Thus plugins can handle each event and apply their own functionality to
+the scene or even the model geometry. With this we emphasize compact computation
+units in plugins, which can still interact freely with the system. The approach
+is directly adapted from \emph{Brickify} \myNotes{ref chapter in brickify}.
+
+% \begin{itemize}
+% \item Gain control for computation units (plugins)
+% \item interact with the system
+% \item plugin hooks (refer to pluginHooks.yaml)
+% \item called on each plugin
+% \item allow plugin to handle the event (e.g do some manipulation to the scene)
+% \end{itemize}
+
+\subsection{Plugins within Convertify}
+
+A \emph{Plugin} bundles methods and system event callbacks to provide a new set
+of features to the application, e.g. the \emph{PlatenerPipeline} plugin builds a
+two-dimensional construction plan from the {\threedmodel} and exposes it for
+download. The \emph{Plugin} can be switched on or off on application load for
+the Client and Server package respectively. Complex applications can be built by
+composing multiple plugins. This supports the framework character of
+applications built with Convertify.
+
+
+% \begin{itemize}
+% \item part of the Plugin Package
+% \item pluggable set of feature
+% \item or self-contained unit
+% \item can be activated for server/ client
+% \item composing multiple plugins --> extensible, maintainable method of building
+%   complex applications
+% \end{itemize}
+
+
+% \begin{itemize}
+% \item Convertify as a framework
+% \item do not mix logic/ ui
+% \item decomposable logic (no spaghetti code)
+% \end{itemize}
+
+
+\subsubsection{Plugins Are Packages of Their Own}
+
+Each \emph{Plugin} resides in the Plugin Package. We define a
+\emph{package.json} file, which contains metadata of the package.
+
+\myNotes{NEXT TODO: brief description of Plugin as separate package, ref
+  Brickify, explain that we enhance with capabilities of protocols (ref to
+  dispatcher and control flow, explain bonus of protocols), show how protocols
+  are defined? -- here or in dispatcher?}
+
 
 \begin{itemize}
-\item entry points
-\item headless startup
-\item basic logic for 3dmodel manipulation (import, mesh-conversion)
-\item scenegraph and rendering (nodes, refs for sync objects in Brickify)
-\item plugin interaction (hooks)
-\item application helpers (threeHelper, renderHelper, commons (we should move
-  commons to convertify))
-\end{itemize}
-
-\subsection{Render Lifecycle}
-
-WHAT?
-
-\begin{itemize}
-\item App Lifecycle: Model Loading
-\item Plugin Init
-\item Scene Refreshes
-\item Scene Graph Interactions
-\item refer to Brickify
-\end{itemize}
-
-WHY?
-
-\begin{itemize}
-\item Gain control for computation units (plugins)
-\item interact with the system
-\end{itemize}
-
-HOW?
-
-\begin{itemize}
-\item plugin hooks (refer to pluginHooks.yaml)
-\item called on each plugin
-\item allow plugin to handle the event (e.g do some manipulation to the scene)
-\end{itemize}
-
-\subsection{A Plugin is...}
-
-WHAT?
-
-\begin{itemize}
-\item pluggable set of feature
-\item or self-contained unit
-\item can be activated for server/ client
-\item composing multiple plugins --> extensible, maintainable method of building
-  complex applications
-\end{itemize}
-
-WHY?
-
-\begin{itemize}
-\item Convertify as a framework
-\item do not mix logic/ ui
-\item decomposable logic (no spaghetti code)
-\end{itemize}
-
-HOW?
-
-\begin{itemize}
-\item define with package.json (could conceptionally be another npm package)
+\item define with package.json (could conceptionally be another npm package) =
+  metadata
 \item add to PluginMap
 \item define hooks
+\item invoked by Dispatcher
 \item space of freedom is huge...
+\item make this very concrete, to show how to write your own plugins
 \end{itemize}
 
 \myNotes{see chapter ??, a list of plugins}
-\myNotes{see chapters ?? for more detail}
+\myNotes{see chapters ?? for more detail (nodevis, platenerpipeline, ...)}
+\myNotes{look into control flow to understand plugin invokations}
 \myNotes{maybe figure about lifecycle and hooks}
 
 \subsection{Control Flow and Plugin Communication}
@@ -259,6 +309,7 @@ plugins in a single place.
 % \item implements each plugin hook and decides how to dispatch each call to the
 %   plugins dependent on application state
 % \end{itemize}
+
 
 \textbf{events} Convertify fires lifecycle events on which the plugins can
 react. The mediator knows an explicit execution order for each plugin when a
@@ -531,5 +582,5 @@ Selecting the best estimated solution by default.
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "./03-Architecture"
+%%% TeX-master: "../ClassicThesis"
 %%% End:
