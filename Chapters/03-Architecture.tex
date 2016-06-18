@@ -192,6 +192,20 @@ load, on draw or on touch interactions with the \emph{Node}.
 %   commons to convertify))
 % \end{itemize}
 
+\subsection{Scene Graph and Scene Management}
+
+\begin{itemize}
+\item project -> scene (one active, multiple hidden) -> node
+\item a single project per application
+\item manages a scene (shallow representation of actual WEBGL scene, high level
+  objects)
+\item node - object in the scene (represents arbitrary data loaded into scene,
+  has transforms)
+\item the model you see is a node
+\item rendering in Renderer (WebGL renderer abstraction)
+\item update loop, plugins may manipulate the model -> changes displayed
+\end{itemize}
+
 \subsection{Lifecycle Events with Plugin Hooks}
 
 \subsubsection{The Internal System Emits Lifecycle Events}
@@ -200,8 +214,32 @@ Similar to other applications\myNotes{what applications?} \emph{Convertify}
 dispatches events from the internal system during the application's lifecycle.
 The internal system refers to framework features, which all applications built
 with \emph{Convertify} share. Such features are model import, scenegraph
-manipulation or render updates. The lifecycle of \emph{Platener} is depicted in
-Figure \myNotes{add figure for platener lifecycle}.
+manipulation or render updates.
+
+
+\myNotes{add figure environment here}
+
+The lifecycle of \emph{Convertify} is depicted in Figure \myNotes{add figure for
+  platener lifecycle}. First we initialize all activated plugins in the
+\emph{init} event. During the \emph{init3d} event each plugin is passed an empty
+\emph{THREE.Object3D} instance. We call it the root node. The root node is
+associated with the \emph{Node} in the scene graph. The plugins append
+the computed visuals onto the root node. All root nodes are rendered by the
+\emph{Renderer}, calling the \emph{update3d} callback. \myNotes{look up event
+  name}. When a \emph{Node} from the \emph{Scene} is selected by the user, we
+dispatch the \emph{onNodeSelect} event. When a new \emph{Node} is added to the
+\emph{Scene}, the \emph{onNodeAdd} hook is triggered. The \emph{onNodeRemove}
+hook is triggered respectively when a \emph{Node} is removed from the
+\emph{Scene}. \myNotes{ref brickify}
+
+% \begin{itemize}
+% \item plugin init - plugin is loaded, general setup
+% \item scene init -
+% \item scene adding
+% \item scene rendering/ update/ brushing
+% \item scene selecting
+% \item scene removing
+% \end{itemize}
 
 % \begin{itemize}
 % \item App Lifecycle: Model Loading
@@ -265,7 +303,7 @@ Each \emph{Plugin} resides in the Plugin Package. We define a
 \emph{npm} package\footnote{Node Package Manager,
   \url{https://docs.npmjs.com/getting-started/what-is-npm}}. This means plugins
 could be installed like any other typical dependency. For the sake of
-development speed, we do not use the \emph{npm} setup yet.
+development speed, we do not use the \emph{npm} setup yet. \myNotes{ref brickify}
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -334,25 +372,103 @@ will interact with the system. We propose a Dispatcher component, behaving
 similar to the mediator
 pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
 
-\subsubsection{Dispatcher}
+\subsubsection{The Dispatcher is a Mediator}
 
-The Dispatcher is the entry point for any client or server code. The Dispatcher
-loads and initializes a set of configured plugins. It organizes the
-communication between plugins and client, plugins and server and plugins and
-plugins in a single place, as shown in Figure~\ref{fig:architecture_overview_dispatcher}.
+The Dispatcher loads and initializes a set of configured plugins. It organizes
+the communication between plugins and client, plugins and server and plugins and
+plugins in a single place, as shown in
+Figure~\ref{fig:architecture_overview_dispatcher}.
 
 % \begin{itemize}
 % \item dispatcher is entry point for client -> logic, server -> logic
 %   application
+
 % \item loads and init given list of plugins via pluginloader
 % \item implements each plugin hook and decides how to dispatch each call to the
 %   plugins dependent on application state
 % \end{itemize}
 
+Convertify fires lifecycle events on which the plugins can react. The mediator
+knows an explicit execution order for each plugin when a lifecycle event is
+fired. Figure~\ref{fig:architecture_dispatcher_pipeline} shows in detail
+how the \emph{PlatenerPipeline} plugin and the \emph{Dispatcher} communicate via
+events.
 
-\textbf{events} Convertify fires lifecycle events on which the plugins can
-react. The mediator knows an explicit execution order for each plugin when a
-lifecycle event is fired.
+\begin{figure}
+\centering
+\includegraphics[width=1\columnwidth]{03-architecture_dispatcher_pipeline}
+\caption{Dispatcher and PlatenerPipeline communicate via lifecycle events.}
+\label{fig:architecture_dispatcher_pipeline}
+\end{figure}
+
+To allow communication between plugins themselves or plugins and Client, we use
+\emph{Protocols} as \emph{PluginHooks} are not flexible enough. A
+\emph{Protocol} defines an interface, which has to be implemented by a
+\textit{delegate}. Via
+delegation\footnote{\url{http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html}}
+we define callbacks which are invoked by Plugins on the Dispatcher. The
+Dispatcher then notifies server, client or other plugins. Furthermore,
+\emph{Protocols} can add a set of methods to the Dispatcher via meta
+programming.
+
+Listing \ref{lst:solutionselectiondelegate} the definition of the
+SolutionSelectionDelegate protocol. It requires its implementing class to
+provide the methods \textit{evaluationDidStart},
+\textit{evalutionOfMethodDidFinish}, \textit{evaluationDidFinish},
+\textit{evaluationDidFail} and \textit{evaluationDidFailWithSolutions}. Listing
+\ref{lst:client_dispatcher_protocol} shows the \emph{ClientDispatcher} implementing the
+\textit{evaluationDidFinish} method. By providing the callbacks, the Dispatcher
+knows about the current state of the conversion and its completion. For example,
+we render all solutions after their computation. To satisfy the
+SolutionSelectionDelegate protocol, the Dispatcher also implements the remaining
+methods.
+
+\begin{listing}[!h]
+\centering
+\begin{minted}[
+linenos
+]{coffeescript}
+SolutionSelectionDelegate = {
+  shouldImplement: [
+    # Invoked before a method is evaluated.
+    'evaluationDidStart'
+    # Invoked after each method finished.
+    'evaluationOfMethodDidFinish'
+    # Invoked after all methods finished.
+    'evaluationDidFinish'
+    # Invoked when an error occured in solution selection.
+    'evaluationDidFail'
+    # Invoked when errors occur in pipeline steps during computation
+    'evaluationDidFailWithSolutions'
+  ]
+}
+\end{minted}
+\caption{\emph{SolutionSelectionDelegate} protocol definition}
+\label{lst:solutionselectiondelegate}
+\end{listing}
+
+\begin{listing}[!h]
+\begin{minted}[
+linenos
+]{coffeescript}
+class Dispatcher extends AbstractDispatcher
+  ### Solution Selection ###
+  @protocol(SolutionSelectionDelegate)
+
+  #
+  # ... more protocol methos ...
+  #
+
+  evaluationDidFinish: (solutions) ->
+    @getPlugin('node-visualizer').render(solutions)
+\end{minted}
+\caption{\emph{ClientDispatcher} implements the \emph{SolutionSelectionDelegate}
+  protocol}
+\label{lst:client_dispatcher_protocol}
+\end{listing}
+
+% https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html
+
 
 \textbf{protocols}
 \begin{itemize}
@@ -389,6 +505,20 @@ HOW?
   \label{fig:architecture_overview_dispatcher}
 \end{figure}
 
+\subsubsection{Dispatcher and Bundle on Client and Server}
+
+The Server and Client package handle lifecycle events differently and use
+different protocols. That is because the Client package has to handle rendering
+and user interaction. The Server package merely computes the manipulated models
+and is used for batch processing of {\threedmodel}s. Therefore, we need two
+Dispatcher implementations for the client and for the server.
+
+A Bundle is the entry point for any client or server code. As the name
+indicates, a Bundle bundles all application code into a single instance. It
+references the specific \emph{ClientDispatcher} or \emph{ServerDispatcher},
+which are implemented in the Client or Server package respectively. Thus we can
+control the system by invoking protocol interfaces. The ClientBundle is exposed
+to the Client package. The ServerBundle is exposed to the ServerPackage.
 
 \subsubsection{Control Flow vs Brickify only plugin hooks}
 
@@ -432,7 +562,7 @@ HOW?
 \item mediator then can oversee the communication
 \end{itemize}
 
-\section{Plugins}
+\section{Plugins in Platener}
 
 \subsection{Plugin Overview}
 
