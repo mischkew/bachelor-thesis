@@ -147,13 +147,43 @@ So if you want to weld a set of vertices, you can call \emph{preprocessVertices}
 
 In case a point is requested without preprocessing \emph{VertexWelding} builds its list without putting the new vertex in between the merged points but picks the first one as representative for all following.
 
-
-
 \begin{figure}
 \includegraphics[width=0.4\columnwidth]{Images/04-approx-WeightedVertex.png}
 \caption{Resulting point (point 3) of welding a WeightedVertex with weight=2 (point 1) and point 2}
 \label{fig:weightedVertex}
 \end{figure}
+
+
+\paragraph{Preprocessing}
+
+Preprocessing is done with one of the following methods:
+
+\begin{description}
+    \item preProcessModel
+    \item preProcessVertices
+    \item preProcessVertex
+\end{description}
+
+They iterate over the weighted vertex list and weld the new vertex with an existing one if they are in welding distance. The vertex is just added to the list if it was not merged after complete iteration.
+
+Merging is done by adding a fraction of the vector between \emph{WeightedVertex} and new vertex. The fraction is based on the weight of the \emph{WeightedVertex} which is the amount of already welded vertices.
+
+A \emph{WeightedVertex} is instanced with weight 1. When a point is added, weight gets increased and the new coordinates are computed:
+
+$ V_{weighted} = V_{weighted} + \frac{V_{new} - V_{weighted}}{w}$
+
+with \\
+$ V_{weighted} := $ \emph{WeightedVertex} \\
+$ V_{new} := $ the new vertex which is added \\
+$ w := $ the weight of the \emph{WeightedVertex}
+
+
+\paragraph{Vertex Replacement}
+
+The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}. 
+
+
+
 
 \subsection{Simplification Pipelinestep}
 
