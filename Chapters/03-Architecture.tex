@@ -25,19 +25,15 @@ lifecycle events and the concept of
 delegation\footnote{\url{https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html}}
 establish clear communication among packages.
 
-% begin block comment
-\iffalse
-\begin{itemize}
-\item platener built on top of...
-\item 4 major packages: convertify, client, server and plugins
-\item optimized towards: working with 3d-models in webgl environment
-\item plugin-based: allow interchangeable computation logic/ conversion methods
-\item combination of lifecycle-based communication and explicit calls via
-  dispatchers (related work: mobile application design, mediator pattern) \ritem
-  explicit communication between packages
-\end{itemize}
-\fi
-% end block comment
+% \begin{itemize}
+% \item platener built on top of...
+% \item 4 major packages: convertify, client, server and plugins
+% \item optimized towards: working with 3d-models in webgl environment
+% \item plugin-based: allow interchangeable computation logic/ conversion methods
+% \item combination of lifecycle-based communication and explicit calls via
+%   dispatchers (related work: mobile application design, mediator pattern) \ritem
+%   explicit communication between packages
+% \end{itemize}
 
 \subsection{Package Responsibilities}
 
@@ -194,17 +190,33 @@ load, on draw or on touch interactions with the \emph{Node}.
 
 \subsection{Scene Graph and Scene Management}
 
-\begin{itemize}
-\item project -> scene (one active, multiple hidden) -> node
-\item a single project per application
-\item manages a scene (shallow representation of actual WEBGL scene, high level
-  objects)
-\item node - object in the scene (represents arbitrary data loaded into scene,
-  has transforms)
-\item the model you see is a node
-\item rendering in Renderer (WebGL renderer abstraction)
-\item update loop, plugins may manipulate the model -> changes displayed
-\end{itemize}
+\myNotes{this is crap somehow}
+The scene graph is built from \emph{Nodes}. Each \emph{Node} is associated
+with a single \emph{THREE.Object3D} instance. This instance is rendered by the
+WebGL renderer. The \emph{Node} is a high-level abstraction of objects in the
+scene graph. \emph{THREE.Object3D} instances contain fine-grained sub-objects and
+actual vertices. For each Plugin we provide further \emph{THREE.Object3D}
+instances, which belong to the \emph{Node}'s \emph{THREE.Object3D}.
+
+\emph{Nodes} belong to a \emph{Scene}. Multiple \emph{Scenes}
+are added to a \emph{Project}. The \emph{Project} is the single root node of the
+scene graph. \emph{Nodes} are added and removed by the \emph{SceneManager},
+which is controlled in a \emph{Bundle}.
+
+% For each \emph{Plugin} we provide further \emph{THREE.Object3D}
+% instances, to which the \emph{Plugins} can append their computed visuals.
+
+% \begin{itemize}
+% \item project -> scene (one active, multiple hidden) -> node
+% \item a single project per application
+% \item manages a scene (shallow representation of actual WEBGL scene, high level
+%   objects)
+% \item node - object in the scene (represents arbitrary data loaded into scene,
+%   has transforms)
+% \item the model you see is a node
+% \item rendering in Renderer (WebGL renderer abstraction)
+% \item update loop, plugins may manipulate the model -> changes displayed
+% \end{itemize}
 
 \subsection{Lifecycle Events with Plugin Hooks}
 
@@ -215,7 +227,6 @@ dispatches events from the internal system during the application's lifecycle.
 The internal system refers to framework features, which all applications built
 with \emph{Convertify} share. Such features are model import, scenegraph
 manipulation or render updates.
-
 
 \myNotes{add figure environment here}
 
@@ -334,18 +345,11 @@ The exposed main file of the package implements a set of \emph{PluginHooks}.
 These hooks are registered at the \emph{Dispatcher}, which is responsible for
 dispatching the lifecycle events to the plugins in a predefined order\myNotes{,
   see chapter ??}. Beside \emph{PluginHooks}, a \emph{Plugin} can expose
-\emph{Protocols} to interact with the system. \emph{Protocols} are describe in
-\myNotes{chapter ??}. The plugin can implement any internal structure or
+\emph{Protocols} to interact with the system. \emph{Protocols} are described in
+\myNotes{chapter ??}. A plugin implements any internal structure or
 complexity. The simplest form of a plugin is a single file. But it may provide a
 whole filetree. A list of plugins used in \emph{Platener} is describe in
 \myNotes{chapter ??}.
-
-% \myNotes{NEXT TODO: brief description of Plugin as separate package, ref
-
-% Brickify, explain that we enhance with capabilities of protocols (ref to
-%   dispatcher and control flow, explain bonus of protocols), show how protocols
-%   are defined? -- here or in dispatcher?}
-
 
 
 % \begin{itemize}
@@ -377,22 +381,73 @@ pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
 The Dispatcher loads and initializes a set of configured plugins. It organizes
 the communication between plugins and client, plugins and server and plugins and
 plugins in a single place, as shown in
-Figure~\ref{fig:architecture_overview_dispatcher}.
+Figure~\ref{fig:architecture_overview_dispatcher}. The \emph{PluginLoader}
+instantiates each plugin and exposes all defined \emph{PluginHooks} to the
+\emph{Dispatcher}. \myNotes{this is all similar to brickify, ref please}
 
 % \begin{itemize}
-% \item dispatcher is entry point for client -> logic, server -> logic
+%   \item dispatcher is entry point for client -> logic, server -> logic
 %   application
-
 % \item loads and init given list of plugins via pluginloader
 % \item implements each plugin hook and decides how to dispatch each call to the
 %   plugins dependent on application state
 % \end{itemize}
 
+
 Convertify fires lifecycle events on which the plugins can react. The mediator
 knows an explicit execution order for each plugin when a lifecycle event is
-fired. Figure~\ref{fig:architecture_dispatcher_pipeline} shows in detail
-how the \emph{PlatenerPipeline} plugin and the \emph{Dispatcher} communicate via
-events.
+fired. Figure~\ref{fig:architecture_dispatcher_pipeline} shows in detail how the
+\emph{PlatenerPipeline} plugin and the \emph{Dispatcher} communicate via events.
+Codewise, the \emph{Dispatcher} implements each plugin hook and remits the event
+to the loaded plugins.
+
+\begin{listing}[!h]
+\centering
+\begin{minted}[
+linenos
+]{coffeescript}
+class ClientDispatcher extends AbstractDispatcher
+
+  #
+  # ...
+  #
+
+  hooks:
+    init: (bundle) ->
+      return @callAllPlugins('init', bundle)
+
+    onNodeAdd: (node) ->
+      return [
+        @callPlugin('solution-selection', 'onNodeAdd', node),
+        @callPlugin('node-visualizer', 'onNodeAdd', node)
+      ]
+
+    onNodeRemove: (node) ->
+      return [
+        @callPlugin('node-visualizer', 'onNodeRemove', node)
+        @callPlugin('solution-selection', 'onNodeRemove', node)
+      ]
+}
+\end{minted}
+\caption{The \emph{ClientDispatcher} implements plugin hooks to remit lifecycle events.}
+\label{lst:client-disp-hooks}
+\end{listing}
+
+Listing \ref{lst:client-disp-hooks} shows, how the \emph{ClientDispatcher}
+\myNotes{client dispatcher explained??} handles the \textit{init},
+\textit{onNodeAdd} and \textit{onNodeRemove} hooks. By remitting events manually, we have fine-grained
+control about the execution order. This is necessary, because we want to invoke
+the \emph{PlatenerPipeline} plugin, computing the construction plans, before
+rendering the results via the \emph{NodeVisualizer} plugin. Also we have to
+remove the \emph{NodeVisualizer} results before deleting the data, to avoid
+reference errors. For both \emph{PluginHooks} the plugins are executed in a
+different ordering.
+
+% \begin{itemize}
+% \item refer to Brickify, PluginLoader
+% \item explain plugins.yaml shortly
+% \item implements plugin hooks itself (show code snippets, hooks property)
+% \end{itemize}
 
 \begin{figure}
 \centering
@@ -402,7 +457,7 @@ events.
 \end{figure}
 
 To allow communication between plugins themselves or plugins and Client, we use
-\emph{Protocols} as \emph{PluginHooks} are not flexible enough. A
+\emph{Protocols} because \emph{PluginHooks} are not flexible enough. A
 \emph{Protocol} defines an interface, which has to be implemented by a
 \textit{delegate}. Via
 delegation\footnote{\url{http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html}}
@@ -411,7 +466,7 @@ Dispatcher then notifies server, client or other plugins. Furthermore,
 \emph{Protocols} can add a set of methods to the Dispatcher via meta
 programming.
 
-Listing \ref{lst:solutionselectiondelegate} the definition of the
+Listing \ref{lst:solutionselectiondelegate} shows the definition of the
 SolutionSelectionDelegate protocol. It requires its implementing class to
 provide the methods \textit{evaluationDidStart},
 \textit{evalutionOfMethodDidFinish}, \textit{evaluationDidFinish},
@@ -468,34 +523,43 @@ class Dispatcher extends AbstractDispatcher
 \end{listing}
 
 % https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html
+% \textbf{protocols}
+% \begin{itemize}
+% \item communication between packages (no lifecycle)
+% \item use protocols (explicit definition of what will happen)
+% \item protocol embodies a set of feature for the application
+% \end{itemize}
 
 
-\textbf{protocols}
-\begin{itemize}
-\item communication between packages (no lifecycle)
-\item use protocols (explicit definition of what will happen)
-\item protocol embodies a set of feature for the application
-\end{itemize}
+\subsubsection{The Dispatcher is the Single Source of Truth}
+\label{sec:disp-single-source}
 
-WHY?
+When applications grow, it is hard to observe all messaging between components
+at once. With the \emph{Dispatcher}, we control all communication between the
+packages at one place. Without implicit ordering of callback executions, we can
+trace erroneous behavior fast. The design of a singleton controlling the
+application's lifecycle is known from frameworks in mobile application
+development, like Android\ref{??} or iOS\ref{??}.
 
-\begin{itemize}
-\item one guy who pulls all the strings (one source of truth)
-\item similar designs in known application frameworks (android, ios)
-\item javascript, non-type language --> protocols ensure correct interfaces
-\end{itemize}
+The usage of \emph{Protocols} helps developers keep track of interfaces between
+components. We enforce this concept, because \javascript is a dynamically typed
+programming language. Statically typed programming languages pay out, when
+projects grow large. Unexpected type and interface errors happen less often.
+Because of the web-environment and previous work, we are bound to \coffeescript.
+Thus, we emphasize explicit structuring of interfaces via \emph{Protocols}.
 
-HOW?
+% \begin{itemize}
+% \item one guy who pulls all the strings (one source of truth)
+% \item look up all communications between decoupled components here
+% \item similar designs in known application frameworks (android, ios)
+% \item javascript, non-type language --> protocols ensure correct interfaces
+% \end{itemize}
 
-\begin{itemize}
-\item refer to Brickify, PluginLoader
-\item explain plugins.yaml shortly
-\item implements plugin hooks itself (show code snippets, hooks property)
-
-\item implements protocols for plugins (show code snippets)
-\item explain how plugins push state (control-flow information) back to the
-  dispatcher
-\end{itemize}
+%\begin{itemize}
+% \item implements protocols for plugins (show code snippets)
+% \item explain how plugins push state (control-flow information) back to the
+%   dispatcher
+%\end{itemize}
 
 \begin{figure}
   \centering
@@ -506,6 +570,9 @@ HOW?
 \end{figure}
 
 \subsubsection{Dispatcher and Bundle on Client and Server}
+
+\myNotes{maybe put this up, so we understand earlier what the ClientDispatcher
+  is}
 
 The Server and Client package handle lifecycle events differently and use
 different protocols. That is because the Client package has to handle rendering
@@ -520,47 +587,64 @@ which are implemented in the Client or Server package respectively. Thus we can
 control the system by invoking protocol interfaces. The ClientBundle is exposed
 to the Client package. The ServerBundle is exposed to the ServerPackage.
 
-\subsubsection{Control Flow vs Brickify only plugin hooks}
+\subsubsection{Brickify uses PluginHooks only}
 
-\begin{itemize}
-\item wiring up plugins
-\item explicitly calling plugin hooks
-\item highly customizable when adding in new plugins
-\item how is control flow achieved? -->
-\end{itemize}
+\emph{Brickify} dispatches plugin hooks directly from the internal system to the
+plugins without using a mediator in between. Compared to \emph{Convertify}, it
+does not require any boilerplate code to setup the communication.
+\emph{Convertify} needs a custom integration of each \emph{Plugin} into its
+\emph{Disptacher}.
 
-\begin{itemize}
-\item ++ pros
-\item loading sequence control (impossible to repair)
-\item fine grained scheduling of communication
-\item explicit execution behavior
-\item ... (look at notes on desk)
-\item
-\item -- cons
-\item boilerplate code
-\item custom integration for each plugin
-\end{itemize}
+On the other hand, \emph{Brickify} could not control the ordering of
+\emph{PluginHook} invokations. It is implicitly defined by the loading sequence
+of plugins. Furthermore, the frontend code needs to access plugin data. The data
+is only available after the plugins are loaded or even specific hooks were
+executed. Via a mediator we can notify the frontend about state changes, rather
+than asyncronically trying to poll the data.
 
-\begin{itemize}
-\item ++ pros
-\item no further config needed
-\item
-\item -- cons
-\item implicit order
-\item in different use cases, different plugins have to interact first (order is
-  not fixed)
-\item frontend often has to work on data which is not available before another
-  plugin loaded
-\end{itemize}
+With the introduction of a \emph{Dispatcher}, \emph{Plugins} now can push state
+back to the system and implement \emph{Protocols} for more control over the
+communication.
 
-\myNotes{now plugins can...}
+% \begin{itemize}
+% \item wiring up plugins
+% \item explicitly calling plugin hooks
+% \item highly customizable when adding in new plugins
+% \item how is control flow achieved? -->
+% \end{itemize}
 
-\begin{itemize}
-\item push application state back to the dispatcher
-\item communication with each other by specifying a protocol which has to be
-  implemented on the mediator
-\item mediator then can oversee the communication
-\end{itemize}
+% \begin{itemize}
+% \item ++ pros
+% \item loading sequence control (impossible to repair)
+% \item fine grained scheduling of communication
+% \item explicit execution behavior
+% \item ... (look at notes on desk)
+% \item
+% \item -- cons
+% \item boilerplate code
+% \item custom integration for each plugin
+% \end{itemize}
+
+% \begin{itemize}
+% \item ++ pros
+% \item no further config needed
+% \item
+% \item -- cons
+% \item implicit order
+% \item in different use cases, different plugins have to interact first (order is
+%   not fixed)
+% \item frontend often has to work on data which is not available before another
+%   plugin loaded
+% \end{itemize}
+
+% \myNotes{now plugins can...}
+
+% \begin{itemize}
+% \item push application state back to the dispatcher
+% \item communication with each other by specifying a protocol which has to be
+%   implemented on the mediator
+% \item mediator then can oversee the communication
+% \end{itemize}
 
 \section{Plugins in Platener}
 
@@ -578,12 +662,13 @@ following paragraphs.
 This plugin provides orientation enhancements for the WebGL scene. Rendering
 xyz-axes and a an axis-aligned grid, users can grasp alignment and dimensions of
 {\threedmodel}s. Figure \ref{fig:architecture_overview_coordinate_system} shows
-the coordinate system in the WebGL view.
+the coordinate system in the WebGL view. The Coordinate System is taken from
+\emph{Brickify} as is\footnote{ref original code file}.
 
 \begin{figure}
-  \label{fig:architecture_overview_coordinate_system}
   \includegraphics[width=1\columnwidth]{03-architecture_overview_coordinate_system}
   \caption{An empty scene showing the coordinate system.}
+  \label{fig:architecture_overview_coordinate_system}
 \end{figure}
 
 \subsubsection{Platener Pipeline}
@@ -599,6 +684,8 @@ plans for the original input model as {\svgfile}s.
 We visualize the results of the Platener Pipeline plugin in the WebGL view. The
 Node Visualizer plugin renders the results of each component of each
 {\fabmethod} respectively.
+
+\myNotes{add figure of a visualized model in wireframe mode (something fancy)}
 
 \subsubsection{Scoring}
 
