@@ -1,0 +1,72 @@
+\documentclass[../ClassicThesis.tex]{subfiles}
+\begin{document}
+
+%************************************************
+\chapter{Implementation Goals and Toolchain}\label{ch:toolchain}
+%************************************************
+
+\newcommand\myNotes[1]{\textcolor{red}{#1}}
+
+\section{Deployed as a Web-Service}
+
+\subsection{Cross-Platform Browser Application}
+
+\begin{itemize}
+\item web service
+\item cross platform
+\item no installation necessary
+\item target group: makers, run in labspaces, everywhere
+\item typical HTML, CSS, Javascript trio
+\end{itemize}
+
+\subsection{Headless Version for Integration with Other Software}
+
+\begin{itemize}
+\item same service without visuals
+\item batch processing or single
+\item idea: integrate with other 3d editing applications to benefit
+  from platener conversions
+\item running on nodejs v 012
+\end{itemize}
+
+\section{Technologies and Libraries}
+
+\begin{itemize}
+\item web service -> necessarily javascript
+\item coffeescript preprocessing, no es6 because previous code base
+  brickify was written in coffeescript -> save effort of rewrites
+\item webgl -> rendering, now almost all major browser support it
+  \myNotes{prove that}
+\item nodejs for headless version/ server (backend) support (v0.12
+  because old brickify dependencies)
+\item threejs -> most acknowledged 3d web library (scene graphs and
+  webgl)
+\item bluebird -> promises (nice tech in js to handle async behavior,
+  better than natives because of error handling, more features)
+\item polyfills -> more cross platform support and isomorphic =>
+  browsers and nodejs run in different vms
+\item styles with stylus lib (also taken from brickify)
+\end{itemize}
+
+\section{Build System and Development Setup}
+
+\begin{itemize}
+\item gruntfile -> and webpack
+\item different setups for client, server and cli in prod/ dev mode
+\item test runner using mocha
+\item bundle code into minified code and output sourcemaps (nice for
+  in browser debugging)
+\item smart server (rebuilding on filechanges, hotreloading (not
+  compiling everything again for speedup))
+\item browser lifereload (code change immediatly displayed in browser)
+\item react hotreloading -> display changes in ui even without a
+  browser reload (super fast feedback loop)
+\end{itemize}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:
