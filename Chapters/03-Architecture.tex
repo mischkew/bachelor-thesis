@@ -165,6 +165,7 @@ thoroughly testable code base.
 % \end{itemize}
 
 \section{Convertify Package and its Plugin Architecture}
+% ************************************************
 
 Platener uses the Convertify package as entry points to the {\threedmodel}
 processing. The package provides features for browser- and
@@ -511,7 +512,7 @@ class Dispatcher extends AbstractDispatcher
   @protocol(SolutionSelectionDelegate)
 
   #
-  # ... more protocol methos ...
+  # ... more protocol methods ...
   #
 
   evaluationDidFinish: (solutions) ->
@@ -647,6 +648,7 @@ communication.
 % \end{itemize}
 
 \section{Plugins in Platener}
+% ************************************************
 
 \subsection{Plugin Overview}
 
@@ -718,120 +720,441 @@ single component of a {\fabmethod} with pre-defined input.
 \begin{enumerate}
 \item Overview/ Purpose/ Plugin Structure
 
-\item \begin{itemize}
-  \item conversion strategies and logic
+\item conversion strategies and logic
+
+  \begin{itemize}
+  \item logic only (ui -> other plugin, frontend)
+  \item processing broken into steps
+  \item composable into fabrication methods = execute steps in sequence, use
+    results from previous step, to go on = conversion strategy
+
+  \item typical pipelining problem \myNotes{look up typical pipelining problems}
+  \item in general we have to: clean mesh, indexing, find structure (understand
+    the model), convert structures (plates and joints), export
+  \item different methods may to these things differently (stacked plates vs.
+    inherent plates)
+
   \end{itemize}
 
 \item Pipeline Steps
 
-  What are pipeline steps? Where to be found in the code? How are they used in
-  Platener Pipeline?
+  \textbf{What are pipeline steps?}
+
+  \begin{itemize}
+  \item processing unit on model data (or abstraction of it)
+  \item indepentend from each other, a single task
+  \item break down problem into sequential sub problems (working with
+    abstractions, generating assumptions -> understand problems better, work in parallel)
+  \item improve debugging experience (trace errors in decouple computation
+    units, also its hard to see how vertices are from
+    looking at the memory, --> see next bullet)
+  \item store state of each step separately, to later render a debugging view of
+    the state (like timetravel for manipulations on the model)
+  \item but keep rendering apart from logic -> NodeVisualizer
+  \item isolated computing -> isolated testing (nice!)
+  \end{itemize}
+
+  \textbf{How are they used in Platener Pipeline?}
+
+  \begin{itemize}
+  \item pipe steps -> build up a pipeline from composition
+  \item final result will be exported from the browser
+  \item a pipeline makes up a conversion strategy
+  \item conversion strategy share certain subproblems -> reusable code
+  \item \myNotes{as steps solve the real algorithmic problems, we dedicated separate
+    chapters to them. look at chapters ??}
+  \end{itemize}
+
+  \textbf{Where to be found in the code?}
+
+  \begin{itemize}
+  \item Plugins Package
+  \item organized in subdirs (remember, separate npm package)
+  \item step factories -> configure steps for different strategies, inject
+    dependencies and state, lazy loading
+  \end{itemize}
 
 \item Fabrication Methods
-
-
   \begin{enumerate}
   \item Plate Method
-
+    \begin{itemize}
+    \item hull and surface constructions
+    \item find plates in the model (inherent), build plates from surfaces
+      (extruding)
+    \item intersect plates (graphing)
+    \item and join connected plates (finger joints)
+    \item \myNotes{figure here}
+    \item \myNotes{listing showing how to concat/ pipe steps}
+    \item main parts of algorithm explain in chapters lukas, klara, dimitri, deus
+    \end{itemize}
 
   \item Stacked Plates Method
-
+    \begin{itemize}
+    \item volume approximation
+    \item stack flat plates to rebuild the object
+    \item preserve form, look and feel, details
+    \item loose functional aspects
+    \item connect via shafts (click together) or use glue
+    \item \myNotes{figure here}
+    \item main parts of the algorithm explained in chapters lukas
+    \end{itemize}
 
   \item Classifier Method
-
+    \begin{itemize}
+    \item advanced technique, combining intense mesh analysis and construction
+      techniques of known geometries
+    \item pros: convert noisy models, local conversions: because different local
+      geometries may be better converted with different techniques, e.g. stacked
+      vs. fingerjoints. we can evaluate better (scoring locally also!). global
+      conversions and evaluations are error prone. classifier method could
+      provide a rather robust conversion strategy. \myNotes{WHY CLASSIFIERS?}
+    \item work in progress
+    \item we can currently use primitive detection algorithms
+    \item \myNotes{figure of detected cylinder in model}
+    \item main parts of the algorithm at the end of paper (classification
+      chapter, ransac stuff)
+    \end{itemize}
   \end{enumerate}
 
 \item Immutable Pipeline State
 
-
   \begin{enumerate}
   \item Overview/ Purpose
-
+    \begin{itemize}
+    \item no unwanted mutations (nice persisting of intermediate results from
+      pipelinesteps)
+    \item later steps work on data form previous steps
+    \item code was not written immutable throughout the project -> changing data
+      will result in wrong visualizations of previous steps by the node
+      visualizer, because rendering performs AFTER all computations are done
+    \end{itemize}
 
   \item Immutability
-
+    \begin{itemize}
+    \item \myNotes{explain principle. have more pros and cons.}
+    \item structural data sharing -> unfortunately, not for us yet, but thats
+      the concept :)
+    \item http://jlongster.com/Using-Immutable-Data-Structures-in-JavaScript
+    \item http://stackoverflow.com/questions/10034537/persistent-vs-immutable-data-structure
+    \item enforces certain code style, mutability may be easier to write
+    \item slow downs maybe (performance)
+    \end{itemize}
 
   \item Implementation Details
-
+    \begin{itemize}
+    \item PipelineState class
+    \item mutable and immutable state properties
+    \item providing a clone method for stored properties, because code throughout the project shall
+      not necessarily be written immutable (hard to obey, --> cg dev orientated,
+      c++ is not immutable)
+    \item immutable properties implement the clonable protocol
+    \item provide immutable in one spot -> state creation
+    \item define a schema (all props always available, having defaults) ->
+      reduce faults when accessing data
+    \item add listing which defines the schema for stacked plates
+    \item accessing undefined values will give us a warning (again, like
+      protocols enforcing interface structure, reducing faulty data access)
+    \item somehow a persistence api (see stackoverflow link)
+    \end{itemize}
   \end{enumerate}
+
+\item Pipeline Implementation
+
+  \begin{enumerate}
+  \item the pipeline works as follows...
+    \begin{itemize}
+    \item Pipeline class
+    \item pipe interface for Step factories (compare listing above, stacked method)
+    \item create state factory -> use composition to persist intermediate results
+      (state is later accessed by node visualizer)
+    \item reduce approach -> pipe last state into next step to produce new state
+    \item show a listing of pseudo code, explaining how the pipeline works
+    \item benchmarking (measure time for intermediate steps vs whole processing)
+    \end{itemize}
+
+  \item it can be reused (because pipelining is a generic concept)
+    \begin{itemize}
+    \item classifier graph (classification method)
+    \item isolated testing (injectable pipeline)
+    \end{itemize}
+  \end{enumerate}
+
+\end{enumerate}
+
+\subsection{Solution Selection}
+
+\begin{enumerate}
+\item WHAT?
+  \begin{itemize}
+  \item Selecting the best estimated solution by default.
+  \item execute all classification methods
+  \item use scorer plugin to evaluate each conversion after computation
+    (globally evaluated, local converted geometries could be really bad)
+  \item provide list of solutions associated with a score
+  \item solution with max score is provided as default download
+  \end{itemize}
+
+\item WHY?
+  \begin{itemize}
+  \item strategies not mergeable in current state (would be future work to bring
+    them together, like classifier method approach)
+  \item so we want to select the method as default, which may has done the job
+    most correctly (scoring)
+  \item also scoring helps to get an idea of the quality of conversion without
+    looking at the result (visually) -> used in headless mode, batch processing
+    we could detect poorly converted objects to have a detailed look of what
+    went wrong (getting development forward, yay!)
+  \end{itemize}
+
+\item MEASUREMENTS and HOW SCORING?
+  \begin{itemize}
+  \item \myNotes{look at screenshots and describe in short what we thought,
+      would be nice measurements}
+  \item scoring plugin: per measurement per classification method -> score
+    method
+  \item then adding all measuremnt scores per classification together
+  \item assign score to the solution
+  \end{itemize}
+
+\item HOW SOLUTION SELECTION?
+  \begin{itemize}
+  \item combining plugins platener pipeline and scorer
+  \item promised -> loop overall pipelines of classification methods
+  \item promised -> then apply scoring
+  \item when failure, catch and report nicely in evaluationDidFail hook (so
+    fronend can notify users, no hard failure)
+  \item results pushed back to system via evaluationDidFinish hook
+  \end{itemize}
 \end{enumerate}
 
 \subsection{Node Visualizer}
 
-
 \begin{enumerate}
-\item Overview - Visual Debugging
+\item Overview
+  \begin{itemize}
+  \item meshlib library for model representation
+  \item convert meshlib face vertex mesh to three js notation
+  \item render imported model and its manipulated forms with threejs
+  \item use data from platener pipeline plugin
+  \item the dispatcher implements solutionselectiondelegate protocol, which
+    lets the node visualizer render the data after it was computed (see listing
+    ??, above)
+  \end{itemize}
 
+\item Visual Debugging
+  \begin{itemize}
+  \item Rendering into WebGL only in NodeVisualizer
+  \item other plugins could also do it
+  \item but keep visualization of processed model in one place
+  \item for each pipeline step, access its state data in a separate
+    visualization
+  \item step through, like explained in walkthrough chapter
+  \end{itemize}
 
 \item Visualizer and Visualizations
-
+  \begin{itemize}
+  \item Visualization class, constructs a drawable (THREE.object3d)
+  \item injects drawable into root node of NodeVisualizer plugin
+  \item Renderer will render it
+  \item Visualizer class, wrapper managing visibilities of visualizations
+  \item toggable through frontend
+  \item visualizersets -> group visualization for a fab method (not all
+    fabmethods have all steps, thus dont need all visualizations)
+  \end{itemize}
 
 \item Interwoven with Platener Pipeline
-
-
   \begin{enumerate}
   \item Role of Immutability
-
+    \begin{itemize}
+    \item \myNotes{(show example of how shapes have fingerjoints)}
+    \item shapes (find outlines of possible plate geometries)
+    \item fingerjoints are added to shapes in a later step
+    \item shapes visualization also shows fingerjoints now (no timetravel - bad
+      debugging (we cannot see if shapes did something wrong))
+    \item data will not be changed if immutable (yes!!)
+    \end{itemize}
 
   \item Extracting Intermediate Data of the Pipeline
-
+    \begin{itemize}
+    \item we access solutions (state per fabmethod)
+    \item PipelineVisualization parent class
+    \item convert state to plain object for fast access
+    \item \myNotes{listing for PipeVis}
+    \item each visualization extending pipeline viz only has to implement a
+      single method, returning a drawable threejs object
+    \end{itemize}
   \end{enumerate}
 \end{enumerate}
 
 \subsection{Isolated Testing}
 
-
 \begin{enumerate}
-\item Static Input and Expected Output
+\item WHY?
+  \begin{itemize}
+  \item validation of data/ conversion
+  \item parallel working (make mock data with certain assumptions)
+  \item isolated testing in real environment (test env is not representative,
+    integration tests with manual evaluation (look at the visual results))
+  \end{itemize}
 
+\item Static Input
+  \begin{itemize}
+  \item build data like assumed for the step we test
+  \item not that easy: many cross references, after certain steps, complex
+    data...
+  \item hard to build by hand, we had to use previous steps and serialize the
+    step data
+  \end{itemize}
 
 \item Testables
+  \begin{itemize}
+  \item 1 step, 1 static input, certain test purpose
+  \item a single integration test
+  \item e.g. classify a single shape as plane in classify geometry step
+  \end{itemize}
 
+\item Implementation
+  \begin{itemize}
+  \item reusing concept of pipeline
+  \item small changes: allow only a single step, get input from testable
+  \end{itemize}
+
+\item Conclusion
+  \begin{itemize}
+  \item not perfected/ technically mature
+  \item mostly we evaluated by dropping in models
+  \item but wrongly executed previous steps may have corrupted our assumptions
+  \item thats why working out nice testables would be worth it!
+  \end{itemize}
 \end{enumerate}
 
-\subsection{Scorer and Solution Selection}
-
-
-Selecting the best estimated solution by default.
-
 \section{Client Package}
-
+% ************************************************
 
 \subsection{Overview - Custom Frontend Code}
 
+\begin{itemize}
+\item when convertify framework, client is freespace to evolve yaself
+\item look and feel of the application
+\item task: connect logic to ui (speak with dispatcher) and build ui
+\item free choice of frontend framework (we take redux + react), but nothing
+  against jquery or angular or backbone or ...
+\item e.g. laser origami or brickify would choose a completely different
+  implementation of client -> custom per application
+\item react by facebook, redux by dan abramov, like flux architecure -> uni
+  directional dataflow, explicit state changes, data driven -> reduce side
+  effects and be efficient in coding and trace down errors easily
+\item \myNotes{diagram which shows benefits of flux architecture vs no flux
+    arch, look at intro vids for redux from dan abramov}
+\end{itemize}
 
 \subsection{React Templates}
 
+\begin{itemize}
+\item show html tree graph and how data communication goes wild when talking
+  with siblings
+\item ideally dumb components (dont know where data is coming from, just display
+  it)
+\item stateless, components directory
+\item WIP: before no redux, so there are some mixed up components left :S
+\item show short example how a dump component looks like, \myNotes{listing!}
+\end{itemize}
 
 \subsection{Redux Data-driven Control Flow}
 
-
 \begin{enumerate}
-\item Dispatcher and Redux `dispatch`
+\item Redux `dispatch` and state
+  \begin{itemize}
+  \item one state container
+  \item functional, no side effects
+  \item maybe copy or reference redux description (just explain why its awesome)
+  \item injected into react via context
+  \end{itemize}
 
+\item Smart Containers
+  \begin{itemize}
+  \item connect to state
+  \item containers know where data is from (vs dump components)
+  \item fitler and preprocess raw data, setup interaction events to trigger
+    actions
+  \item give data and callbacks to a component (they setup the actual ui, but
+    contain no visible elements themselves)
+  \item \myNotes{listing show how to connect and use component from other
+      listing}
+  \end{itemize}
+
+\item Manage Async Plugin Hell
+  \begin{itemize}
+  \item as described before, plugin data is not available on load
+  \item we can use Dispatcher and redux dispatch combined
+  \item protocols -> state change in plugins -> dispatch -> state change in
+    frontend
+  \item no polling or observing of data, fully reactive (system -> client communication)
+  \item as client has access to bundle, we can call interfaces exposed by
+    protocols (client -> system communication)
+  \end{itemize}
 \end{enumerate}
 
 \section{Server Package}
-
+% ************************************************
 
 \subsection{Overview - Custom Server Code}
 
+\begin{itemize}
+\item like client, can have custom implementations
+\item we have caching and cli (headless version of application)
+\item requires isomorphic code: execute on client and server equally
+\item \myNotes{isomorphic means...}
+\item threejs, polyfills, \myNotes{...}
+\end{itemize}
 
 \subsection{Model Cache}
 
+\begin{itemize}
+\item idea: build up repository of models when users interact with it
+\item taken from brickify: uploading meshlib version of model
+\end{itemize}
 
 \subsection{Test Pipeline}
 
-
 \begin{enumerate}
-\item Headless Conversion of Objects
+\item WHY do we have a Test Pipeline?
+  \begin{itemize}
+  \item robustness tests
+  \item batch processing
+  \item headless version for integration with other projects
+  \item failure detection because of diversity of objects
+  \end{itemize}
 
+\item Headless Conversion of Objects
+  \begin{itemize}
+  \item run solutionselection plugin also
+  \item but dispatcher is setup a bit differently
+  \item no recomputation, no grid, no visualizer
+  \item scene manager will not render anything (unless, WIP we exchange webgl
+    rendering with headlessgl to produce screenshots of each conversion)
+  \item cli tool -> safe results into directories
+  \end{itemize}
 
 \item Reports
-
+  \begin{itemize}
+  \item = extended console logs
+  \item show how conversion was going
+  \item display failures, status, progress
+  \item in the end: sum up + give stats
+  \item WIP: current problems: not all conversions are garbage collected
+    correctly, will run out of memory after some conversions -.- (maybe nobody
+    has to know about that)
+  \end{itemize}
 
 \item Benchmarks
-
+  \begin{itemize}
+  \item xxx testmodels
+  \item we proposed mostly stacked as the best solution
+  \item too many arbitrary forms hindered plate conversion
+  \item just shows conversion stats (maybe all models vs box category only)
+  \item \myNotes{measure times for conversions and evaluate}
+  \end{itemize}
 \end{enumerate}
 
 \end{document}
