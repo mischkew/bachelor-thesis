@@ -1,0 +1,13 @@
+*.aux
+*.fls
+*.log
+*.out
+*.fdb_latexmk
+*.lof
+*.toc
+_region_.pdf
+_region_.tex
+_minted-*
+auto/
+*.pdf
+!ClassicThesis.pdf
