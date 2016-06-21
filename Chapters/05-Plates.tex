@@ -15,7 +15,121 @@ coplanar / shapesfinder / holedetection
 
 \subsection{Coplanar Faces}
 
-fvdfsjkldf
+The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by Meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
+
+Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass. 
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+setupFaceEdgeEdgeFaceLookup: ->
+  for faceIndex in [0...faceCount]
+    # Determine the ordering of vertices (this avoids double edges)
+    { min_vertex
+      mid_vertex
+      max_vertex } = @findMinMidMaxVertex()
+    # Register which edges this triangle uses.
+    @addEntryToEdgeFaceMap(min_vertex, mid_vertex, faceIndex)
+    @addEntryToEdgeFaceMap(mid_vertex, max_vertex, faceIndex)
+    @addEntryToEdgeFaceMap(min_vertex, max_vertex, faceIndex)
+    # Set the edges that make up this triangle.
+    @faceVertexMesh.faceToEdges[faceIndex] = [
+      [min_vertex, mid_vertex]
+      [mid_vertex, max_vertex]
+      [min_vertex, max_vertex]
+    ]
+\end{minted}
+\caption{Simplified lookup table generation.}
+\label{lst:coffeescript}
+\end{listing}
+
+Afterward, the faces are grouped. This in done by iterating over all faces. When a face is found which hasn't been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index.
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+for faceIndex in [0...faceCount] when not faceVisited[faceIndex]
+  faceGroup = [faceIndex]
+  faceGroupIndex = faceGroups.length
+  outerEdgeGroup = []
+  groupNormal = @faceVertexMesh.getFaceNormal(faceIndex)
+  faceVisited[faceIndex] = true
+  # connect the adjacent faces
+  edgeQueue = []
+  adjacentEdges = @faceVertexMesh.getEdgesFromFace(faceIndex)
+  for edge in adjacentEdges
+    edgeQueue.push({ edge, faceIndex })
+  @traverseAdjacentFaces(...)
+\end{minted}
+\caption{Iteration over faces with creation of new face groups.}
+\label{lst:coffeescript}
+\end{listing}
+
+There are multiple important variables being set here: First, we have the new face group, containing only the current face. Next, we have the index of the face group, used for creating a face to face group lookup table. The outerEdgeGroup contains all edges surrounding the group, wich allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
+
+After the edges have been pushed in the queue, we start working on the it:
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+traverseAdjacentFaces: tco (
+    edgeQueue,
+    faceVisited,
+    faceGroup,
+    faceGroupIndex,
+    outerEdgeGroup,
+    groupNormal
+  ) ->
+    if edgeQueue.length is 0
+      return
+
+    { edge, faceIndex } = edgeQueue.shift()
+    faceNormal = @faceVertexMesh.getFaceNormal(faceIndex)
+
+    # get the faces from the edge and choose the one thats not the current one
+    adjacentFaces = @faceVertexMesh.getFacesFromEdge(
+      edge[0]
+      edge[1]
+    )
+
+    nextFaceIndex =
+      if adjacentFaces[0] is faceIndex
+      then adjacentFaces[1]
+      else adjacentFaces[0]
+    nextFaceNormal = @faceVertexMesh.getFaceNormal(nextFaceIndex)
+
+    if @isAngleZero(faceNormal, nextFaceNormal)
+      if not faceVisited[nextFaceIndex]
+      # if the adjacent face is coplanar and wasn't visited yet
+      # add to group, mark as visited, check adjacent faces
+        faceGroup.push(nextFaceIndex)
+        groupNormal.add(nextFaceNormal)
+        @faceToFaceGroup[nextFaceIndex] = faceGroupIndex
+        faceVisited[nextFaceIndex] = true
+
+        adjacentEdges = @faceVertexMesh.getEdgesFromFace(nextFaceIndex)
+        for edge in adjacentEdges
+          edgeQueue.push({ edge, faceIndex: nextFaceIndex })
+    else
+      # the edge is an outer edge for this coplanar group
+      # in that case, don't check if the face was already visited
+      outerEdgeGroup.push(edge)
+
+    @recur(
+      edgeQueue
+      faceVisited
+      faceGroup
+      faceGroupIndex
+      outerEdgeGroup
+      groupNormal
+    )
+\end{minted}
+\caption{Iteration over faces with creation of new face groups.}
+\label{lst:coffeescript}
+\end{listing}
 
 \subsection{Shape Finder / Deus}
 
@@ -32,7 +146,7 @@ In order to find inherent plates in a mesh, the first step is to find all shapes
 \begin{listing}[ht]
 \begin{minted}[
 linenos
-]{coffee}
+]{coffeescript}
 candidates = []
 for shape1, index1 in shapes
     for shape2, index2 in shapes when index1 < index2
