@@ -114,7 +114,7 @@ For each welding application a new instance of \emph{VertexWelding} is created w
 
 \emph{VertexWelding} provides 5 public functions:
 
-\myNotes{ist 'public' das passende Wort?}
+\myNotes{ist 'public' das passende Wort? - javascript ist alles 'public'}
 
 \myNotes{TODO: KLein-Großschreibung}
 
@@ -143,7 +143,7 @@ So if you want to weld a set of vertices, you can call \emph{preprocessVertices}
 
 \myNotes{TODO: Implementation}
 
-\emph{VertexWelding} builds a list of weighted vertices during preprocessing. Each new vertex is either merged with an existing one or added to the list. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure \ref{fig:weightedVertex}. Then \emph{VertexWelding} returns the respective vertex for each requested point. 
+\emph{VertexWelding} builds a list of weighted vertices during preprocessing. Each new vertex is either merged with an existing one or added to the list. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure \ref{fig:weightedVertex}. Then all points of a given set have to be replaced while \emph{getCorrespondingVertex} returns the respective vertex for each requested point. 
 
 In case a point is requested without preprocessing \emph{VertexWelding} builds its list without putting the new vertex in between the merged points but picks the first one as representative for all following.
 
@@ -178,9 +178,13 @@ $ V_{new} := $ the new vertex which is added \\
 $ w := $ the weight of the \emph{WeightedVertex}
 
 
+\myNotes{TODO: reread und rewrite}
+
 \paragraph{Vertex Replacement}
 
-The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}. 
+The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
+
+A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore. 
 
 
 
@@ -310,17 +314,37 @@ For instance, this may occur in \myNotes{CurvedShapes (richtige Bezeichnung einz
 \myNotes{TODO: letzten Satz besser schreiben}
 
 
-\subsection{Alternative Methoden}
+\myNotes{TODO: Überschrift nächste subsection}
 
-\subsection{Warum diese Methode gewählt?}
+\subsection{passende Überschrift zu: Alternative Methoden und warum diese Methode gewählt, vllt sogar: future work}
+
+\myNotes{TODO: reread und rewrite}
+
+Different approaches for welding are sorting into an octree and hashing. 
+
+\paragraph{Octree}
+
+The space is discretised into buckets which dimensions equal the welding distance. At first all vertices are sort into these buckets. Then points are compared within each bucket along with its 26 surrounding ones and merged accordingly.
+
+This has the same time complexity of $O(n^2)$ as the current implementation. However it would perform slightly faster for complete mesh simplification and slightly slower for fragmental welding of small vertex sets. Due to the vertex arrangement of most objects the number of comparisons would be lower and consequential the runtime too. On the opposite it performs slower for welding steps that take only a small amount of vertices: Most of them have to be compared so the bucket system does not bring any advantages.
+
+\paragraph{Hashing}
+
+Hashing is usually done if only identical points are merged instead of vertices that lie close to each other. It is similar to the Octree approach and sorts vertices into a hash list. 
+
+\paragraph{binary space partition}
+
+
+
 
 \section{Point on Line Removal}
 
-\section{vllt: Remove Contained Plates - in Lukas Kapitel}
+\section{Remove Contained Plates - in Lukas Kapitel}
+
+\section{Hole Detection - in Plates Kapitel}
 
 \section{Prism Classifier - in Classifier Kapitel}
 
-\section{Hole Detection - in Plates Kapitel}
 
 % (Plate) - Shape - EdgeLoop - Architektur und Funktionalität
 % (Clipping)
