@@ -75,61 +75,76 @@ After the edges have been pushed in the queue, we start working on the it:
 \begin{minted}[
 linenos
 ]{coffeescript}
-traverseAdjacentFaces: tco (
-    edgeQueue,
-    faceVisited,
-    faceGroup,
-    faceGroupIndex,
-    outerEdgeGroup,
-    groupNormal
-  ) ->
-    if edgeQueue.length is 0
-      return
+traverseAdjacentFaces: tco (...) ->
+  if edgeQueue.length is 0
+    return
+  { edge, faceIndex } = edgeQueue.shift()
+  faceNormal = @faceVertexMesh.getFaceNormal(faceIndex)
+  # get the faces from the edge and choose the one thats not the current one
+  adjacentFaces = @faceVertexMesh.getFacesFromEdge(
+    edge[0]
+    edge[1]
+  )
+  nextFaceIndex =
+    if adjacentFaces[0] is faceIndex
+    then adjacentFaces[1]
+    else adjacentFaces[0]
+  nextFaceNormal = @faceVertexMesh.getFaceNormal(nextFaceIndex)
+ 
+  # check if faces are coplanar
 
-    { edge, faceIndex } = edgeQueue.shift()
-    faceNormal = @faceVertexMesh.getFaceNormal(faceIndex)
-
-    # get the faces from the edge and choose the one thats not the current one
-    adjacentFaces = @faceVertexMesh.getFacesFromEdge(
-      edge[0]
-      edge[1]
-    )
-
-    nextFaceIndex =
-      if adjacentFaces[0] is faceIndex
-      then adjacentFaces[1]
-      else adjacentFaces[0]
-    nextFaceNormal = @faceVertexMesh.getFaceNormal(nextFaceIndex)
-
-    if @isAngleZero(faceNormal, nextFaceNormal)
-      if not faceVisited[nextFaceIndex]
-      # if the adjacent face is coplanar and wasn't visited yet
-      # add to group, mark as visited, check adjacent faces
-        faceGroup.push(nextFaceIndex)
-        groupNormal.add(nextFaceNormal)
-        @faceToFaceGroup[nextFaceIndex] = faceGroupIndex
-        faceVisited[nextFaceIndex] = true
-
-        adjacentEdges = @faceVertexMesh.getEdgesFromFace(nextFaceIndex)
-        for edge in adjacentEdges
-          edgeQueue.push({ edge, faceIndex: nextFaceIndex })
-    else
-      # the edge is an outer edge for this coplanar group
-      # in that case, don't check if the face was already visited
-      outerEdgeGroup.push(edge)
-
-    @recur(
-      edgeQueue
-      faceVisited
-      faceGroup
-      faceGroupIndex
-      outerEdgeGroup
-      groupNormal
-    )
+  @recur(...)
 \end{minted}
-\caption{Iteration over faces with creation of new face groups.}
+\caption{Function repeated for each edge in queue.}
 \label{lst:coffeescript}
 \end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+if @isAngleZero(faceNormal, nextFaceNormal)
+  if not faceVisited[nextFaceIndex]
+    faceGroup.push(nextFaceIndex)
+    groupNormal.add(nextFaceNormal)
+    @faceToFaceGroup[nextFaceIndex] = faceGroupIndex
+    faceVisited[nextFaceIndex] = true
+    adjacentEdges = @faceVertexMesh.getEdgesFromFace(nextFaceIndex)
+    for edge in adjacentEdges
+      edgeQueue.push({ edge, faceIndex: nextFaceIndex })
+else
+  outerEdgeGroup.push(edge)
+\end{minted}
+\caption{Check for coplanar faces.}
+\label{lst:coffeescript}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+# https://gist.github.com/adrusi/1905351
+tco = (fn) -> (args...) ->
+  @recured = false
+  @args = []
+  @recur = (args...) =>
+    @recured = true
+    @args = args
+
+  returnVal = fn.apply @, args
+  while true
+    if @recured
+      tempArgs = @args
+      @args = undefined
+      @recured = false
+      returnVal = fn.apply @, tempArgs
+    else
+      return returnVal
+\end{minted}
+\caption{Tail call optimization helper function.}
+\label{lst:coffeescript}
+\end{listing}
+
 
 \subsection{Shape Finder / Deus}
 
