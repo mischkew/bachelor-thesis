@@ -17,7 +17,7 @@ coplanar / shapesfinder / holedetection
 
 The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by Meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
 
-Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass. 
+Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass (see Listing \ref{lst:lookuptables}). 
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -41,10 +41,10 @@ setupFaceEdgeEdgeFaceLookup: ->
     ]
 \end{minted}
 \caption{Simplified lookup table generation.}
-\label{lst:coffeescript}
+\label{lst:lookuptables}
 \end{listing}
 
-Afterward, the faces are grouped. This in done by iterating over all faces. When a face is found which hasn't been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index.
+Afterward, the faces are grouped. This in done by iterating over all faces. When a face is found which hasn't been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index (Listing \ref{lst:iteratefaces}).
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -64,12 +64,12 @@ for faceIndex in [0...faceCount] when not faceVisited[faceIndex]
   @traverseAdjacentFaces(...)
 \end{minted}
 \caption{Iteration over faces with creation of new face groups.}
-\label{lst:coffeescript}
+\label{lst:iteratefaces}
 \end{listing}
 
-There are multiple important variables being set here: First, we have the new face group, containing only the current face. Next, we have the index of the face group, used for creating a face to face group lookup table. The outerEdgeGroup contains all edges surrounding the group, wich allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
+There are multiple important variables being set here: First, we have the new face group, containing only the current face. Next, we have the index of the face group, used for creating a face to face group lookup table. The outerEdgeGroup contains all edges surrounding the group, which allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
 
-After the edges have been pushed in the queue, we start working on the it:
+After the edges have been pushed in the queue, we start working on it (see Listing \ref{lst:tranverseadjacent}).  
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -96,8 +96,10 @@ traverseAdjacentFaces: tco (...) ->
   @recur(...)
 \end{minted}
 \caption{Function repeated for each edge in queue.}
-\label{lst:coffeescript}
+\label{lst:traverseadjacent}
 \end{listing}
+
+
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -116,7 +118,7 @@ else
   outerEdgeGroup.push(edge)
 \end{minted}
 \caption{Check for coplanar faces.}
-\label{lst:coffeescript}
+\label{lst:coplanarcheck}
 \end{listing}
 
 \begin{listing}[ht]
@@ -142,7 +144,7 @@ tco = (fn) -> (args...) ->
       return returnVal
 \end{minted}
 \caption{Tail call optimization helper function.}
-\label{lst:coffeescript}
+\label{lst:tco}
 \end{listing}
 
 
