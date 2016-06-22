@@ -65,11 +65,12 @@ between two connected vertices.\\
 \\
 We only support geometry which is arranged in two-manifold meshes.
 Two-manifoldness is a constraint on the mesh, which requires each egde
-to only touch two neighboring faces. Figure~\ref{} shows a comparison
-of a manifold and non-manifold part of a mesh. It follows then, that
-each triangular face has to have three adjacent faces. Thus, the
-constraint enforces the mesh to be a fully connected graph without
-holes \cite[p.~28]{master-thesis}. We require two-manifoldness to make
+to only touch two neighboring faces. Figure~\ref{}\myNotes{add figure}
+shows a comparison of a manifold and non-manifold part of a mesh. It
+follows then, that each triangular face has to have three adjacent
+faces. Thus, the constraint enforces the mesh to be a fully connected
+graph without holes \cite[p.~28]{master-thesis}. We require
+two-manifoldness to make
 sophisticated assumption when designing the conversion algorithms.\\
 \\
 The Standard Tessellation Language (STL) format is a common file
@@ -81,9 +82,9 @@ with their face normal. The face normal determines the orientation of
 the face. We need the face normal, because from the vertices only, we
 cannot say in which direction the face points. Each face is a list of
 vertices. A vertex is described by three floating point numbers.
-Listing~\ref{alg:stl-file} shows an {\stlfile} in ASCII encoding. For saving
-disk-space, the file is
-mostly stored in a binary format \cite[p.~8]{stl-file}.
+Listing~\ref{alg:stl-file} shows an {\stlfile} in ASCII encoding. For
+saving disk-space, the file is mostly stored in a binary format
+\cite[p.~8]{stl-file}.
 
 % \begin{algorithm}
 %   \caption{General format of a STL-file in ASCII encoding.}
@@ -221,10 +222,10 @@ The \class{Nodes} are part of a \class{Scene}. The \class{Renderer}
 sets up a WebGL context and initializes {\threejs}. Then the
 \class{SceneManager} passes all active \class{Scenes} to the
 \class{Renderer}, which will traverse the flat scene graph and render
-each attached \class{THREE.Object3D}. Figure~\ref{} shows how these
-classes interact. During that loading and render process, {\brickify}
-emits system events, e.g. change events to the scene graph
-(\textit{onNodeAdd},
+each attached \class{THREE.Object3D}. Figure~\ref{}\myNotes{add
+  figure} shows how these classes interact. During that loading and
+render process, {\brickify} emits system events, e.g. change events to
+the scene graph (\textit{onNodeAdd},
 \textit{onNodeRemove}).\\
 \\
 {\brickify} decomposes its features into \class{Plugins}. A

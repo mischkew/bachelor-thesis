@@ -3,7 +3,8 @@
 * DONE write about *BUNDLE*
   CLOSED: [2016-06-18 Sat 15:11]
 
-* TODO add mynotes for missing refs and figures
+* DONE add mynotes for missing refs and figures
+  CLOSED: [2016-06-22 Wed 19:44]
 
 * FIGURES
 ** mesh of object
