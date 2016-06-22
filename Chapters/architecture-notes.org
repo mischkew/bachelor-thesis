@@ -3,11 +3,19 @@
 * DONE write about *BUNDLE*
   CLOSED: [2016-06-18 Sat 15:11]
 
+* TODO add mynotes for missing refs and figures
+
 * FIGURES
 ** mesh of object
 ** stl listing of simple box
 ** manifold, non-manifold meshes
+** brickify scene manager classes and interaction
 
+* FOOTNOTES (for first occurences of lib names)
+** threejs
+** brickify
+** meshlib
+** lego
 
 * we need an interlude
 ** what environment

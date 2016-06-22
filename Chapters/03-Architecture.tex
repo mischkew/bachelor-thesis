@@ -202,28 +202,50 @@ The framework {\convertify} is based on the application {\brickify} by
 \citeauthor{brickify-thesis}. {\brickify} is a web-application which
 converts {\threedmodel}s into a hybrid model, consisting of {\lego}
 bricks and fewer 3D-printable parts. The previous work provides
-features like rendering or scene graphing, which can be shared with
+features like rendering or scene graphs, which can be shared with
 {\convertify}. In this section we present important design decisions
-of {\brickify}, which will help understanding how our framework works.
+of {\brickify}, which will help understanding how our framework
+works.\\
+\\
+{\brickify} implements a flat scene graph using \class{Nodes}. Each
+\class{Node} references an input model, has a {\threejs} object and
+transforms. The {\threejs} object is a \class{THREE.Object3D}. This is
+a generic object, which can be rendered into a WebGL scene with
+{\threejs}. This \class{THREE.Object3D} will be displayed on the
+screen by {\brickify}. The transforms describe spatial properties like
+position, scale or rotation and are applied to the {\threejs} node.
+Note, that \class{Nodes} represent entities in the scene, but only
+{\threejs} nodes can actually be rendered.
 
-The goals of {\brickify} ...
+The \class{Nodes} are part of a \class{Scene}. The \class{Renderer}
+sets up a WebGL context and initializes {\threejs}. Then the
+\class{SceneManager} passes all active \class{Scenes} to the
+\class{Renderer}, which will traverse the flat scene graph and render
+each attached \class{THREE.Object3D}. Figure~\ref{} shows how these
+classes interact. During that loading and render process, {\brickify}
+emits system events, e.g. change events to the scene graph
+(\textit{onNodeAdd},
+\textit{onNodeRemove}).\\
+\\
+{\brickify} decomposes its features into \class{Plugins}. A
+\class{Plugin} provides a set of methods which can be called upon
+system events to interact with the WebGL scene.
+\citeauthor{brickify-thesis} refers to these callbacks as
+\class{PluginHooks} or just hooks.
 
-  % - Subsection overview
-  %   - Recap: What is Brickify?
-  %   - Motivation: Reuse ideas of Brickify to bootstrap the framework
-  %     with previous work
-
-  %   - Goals of Brickify (3dobject conversions, aimed to be a
-  %     framework in the beginning)
-
-  %   - needs-figure :: Scene (flat graph, annotation with threejs objects)
-  %   - Renderer (bring threejs objects to WebGL scene)
-  %   - Plugins (decomposed computation/ feature units)
-  %   - needs-figure :: PluginHooks (communication via events)
-  %   - Bundle (control the application from outside)
-
-  %   - Framework characteristics of Brickify (though logic and ui not
-  %     decomposed, that is why we had to make changes, subsection summary)
+User interfaces are implemented in a separated code package. This
+mostly separates the web-interface from the scene features. The
+interface code uses a \class{Bundle} as an entry point to the plugin
+and scene system. The \class{Bundle} starts \class{Plugins} and loads
+{\threedmodels} from the filesystem into the application.\\
+\\
+{\brickify} provides abstractions for scene management and rendering.
+Plugins interact with the internal system via hooks. The separation of
+{\lego}-conversion features from the rendering engine bring clear
+interfaces. We encountered several hick-ups with this architecture
+when we tried to organize the communication between several plugins.
+In the following section, we outline our improvements to the internal
+system of {\brickify}.
 
 \subsection{The Framework Reuses Ideas and Components of Brickify}
 \label{sec:reuses-brickify}
