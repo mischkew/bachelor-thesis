@@ -3,6 +3,12 @@
 * DONE write about *BUNDLE*
   CLOSED: [2016-06-18 Sat 15:11]
 
+* FIGURES
+** mesh of object
+** stl listing of simple box
+** manifold, non-manifold meshes
+
+
 * we need an interlude
 ** what environment
 ** what languages

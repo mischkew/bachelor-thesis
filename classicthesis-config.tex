@@ -10,6 +10,12 @@
 % http://postcards.miede.de
 % ****************************************************************************************************
 
+\usepackage[centerlast]{caption}
+\captionsetup{font=small}
+
+\usepackage{subcaption}
+\expandafter\def\csname ver@subfig.sty\endcsname{}
+
 \usepackage[utf8]{inputenc}
 
 % ****************************************************************************************************
@@ -123,10 +129,11 @@ Lukas Wagner
         \setlength{\extrarowheight}{3pt} % increase table row height
 \newcommand{\tableheadline}[1]{\multicolumn{1}{c}{\spacedlowsmallcaps{#1}}}
 \newcommand{\myfloatalign}{\centering} % to be used with each float for alignment
-\usepackage[centerlast]{caption}
-\captionsetup{font=small}
+
+
 %\usepackage{subfig}
-\usepackage{subcaption}
+%\usepackage{subcaption}
+
 
 % ****************************************************************************************************
 

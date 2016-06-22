@@ -10,7 +10,7 @@
   - [X] Chapter overview
   - [X] Motivation Framework: Convertify (build applications like
                                                Brickify/ Laser Origami)
-  - [X] Motivation Application: Platener
+  - [X] Motivation Application: Platener (it's a *web app*)
 
 ** Computer Graphics in Web-Environments
 
@@ -64,7 +64,7 @@
 
 *** The Framework Reuses Ideas and Components of Brickify
 
-    - Section overview: The framework can provide features out of the
+    - Subsection overview: The framework can provide features out of the
       box, by taking components from Brickify (Render-loop, Scene
       Management, Plugin loading)
     - needs-cross-ref :: Render-loop is =Renderer class=, reused component
@@ -72,24 +72,85 @@
          and =SceneManager class=, reused component
     - needs-cross-ref :: Plugins, but we greatly enhance this, see
          next chapter, reused idea
+    - Subsection summary
 
 *** The Framework Provides an Enhanced Plugin System
 
+    - Subsection overview
     - Plugin definition in Convertify
     - *full fledged applications will implement a set of plugins to
       provide functionality and web-ui code to provide interface*
-    - needs-ref :: Lifecycle events in Convertify (= PluginHooks of Brickify)
+    - *feature for web gl scene and reaction on changes of the scene*
+    - needs-ref :: Lifecycle events in Convertify (= PluginHooks of
+                   Brickify, Convertify vs. Plugins)
     - needs-figure :: Example Plugin, interacting via PluginHooks
     - System dispatches events (where do events come from?)
     - needs-ref :: mediator organizes communication
-    - needs-figure :: mediator between dispatched system events and plugins
+    - needs-figure :: mediator between dispatched system events and
+                      plugins (internal handling of system events
+                      before reaching plugins)
     - *full fledged applications will implement a mediator to organize
       feature communication*
-
+    - Subsection summary
 
 ** The Application Is Implemented with the Framework: Platener
 
-# built with convertify
-# more specify pipeline stuff here
-#
-# divided into packages
+   - Section overview
+   - Application is built with Convertify (integration with lifecycle events
+     and rendering engine)
+   - needs-figure :: Application is separated into Packages
+   - Plugins provide scene feature
+   - Client Code to integrate plugins, system and user interfaces
+
+*** Platener Uses Plugins to Implement Features
+
+    - Subsection overview
+    - Plugins provide scene features and also combine functionality
+      with each other to assemble a full fledged application
+
+**** Platener Pipeline Plugin
+**** Node Visualizer Plugin
+**** Scorer Plugin
+**** Solution Selection Plugin
+**** Coordinate System Plugin
+**** Isolated Testing Plugin
+
+*** The PlatenerPipeline Plugin Computes the Model Conversions
+
+    - Subsection overview
+    - needs-figure :: Pipelining Approach to subdivide the problem space
+    - PipelineSteps as single computation units
+    - Several Pipeline Steps make up a Fabrication Method
+    - needs-figure, needs-ref :: Immutable PipelineState allows timetravel visual debugging
+    - Subsection summary
+
+*** The Client Package Connects All Features Into an Application
+
+    - Subsection overview
+    - needs-figure :: Client code connects all plugin features with a user interface
+    - Use Framework to wire up everything, but not part of the
+      framework (Bundle and Protocols come in handy, Client code
+      implements a Dispatcher instance = the mediator)
+    - We have a WebApp and a Server package, which are both Client
+      code, because we have two types of applications
+    - the WebApp is an online service deployed for use by Makers
+    - the CLI tool is a service for batch processing or integration
+      with other applications
+
+**** The WebApp Package Builds a Cross-platform Web Page
+
+     - Subsubsection overview
+     - needs-ref :: Web Interfaces are built with HTML and CSS
+     - needs-ref :: The React library | copy from AOP paper
+     - needs-ref, needs-figure :: The Redux library (Dump Components and Smart Containers)
+     - needs-figure :: Using Redux dispatch in the Dispatcher
+     - Subsubsection summary
+
+**** The Server Package Allows Headless Batch Processing of Models
+
+     - Subsubsection overview
+     - A CLI tool runs in nodejs
+     - needs-ref :: Processing objects without opening a browser (isomorphic code)
+     - Processing multiple objects in sequence
+     - Integration with tools to be built in future
+     - Subsubsection summary

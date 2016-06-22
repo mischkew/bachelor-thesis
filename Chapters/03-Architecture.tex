@@ -1,6 +1,12 @@
 \documentclass[../ClassicThesis.tex]{subfiles}
 \begin{document}
+
 \newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand{\class}[1]{\emph{#1}}
+
+% put this into the intro
+% \platener is a web application,
+% converts input {\threedmodels} into {\svgfiles}
 
 % ************************************************
 \chapter{Architecture}
@@ -9,7 +15,7 @@
 
 In this chapter we outline the architecture and composition of the
 application {\platener}. Therefore, we look at concepts of graphics
-programming in web-environments in Section~\ref{cg-web}. Then, we
+programming in web-environments in Section~\ref{sec:cg-web}. Then, we
 explore the structure of our software from two points of view. At
 first, we present {\convertify} in
 Section~\ref{sec:framework-convertify}. {\convertify} is the
@@ -46,21 +52,71 @@ graphs in Section~\ref{sub:render-and-graph}.
 \label{sub:model-representation}
 
 This section explains which data structures and disk-formats are used
-to represent {\threedmodels} and how we utilize the
-{\meshlib}\footnote{\url{https://github.com/brickify/meshlib}}
-{\javascript} library to import models into the browser.
+to represent {\threedmodel}s. First, we explain the terminology of
+meshes. Secondly, we look at the {\stlfile} format\\
+\\
+The model geometry is represented by a set of connected polygons,
+approximating the model surface. These connected polygons form a mesh.
+Figure~\ref{} shows a mesh. For the sake of simplicity, we use
+triangles as polygons. A triangle in the mesh is called face. Each
+face is described by a list of three coordinates in 3D-space. Such a
+coordinate is called vertex \cite[p.~3]{cg-intro}. An edge is the line
+between two connected vertices.\\
+\\
+We only support geometry which is arranged in two-manifold meshes.
+Two-manifoldness is a constraint on the mesh, which requires each egde
+to only touch two neighboring faces. Figure~\ref{} shows a comparison
+of a manifold and non-manifold part of a mesh. It follows then, that
+each triangular face has to have three adjacent faces. Thus, the
+constraint enforces the mesh to be a fully connected graph without
+holes \cite[p.~28]{master-thesis}. We require two-manifoldness to make
+sophisticated assumption when designing the conversion algorithms.\\
+\\
+The Standard Tessellation Language (STL) format is a common file
+format for {\threedmodel} representation in the context of
+{\threedprinting}. We support the {\stlfile} format, because our goal
+is to make models, built for a {\threedprinter}, available for the
+{\lasercutter}. An {\stlfile} consists of a list of faces associated
+with their face normal. The face normal determines the orientation of
+the face. We need the face normal, because from the vertices only, we
+cannot say in which direction the face points. Each face is a list of
+vertices. A vertex is described by three floating point numbers.
+Listing~\ref{alg:stl-file} shows an {\stlfile} in ASCII encoding. For saving
+disk-space, the file is
+mostly stored in a binary format \cite[p.~8]{stl-file}.
 
-% vertex, face, mesh, face-vertex-mesh
-% two-manifold assumption and necessity
+% \begin{algorithm}
+%   \caption{General format of a STL-file in ASCII encoding.}
+%   \label{alg:stl-file}
+%   \algblock[Name]{solid}{endsolid}
+%   \begin{algorithmic}
+%     \solid \textit{name}\\
+%     facet normal \textit{n1} \textit{n2} \textit{n3}\\
+%       outer loop\\
+%        vertex \textit{p1x} \textit{p1y} \textit{p1z}\\
+%        vertex \textit{p2x} \textit{p2y} \textit{p2z}\\
+%        vertex \textit{p3x} \textit{p3y} \textit{p3z}\\
+%       endloop\\
+%      endfacet\\
+%     \endsolid \textit{name}
+%   \end{algorithmic}
+% \end{algorithm}
 
-
-
-    % - subsection overview
-    % - 3D-data representation in vertices, faces, two-manifold meshes
-    % - stl file format (most simple, but community has it)
-    % - meshlib library to stream-read stl files
-    % - convert face-vertex-mesh to threejs geometries
-    % - subsection summary
+Reconstructing the original {\threedmodel} from an {\stlfile} does not
+always result in one-to-one solution. The vertices are stored with
+floating point numbers instead of referring to the same vertex with an
+index. Thus, we have to assume, that two overlapping points represent
+an identical vertex. We use the library {\meshlib} to create an
+indexed face-vertex-mesh from the possibly ambiguous {\stlfile}. With
+{\meshlib} we can convert the face-vertex-mesh representation to a
+{\threejs} geometry. With a {\threejs} geometry, we can render a
+{\threedmodel} in {\convertify}.\\
+\\
+To support a variety of {\threedprinter} optimized models, we use the
+{\stlfile} format. We import the files with the {\meshlib} library.
+The imported face-vertex-mesh structure is then converted for usage
+with {\threejs}. The section below, explains how the {\threejs}
+representation is displayed on the screen.
 
 \subsection{Render Loop and Scene Graphs}
 \label{sub:render-and-graph}
@@ -128,15 +184,54 @@ The framework {\convertify} uses common computer graphics patterns
 like render loops and scene graphs. With the help of WebGL and
 {\threejs} we are able to bring these concepts into a web-environment.
 
-
-
-
-
-
-
-
 \section{The Framework: Convertify}
 \label{sec:framework-convertify}
+
+In this section we present {\convertify}, a web-framework for working
+with {\threedmodel}s in {\threejs}. The framework is based on
+previous work by \citeauthor{brickify-thesis}. We explain the work and
+concepts of \citeauthor{brickify-thesis} in
+Section~\ref{sec:based-brickify}. Then we outline, how we incorporated
+the previous work into {\convertify} in
+Section~\ref{sec:reuses-brickify} and Section~\ref{sec:plugin-system}.
+
+\subsection{The Framework is Based on Brickify}
+\label{sec:based-brickify}
+
+The framework {\convertify} is based on the application {\brickify} by
+\citeauthor{brickify-thesis}. {\brickify} is a web-application which
+converts {\threedmodel}s into a hybrid model, consisting of {\lego}
+bricks and fewer 3D-printable parts. The previous work provides
+features like rendering or scene graphing, which can be shared with
+{\convertify}. In this section we present important design decisions
+of {\brickify}, which will help understanding how our framework works.
+
+The goals of {\brickify} ...
+
+  % - Subsection overview
+  %   - Recap: What is Brickify?
+  %   - Motivation: Reuse ideas of Brickify to bootstrap the framework
+  %     with previous work
+
+  %   - Goals of Brickify (3dobject conversions, aimed to be a
+  %     framework in the beginning)
+
+  %   - needs-figure :: Scene (flat graph, annotation with threejs objects)
+  %   - Renderer (bring threejs objects to WebGL scene)
+  %   - Plugins (decomposed computation/ feature units)
+  %   - needs-figure :: PluginHooks (communication via events)
+  %   - Bundle (control the application from outside)
+
+  %   - Framework characteristics of Brickify (though logic and ui not
+  %     decomposed, that is why we had to make changes, subsection summary)
+
+\subsection{The Framework Reuses Ideas and Components of Brickify}
+\label{sec:reuses-brickify}
+
+\subsection{The Framework Provides an Enhanced Plugin System}
+\label{sec:plugin-system}
+
+
 
 \section{The Application: Platener}
 \label{sec:application-platener}
