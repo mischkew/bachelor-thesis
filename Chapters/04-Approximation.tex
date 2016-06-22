@@ -344,6 +344,63 @@ Hashing is usually done if only identical points are merged instead of vertices 
 \section{Hole Detection - in Plates Kapitel}
 
 \section{Prism Classifier - in Classifier Kapitel}
+\chapter{Classifiers}
+\section{primitives}
+\subsection{Prism - Dimitri}
+
+\subsubsection{Bucket System}
+
+The surface normals are sorted into buckets.
+
+TODO: buckets sind minimal größer als threshold...
+
+
+All normals lie in the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (surfaces with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative. 
+
+
+\begin{listing}[!h]
+\centering
+\begin{minted}[
+linenos
+]{coffeescript}
+_normalInHemisphere: (normal) ->
+    if normal.z < 0
+        return normal.clone().negate()
+    else
+        return normal
+\end{minted}
+\caption{Normals are transformed into hemsiphere}
+\label{lst:_normalInHemisphere}
+\end{listing}
+
+
+This hemisphere is separated into rings (only the surface needs to be considered since all normals starting in the origin end on the hemispheres surface). Each ring covers the threshold angle in $z$-direction:
+
+\begin{equation*}
+    I_{Ring} = \floor*{ 
+                    \arcsin{ 
+                        \frac{z}{ \sqrt{ x^{2} + y^{2} } } 
+                    } 
+                    / t 
+                }
+\end{equation*}
+
+with \\
+$I_{Ring} := $ ring index \\
+$ x, y, z := $ normal coordinates \\
+$ t := $ bucket threshold \\
+
+
+\begin{equation*}
+    I_{MaxRing} = \floor*{
+                    \frac{\pi}{2}
+                    / t
+                  }
+\end{equation*}
+
+with \\
+$I_{MaxRing} := $ maximum ring index \\
+$ t := $ bucket threshold \\
 
 
 % (Plate) - Shape - EdgeLoop - Architektur und Funktionalität
