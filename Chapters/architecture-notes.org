@@ -1,0 +1,26 @@
+#+TITLE Notes for my Bachelor Thesis
+
+* DONE write about *BUNDLE*
+  CLOSED: [2016-06-18 Sat 15:11]
+
+* we need an interlude
+** what environment
+** what languages
+** what libraries
+** how buildsystem
+** how dev workflow
+** which parts of the system (which executables to we produce)
+
+* decompose on a higher level
+
+** convertify is the framework (that we present first)
+
+** the application platener is built with convertify, other applications could be built with convertify too. laser origami, brickify
+
+* nicos tips:
+
+** dont compare to brickify too much (what do i want? make it bad?, no!)
+
+** overiew, explain, summary -> recursive
+
+** use more examples, my descriptions are not concrete enough
