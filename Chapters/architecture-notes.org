@@ -6,6 +6,8 @@
 * DONE add mynotes for missing refs and figures
   CLOSED: [2016-06-22 Wed 19:44]
 
+* TODO discuss paragraph styles
+
 * FIGURES
 ** mesh of object
 ** stl listing of simple box

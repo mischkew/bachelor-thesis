@@ -2,7 +2,9 @@
 \begin{document}
 
 \newcommand\myNotes[1]{\textcolor{red}{#1}}
+\newcommand{\note}[1]{\myNotes{#1}}
 \newcommand{\class}[1]{\emph{#1}}
+\newcommand{\name}[1]{\texit{#1}}
 
 % put this into the intro
 % \platener is a web application,
@@ -26,13 +28,14 @@ Section~\ref{sec:application-platener}.\\
 With a framework like {\convertify} we can implement generic
 {\threedmodel} manipulation web-applications. {\threedmodel}
 manipulation means restructuring the model geometry in such a way,
-that it can be used in a new context - apart from visualization on
+that it can be used for a new purpose - apart from visualization on
 computer screens. Such manipulations include converting the
 {\threedmodel} for physical output devices like {\threedprinter}s or
 {\lasercutter}s. For example, {\brickify} creates models consisting of
 3D-printed parts and
 {\lego}-assembled\footnote{\url{http://www.lego.com}} parts. Thus,
-{\brickify} could ideally be built with {\convertify}.\\
+applications like
+{\brickify} can be built with {\convertify}.\\
 \\
 {\platener} is an application implemented in the framework {\convertify}.
 Using a framework helps us focusing on the algorithmic challenges of
@@ -57,7 +60,7 @@ meshes. Secondly, we look at the {\stlfile} format\\
 \\
 The model geometry is represented by a set of connected polygons,
 approximating the model surface. These connected polygons form a mesh.
-Figure~\ref{} shows a mesh. For the sake of simplicity, we use
+Figure~\ref{} shows a mesh. To benefit from hardware acceleration, we use
 triangles as polygons. A triangle in the mesh is called face. Each
 face is described by a list of three coordinates in 3D-space. Such a
 coordinate is called vertex \cite[p.~3]{cg-intro}. An edge is the line
@@ -65,7 +68,7 @@ between two connected vertices.\\
 \\
 We only support geometry which is arranged in two-manifold meshes.
 Two-manifoldness is a constraint on the mesh, which requires each egde
-to only touch two neighboring faces. Figure~\ref{}\myNotes{add figure}
+to exactly touch two neighboring faces. Figure~\ref{}\myNotes{add figure}
 shows a comparison of a manifold and non-manifold part of a mesh. It
 follows then, that each triangular face has to have three adjacent
 faces. Thus, the constraint enforces the mesh to be a fully connected
@@ -140,17 +143,17 @@ Figure~\ref{fig:render-loop} shows an exemplary flow.\\
   \label{fig:render-loop}
 \end{figure}
 
-When an object is rendered on the screen, it is part of a scene. A
-scene is the visual space, in which the rendered objects can be seen.
-Instead of rendering each vertex of the model directly to the scene,
-we use representations of objects, which are organized in a
-hierarchical data structure. We refer to this hierarchical structure
-as scene graph. A simple scene graph is depicted in Figure~\ref{}. The
-shown graph contains a box as single root node. The sides of the box
-are children of the root node. With this abstraction we can easily
-apply transformations to parts of the model only, without necessarily
-touching each face or vertex. Every object, that is rendered by
-{\convertify} is part of a scene graph.
+Each object is part of a scene. A scene is the visual space, in which
+the rendered objects can be seen. Instead of rendering each vertex of
+the model directly to the scene, we use representations of objects,
+which are organized in a hierarchical data structure. We refer to this
+hierarchical structure as scene graph\ref{}\myNotes{reference scene
+  graph data structure}. A simple scene graph is depicted in
+Figure~\ref{}. The shown graph contains a box as single root node. The
+sides of the box are children of the root node. With this abstraction
+we can easily apply transformations to parts of the model only,
+without necessarily touching each face or vertex. Every object, that
+is recognized by {\convertify} is part of a scene graph.
 
 \begin{figure}[H]
   \centering
@@ -176,8 +179,8 @@ effects in web-browsers, we have to use the Web Graphics Library
 execute special effects code (shader code)~\cite{mdn-webgl}.
 \\
 On top of WebGL we use {\threejs}\footnote{\url{http://threejs.org}}.
-{\threejs} is a {\javascript} library, which wraps the WebGL API and
-attempts to make the usage of WebGL simpler. It provides a scene graph
+{\threejs} is a {\javascript} library, which wraps the WebGL API to
+make the usage of WebGL simpler. It provides a scene graph
 implementation. {\threejs}
 data representations are used throughout {\convertify}.\\
 \\
@@ -199,60 +202,260 @@ Section~\ref{sec:reuses-brickify} and Section~\ref{sec:plugin-system}.
 \subsection{The Framework is Based on Brickify}
 \label{sec:based-brickify}
 
-The framework {\convertify} is based on the application {\brickify} by
-\citeauthor{brickify-thesis}. {\brickify} is a web-application which
-converts {\threedmodel}s into a hybrid model, consisting of {\lego}
-bricks and fewer 3D-printable parts. The previous work provides
-features like rendering or scene graphs, which can be shared with
-{\convertify}. In this section we present important design decisions
-of {\brickify}, which will help understanding how our framework
-works.\\
-\\
+The framework {\convertify} is based on the application {\brickify}
+by \citeauthor{brickify-thesis}. {\brickify} is a web-application
+which converts {\threedmodel}s into a hybrid model, consisting of
+{\lego} bricks and fewer 3D-printable parts. The previous work
+provides features like rendering or scene graphs, which can be
+shared with {\convertify}. In this section we present important
+design decisions of {\brickify}, which will help understanding how
+our framework
+works.
+
 {\brickify} implements a flat scene graph using \class{Nodes}. Each
 \class{Node} references an input model, has a {\threejs} object and
-transforms. The {\threejs} object is a \class{THREE.Object3D}. This is
-a generic object, which can be rendered into a WebGL scene with
+transforms. The {\threejs} object is a \class{THREE.Object3D}. This
+is a generic object, which can be rendered into a WebGL scene with
 {\threejs}. This \class{THREE.Object3D} will be displayed on the
-screen by {\brickify}. The transforms describe spatial properties like
-position, scale or rotation and are applied to the {\threejs} node.
-Note, that \class{Nodes} represent entities in the scene, but only
-{\threejs} nodes can actually be rendered.
+screen by {\brickify}. The transforms describe spatial properties
+like position, scale or rotation and are applied to the {\threejs}
+node. Note, that \class{Nodes} represent entities in the scene, but
+only {\threejs} nodes can actually be rendered.
 
 The \class{Nodes} are part of a \class{Scene}. The \class{Renderer}
 sets up a WebGL context and initializes {\threejs}. Then the
 \class{SceneManager} passes all active \class{Scenes} to the
-\class{Renderer}, which will traverse the flat scene graph and render
-each attached \class{THREE.Object3D}. Figure~\ref{}\myNotes{add
-  figure} shows how these classes interact. During that loading and
-render process, {\brickify} emits system events, e.g. change events to
-the scene graph (\textit{onNodeAdd},
-\textit{onNodeRemove}).\\
-\\
+\class{Renderer}, which will traverse the flat scene graph and
+render each attached \class{THREE.Object3D}.
+Figure~\ref{}\myNotes{add figure} shows how these classes interact.
+During that loading and render process, {\brickify} emits system
+events, e.g. change events to the scene graph (\textit{onNodeAdd},
+\textit{onNodeRemove}).
+
 {\brickify} decomposes its features into \class{Plugins}. A
 \class{Plugin} provides a set of methods which can be called upon
-system events to interact with the WebGL scene.
+emitted system events to interact with the WebGL scene.
 \citeauthor{brickify-thesis} refers to these callbacks as
 \class{PluginHooks} or just hooks.
 
-User interfaces are implemented in a separated code package. This
-mostly separates the web-interface from the scene features. The
+User interfaces are implemented within the same code package. This
+does not separate the web-interface from the scene features. Thus, it
+is hard to observe and apply changes to the system. The
 interface code uses a \class{Bundle} as an entry point to the plugin
 and scene system. The \class{Bundle} starts \class{Plugins} and loads
-{\threedmodels} from the filesystem into the application.\\
-\\
+{\threedmodels} from the filesystem into the application.
+
 {\brickify} provides abstractions for scene management and rendering.
 Plugins interact with the internal system via hooks. The separation of
 {\lego}-conversion features from the rendering engine bring clear
 interfaces. We encountered several hick-ups with this architecture
 when we tried to organize the communication between several plugins.
-In the following section, we outline our improvements to the internal
-system of {\brickify}.
+In the following sections, we outline our improvements to the internal
+system of {\brickify}. In Section~\ref{sec:reuses-brickify} we talk
+about components which could be reused with minor adaptions.
+Section~\ref{sec:plugin-system} presents the necessary changes to the
+plugin system.
 
 \subsection{The Framework Reuses Ideas and Components of Brickify}
 \label{sec:reuses-brickify}
 
+{\brickify} provides a set of core feature any WebGL application can
+make use of. This includes components like the render loop, scene
+management and plugin loading. {\convertify} has the goal to provide
+these essential components to help implementing WebGL application
+fast-forwardly. The implementation of such applications should be
+independent from any user interface code or required frontend
+libraries, avoiding additional vendor-locks to {\threejs}. In this
+section we explain, how we reached this goal.
+
+\myNotes{work on that section}
+re-uses render loop, scene management, plugin loading, bundle
+
+changes were: in project structure and ui code <> lots of mixing with
+ui code (convertify does not have any ui code out of the box. that
+will be part of the application that uses convertify)
+
+To make {\convertify} a multi-purpose WebGL framework, we stripped
+away any interwoven interface code from the \class{Renderer},
+\class{SceneManager} and \class{Bundle}. We also used the plugin
+system of {\brickify}. The applied changes to the plugin system are
+described in the following section.
+
 \subsection{The Framework Provides an Enhanced Plugin System}
 \label{sec:plugin-system}
+
+% - Subsection overview
+
+We present a plugin system that reacts to system events during the
+application's lifecycle. Additionally, we present a method, which organizes
+communication between \class{Plugins}.
+
+\subsubsection{Plugins Interact with the Internal System via
+  Lifecycle Events}
+
+% - Plugin definition in Convertify
+% - *feature for web gl scene and reaction on changes of the scene*
+% - *full fledged applications will implement a set of plugins to
+% provide functionality and web-ui code to provide interface*
+
+A \class{Plugin} bundles an exchangeable set of features which will
+interact with the WebGL scene or will react on changes to the scene.
+Such features are touch interactions with the rendered model or
+starting computation on the model data when it is added to the
+scene. Any full fledged application implements a set of
+\class{Plugins} to provide the scene functionality. E.g. a concrete
+conversion strategy provided by {\platener} is implemented by a
+single \class{Plugin}.
+
+% - needs-ref :: Lifecycle events in Convertify (= PluginHooks of
+% Brickify, Convertify vs. Plugins)
+% - needs-figure :: Example Plugin, interacting via PluginHooks
+% - System dispatches events (where do events come from?)
+
+Similar to {\brickify} we emit system events from internal components.
+Figure \ref{fig:}\myNotes{add system events figure} depicts the
+system's lifecycle and the emitted events. The subscribers to system
+events are \class{Plugins}. Each event can be handled by a
+\class{PluginHook}, if a \class{Plugin} implements it. To implement a
+\class{PluginHook} each \class{Plugin} registers a callback for that
+event. These callbacks get called when the event is dispatched by the
+system. Thus, \class{Plugins} can react to each event and apply their
+own functionality to the scene or even the model geometry. With this
+we emphasize compact computation units in plugins, which can still
+interact freely with the system.
+
+We have a short look at the \name{PlatenerPipeline} plugin, to
+illustrate an exemplary work flow of plugins. The
+\name{PlatenerPipeline} plugin is a \class{Plugin} implemented in
+{\platener}. It reads the model data after a {\threedmodel} was
+loaded into the scene. Then it processes the data to create a
+{\lasercutter} conversion. When the model is deleted from the scene
+by a user, the plugin releases the processed data. This plugin does
+not react to further user interactions, like clicking or rotating
+the model. Figure \ref{} \myNotes{plugin example flow} shows how this
+plugin integrates with {\convertify}.
+
+\subsubsection{Organizing Plugin Communication with a
+  Dispatcher}
+
+As {\convertify} manages multiple plugins, which either
+represent computation logic or render components, we have to
+know exactly when each of these plugins will interact with the
+system. We propose a \class{Dispatcher} component, behaving
+similar to the \name{mediator} pattern.
+
+According to \citeauthor{gof}, the \name{mediator} pattern is a
+behavioral software design pattern. The mediator encapsulates
+interconnections of components. It acts as a communication hub and
+coordinates its clients. The client components are loosely coupled as
+as they do not refer to each other explicitly. The mediator takes away
+that necessity \cite[p. ?]{gof}\note{fix citing, lookup page}.
+% https://sourcemaking.com/design_patterns/mediator
+
+The \class{Dispatcher} implements every \class{PluginHook}. All system
+events are emitted to the \class{Dispatcher} first, before the
+\class{Dispatcher} will remit them to the \class{Plugins}. With this
+component in the middle, we can control the order in which the events
+will be received by the \class{Plugins}. We have to determine the
+order of \class{PluginHook} executions explicitly, because for
+different events, different \class{Plugins} have to run first. E.g.
+{\platener} wants to process the model data before it is rendered when
+a user adds a node to the scene. But it wants to destroy the
+visualization before releasing all the computed data.
+
+These hooks are registered at the \emph{Dispatcher}, which is
+responsible for dispatching the lifecycle events to the plugins
+in a predefined order\myNotes{, see chapter ??}. Beside
+\emph{PluginHooks}, a \emph{Plugin} can expose \emph{Protocols}
+to interact with the system. \emph{Protocols} are described in
+\myNotes{chapter ??}.
+
+
+
+\subsubsection{The Dispatcher is a Mediator}
+
+The Dispatcher loads and initializes a set of configured plugins. It organizes
+the communication between plugins and client, plugins and server and plugins and
+plugins in a single place, as shown in
+Figure~\ref{fig:architecture_overview_dispatcher}. The \emph{PluginLoader}
+instantiates each plugin and exposes all defined \emph{PluginHooks} to the
+\emph{Dispatcher}. \myNotes{this is all similar to brickify, ref please}
+
+Convertify fires lifecycle events on which the plugins can react. The mediator
+knows an explicit execution order for each plugin when a lifecycle event is
+fired. Figure~\ref{fig:architecture_dispatcher_pipeline} shows in detail how the
+\emph{PlatenerPipeline} plugin and the \emph{Dispatcher} communicate via events.
+Codewise, the \emph{Dispatcher} implements each plugin hook and remits the event
+to the loaded plugins.
+
+
+Listing \ref{lst:client-disp-hooks} shows, how the
+\emph{ClientDispatcher} \myNotes{client dispatcher explained??}
+handles the \textit{init}, \textit{onNodeAdd} and
+\textit{onNodeRemove} hooks. By remitting events manually, we have
+fine-grained control about the execution order. This is necessary,
+because we want to invoke the \emph{PlatenerPipeline} plugin,
+computing the construction plans, before rendering the results via
+the \emph{NodeVisualizer} plugin. Also we have to remove the
+\emph{NodeVisualizer} results before deleting the data, to avoid
+reference errors. For both \emph{PluginHooks} the plugins are
+executed in a different ordering.
+
+
+To allow communication between plugins themselves or plugins and
+Client, we use \emph{Protocols} because \emph{PluginHooks} are not
+flexible enough. A \emph{Protocol} defines an interface, which has
+to be implemented by a \textit{delegate}. Via
+delegation\footnote{\url{http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html}}
+we define callbacks which are invoked by Plugins on the Dispatcher.
+The Dispatcher then notifies server, client or other plugins.
+Furthermore, \emph{Protocols} can add a set of methods to the
+Dispatcher via meta programming.
+
+Listing \ref{lst:solutionselectiondelegate} shows the definition of
+the SolutionSelectionDelegate protocol. It requires its implementing
+class to provide the methods \textit{evaluationDidStart},
+\textit{evalutionOfMethodDidFinish}, \textit{evaluationDidFinish},
+\textit{evaluationDidFail} and
+\textit{evaluationDidFailWithSolutions}. Listing
+\ref{lst:client_dispatcher_protocol} shows the
+\emph{ClientDispatcher} implementing the
+\textit{evaluationDidFinish} method. By providing the callbacks, the
+Dispatcher knows about the current state of the conversion and its
+completion. For example, we render all solutions after their
+computation. To satisfy the SolutionSelectionDelegate protocol, the
+Dispatcher also implements the remaining methods.
+
+
+
+\subsubsection{The Dispatcher is the Single Source of Truth}
+\label{sec:disp-single-source}
+
+When applications grow, it is hard to observe all messaging between
+components at once. With the \emph{Dispatcher}, we control all
+communication between the packages at one place. Without implicit
+ordering of callback executions, we can trace erroneous behavior
+fast. The design of a singleton controlling the application's
+lifecycle is known from frameworks in mobile application
+development, like Android\ref{??} or iOS\ref{??}.
+
+The usage of \emph{Protocols} helps developers keep track of
+interfaces between components. We enforce this concept, because
+\javascript is a dynamically typed programming language. Statically
+typed programming languages pay out, when projects grow large.
+Unexpected type and interface errors happen less often. Because of
+the web-environment and previous work, we are bound to
+\coffeescript. Thus, we emphasize explicit structuring of interfaces
+via \emph{Protocols}.
+
+% - needs-ref :: mediator organizes communication
+% - needs-figure :: mediator between dispatched system events and
+%                   plugins (internal handling of system events
+%                   before reaching plugins)
+% - *full fledged applications will implement a mediator to organize
+% feature communication*
+
+    % - Subsection summary
 
 
 
@@ -493,26 +696,28 @@ which is controlled in a \emph{Bundle}.
 
 \subsubsection{The Internal System Emits Lifecycle Events}
 
-Similar to other applications\myNotes{what applications?} \emph{Convertify}
-dispatches events from the internal system during the application's lifecycle.
-The internal system refers to framework features, which all applications built
-with \emph{Convertify} share. Such features are model import, scenegraph
-manipulation or render updates.
+Similar to other applications\myNotes{what applications?}
+\emph{Convertify} dispatches events from the internal system during
+the application's lifecycle. The internal system refers to framework
+features, which all applications built with \emph{Convertify} share.
+Such features are model import, scenegraph manipulation or render
+updates.
 
 \myNotes{add figure environment here}
 
-The lifecycle of \emph{Convertify} is depicted in Figure \myNotes{add figure for
-  platener lifecycle}. First we initialize all activated plugins in the
-\emph{init} event. During the \emph{init3d} event each plugin is passed an empty
-\emph{THREE.Object3D} instance. We call it the root node. The root node is
-associated with the \emph{Node} in the scene graph. The plugins append
-the computed visuals onto the root node. All root nodes are rendered by the
-\emph{Renderer}, calling the \emph{update3d} callback. \myNotes{look up event
-  name}. When a \emph{Node} from the \emph{Scene} is selected by the user, we
-dispatch the \emph{onNodeSelect} event. When a new \emph{Node} is added to the
-\emph{Scene}, the \emph{onNodeAdd} hook is triggered. The \emph{onNodeRemove}
-hook is triggered respectively when a \emph{Node} is removed from the
-\emph{Scene}. \myNotes{ref brickify}
+The lifecycle of \emph{Convertify} is depicted in Figure \myNotes{add
+  figure for platener lifecycle}. First we initialize all activated
+plugins in the \emph{init} event. During the \emph{init3d} event each
+plugin is passed an empty \emph{THREE.Object3D} instance. We call it
+the root node. The root node is associated with the \emph{Node} in the
+scene graph. The plugins append the computed visuals onto the root
+node. All root nodes are rendered by the \emph{Renderer}, calling the
+\emph{update3d} callback. \myNotes{look up event name}. When a
+\emph{Node} from the \emph{Scene} is selected by the user, we dispatch
+the \emph{onNodeSelect} event. When a new \emph{Node} is added to the
+\emph{Scene}, the \emph{onNodeAdd} hook is triggered. The
+\emph{onNodeRemove} hook is triggered respectively when a \emph{Node}
+is removed from the \emph{Scene}. \myNotes{ref brickify}
 
 % \begin{itemize}
 % \item plugin init - plugin is loaded, general setup
@@ -531,15 +736,18 @@ hook is triggered respectively when a \emph{Node} is removed from the
 % \item refer to Brickify
 % \end{itemize}
 
-\subsubsection{Plugins Interact with the Internal System via Lifecycle Events}
+\subsubsection{Plugins Interact with the Internal System via
+  Lifecycle Events}
 
-The subscribers to lifecycle events are \emph{Plugins}. Each event type exposes
-a \emph{PluginHook}. Each \emph{Plugin} registers a callback on an arbitrary
-number of events. These callbacks get called when the event is dispatched by the
-system. Thus plugins can handle each event and apply their own functionality to
-the scene or even the model geometry. With this we emphasize compact computation
-units in plugins, which can still interact freely with the system. The approach
-is directly adapted from \emph{Brickify} \myNotes{ref chapter in brickify}.
+The subscribers to lifecycle events are \emph{Plugins}. Each event
+type exposes a \emph{PluginHook}. Each \emph{Plugin} registers a
+callback on an arbitrary number of events. These callbacks get
+called when the event is dispatched by the system. Thus plugins can
+handle each event and apply their own functionality to the scene or
+even the model geometry. With this we emphasize compact computation
+units in plugins, which can still interact freely with the system.
+The approach is directly adapted from \emph{Brickify} \myNotes{ref
+  chapter in brickify}.
 
 % \begin{itemize}
 % \item Gain control for computation units (plugins)
@@ -551,13 +759,14 @@ is directly adapted from \emph{Brickify} \myNotes{ref chapter in brickify}.
 
 \subsection{Plugins within Convertify}
 
-A \emph{Plugin} bundles methods and system event callbacks to provide a new set
-of features to the application, e.g. the \emph{PlatenerPipeline} plugin builds a
-two-dimensional construction plan from the {\threedmodel} and exposes it for
-download. The \emph{Plugin} can be switched on or off on application load for
-the Client and Server package respectively. Complex applications can be built by
-composing multiple plugins. This supports the framework character of
-applications built with Convertify.
+A \emph{Plugin} bundles methods and system event callbacks to
+provide a new set of features to the application, e.g. the
+\emph{PlatenerPipeline} plugin builds a two-dimensional construction
+plan from the {\threedmodel} and exposes it for download. The
+\emph{Plugin} can be switched on or off on application load for the
+Client and Server package respectively. Complex applications can be
+built by composing multiple plugins. This supports the framework
+character of applications built with Convertify.
 
 
 % \begin{itemize}
@@ -641,10 +850,10 @@ whole filetree. A list of plugins used in \emph{Platener} is describe in
 
 \subsection{Control Flow and Plugin Communication}
 
-As Platener is composed of multiple plugins, which either represent computation
-logic or render components, we have to know exactly when each of these plugins
-will interact with the system. We propose a Dispatcher component, behaving
-similar to the mediator
+As Platener is composed of multiple plugins, which either represent
+computation logic or render components, we have to know exactly when
+each of these plugins will interact with the system. We propose a
+Dispatcher component, behaving similar to the mediator
 pattern\footnote{\url{https://sourcemaking.com/design_patterns/mediator}}.
 
 \subsubsection{The Dispatcher is a Mediator}
@@ -704,15 +913,17 @@ class ClientDispatcher extends AbstractDispatcher
 \label{lst:client-disp-hooks}
 \end{listing}
 
-Listing \ref{lst:client-disp-hooks} shows, how the \emph{ClientDispatcher}
-\myNotes{client dispatcher explained??} handles the \textit{init},
-\textit{onNodeAdd} and \textit{onNodeRemove} hooks. By remitting events manually, we have fine-grained
-control about the execution order. This is necessary, because we want to invoke
-the \emph{PlatenerPipeline} plugin, computing the construction plans, before
-rendering the results via the \emph{NodeVisualizer} plugin. Also we have to
-remove the \emph{NodeVisualizer} results before deleting the data, to avoid
-reference errors. For both \emph{PluginHooks} the plugins are executed in a
-different ordering.
+Listing \ref{lst:client-disp-hooks} shows, how the
+\emph{ClientDispatcher} \myNotes{client dispatcher explained??}
+handles the \textit{init}, \textit{onNodeAdd} and
+\textit{onNodeRemove} hooks. By remitting events manually, we have
+fine-grained control about the execution order. This is necessary,
+because we want to invoke the \emph{PlatenerPipeline} plugin,
+computing the construction plans, before rendering the results via
+the \emph{NodeVisualizer} plugin. Also we have to remove the
+\emph{NodeVisualizer} results before deleting the data, to avoid
+reference errors. For both \emph{PluginHooks} the plugins are
+executed in a different ordering.
 
 % \begin{itemize}
 % \item refer to Brickify, PluginLoader
@@ -727,27 +938,29 @@ different ordering.
 \label{fig:architecture_dispatcher_pipeline}
 \end{figure}
 
-To allow communication between plugins themselves or plugins and Client, we use
-\emph{Protocols} because \emph{PluginHooks} are not flexible enough. A
-\emph{Protocol} defines an interface, which has to be implemented by a
-\textit{delegate}. Via
+To allow communication between plugins themselves or plugins and
+Client, we use \emph{Protocols} because \emph{PluginHooks} are not
+flexible enough. A \emph{Protocol} defines an interface, which has
+to be implemented by a \textit{delegate}. Via
 delegation\footnote{\url{http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html}}
-we define callbacks which are invoked by Plugins on the Dispatcher. The
-Dispatcher then notifies server, client or other plugins. Furthermore,
-\emph{Protocols} can add a set of methods to the Dispatcher via meta
-programming.
+we define callbacks which are invoked by Plugins on the Dispatcher.
+The Dispatcher then notifies server, client or other plugins.
+Furthermore, \emph{Protocols} can add a set of methods to the
+Dispatcher via meta programming.
 
-Listing \ref{lst:solutionselectiondelegate} shows the definition of the
-SolutionSelectionDelegate protocol. It requires its implementing class to
-provide the methods \textit{evaluationDidStart},
+Listing \ref{lst:solutionselectiondelegate} shows the definition of
+the SolutionSelectionDelegate protocol. It requires its implementing
+class to provide the methods \textit{evaluationDidStart},
 \textit{evalutionOfMethodDidFinish}, \textit{evaluationDidFinish},
-\textit{evaluationDidFail} and \textit{evaluationDidFailWithSolutions}. Listing
-\ref{lst:client_dispatcher_protocol} shows the \emph{ClientDispatcher} implementing the
-\textit{evaluationDidFinish} method. By providing the callbacks, the Dispatcher
-knows about the current state of the conversion and its completion. For example,
-we render all solutions after their computation. To satisfy the
-SolutionSelectionDelegate protocol, the Dispatcher also implements the remaining
-methods.
+\textit{evaluationDidFail} and
+\textit{evaluationDidFailWithSolutions}. Listing
+\ref{lst:client_dispatcher_protocol} shows the
+\emph{ClientDispatcher} implementing the
+\textit{evaluationDidFinish} method. By providing the callbacks, the
+Dispatcher knows about the current state of the conversion and its
+completion. For example, we render all solutions after their
+computation. To satisfy the SolutionSelectionDelegate protocol, the
+Dispatcher also implements the remaining methods.
 
 \begin{listing}[!h]
 \centering
@@ -805,19 +1018,22 @@ class Dispatcher extends AbstractDispatcher
 \subsubsection{The Dispatcher is the Single Source of Truth}
 \label{sec:disp-single-source}
 
-When applications grow, it is hard to observe all messaging between components
-at once. With the \emph{Dispatcher}, we control all communication between the
-packages at one place. Without implicit ordering of callback executions, we can
-trace erroneous behavior fast. The design of a singleton controlling the
-application's lifecycle is known from frameworks in mobile application
+When applications grow, it is hard to observe all messaging between
+components at once. With the \emph{Dispatcher}, we control all
+communication between the packages at one place. Without implicit
+ordering of callback executions, we can trace erroneous behavior
+fast. The design of a singleton controlling the application's
+lifecycle is known from frameworks in mobile application
 development, like Android\ref{??} or iOS\ref{??}.
 
-The usage of \emph{Protocols} helps developers keep track of interfaces between
-components. We enforce this concept, because \javascript is a dynamically typed
-programming language. Statically typed programming languages pay out, when
-projects grow large. Unexpected type and interface errors happen less often.
-Because of the web-environment and previous work, we are bound to \coffeescript.
-Thus, we emphasize explicit structuring of interfaces via \emph{Protocols}.
+The usage of \emph{Protocols} helps developers keep track of
+interfaces between components. We enforce this concept, because
+\javascript is a dynamically typed programming language. Statically
+typed programming languages pay out, when projects grow large.
+Unexpected type and interface errors happen less often. Because of
+the web-environment and previous work, we are bound to
+\coffeescript. Thus, we emphasize explicit structuring of interfaces
+via \emph{Protocols}.
 
 % \begin{itemize}
 % \item one guy who pulls all the strings (one source of truth)
