@@ -11,11 +11,11 @@ There are multiple approaches for finding plates contained in a 3D-mesh. The fir
 
 \section{Prerequisites for finding plates}
 
-coplanar / shapesfinder / holedetection
+Before finding plates, the model's faces have to be grouped into planar surfaces. This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
 
 \subsection{Coplanar Faces}
 
-The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by Meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
+The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
 
 Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass (see Listing \ref{lst:lookuptables}). 
 
@@ -55,6 +55,7 @@ for faceIndex in [0...faceCount] when not faceVisited[faceIndex]
   faceGroupIndex = faceGroups.length
   outerEdgeGroup = []
   groupNormal = @faceVertexMesh.getFaceNormal(faceIndex)
+  @faceToFaceGroup[faceIndex] = faceGroupIndex
   faceVisited[faceIndex] = true
   # connect the adjacent faces
   edgeQueue = []
@@ -67,9 +68,9 @@ for faceIndex in [0...faceCount] when not faceVisited[faceIndex]
 \label{lst:iteratefaces}
 \end{listing}
 
-There are multiple important variables being set here: First, we have the new face group, containing only the current face. Next, we have the index of the face group, used for creating a face to face group lookup table. The outerEdgeGroup contains all edges surrounding the group, which allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
+There are multiple important variables being set here: First, we have the new \mintinline{coffeescript}{faceGroup}, containing only the current face. Next, we have the index of the group, used for creating a \mintinline{coffeescript}{faceToFaceGroup} lookup table. The \mintinline{coffeescript}{outerEdgeGroup} contains all edges surrounding the group, which allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
 
-After the edges have been pushed in the queue, we start working on it (see Listing \ref{lst:tranverseadjacent}).  
+After the edges have been pushed in the queue, we start processing it (see Listing \ref{lst:traverseadjacent}).  
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -92,6 +93,7 @@ traverseAdjacentFaces: tco (...) ->
   nextFaceNormal = @faceVertexMesh.getFaceNormal(nextFaceIndex)
  
   # check if faces are coplanar
+  # [...]
 
   @recur(...)
 \end{minted}
@@ -99,7 +101,10 @@ traverseAdjacentFaces: tco (...) ->
 \label{lst:traverseadjacent}
 \end{listing}
 
+\todo{list tco code? or just mention?}
 
+This is implemented as a \emph{tail recursion}, the helper function \mintinline{coffeescript}{tco} is based on an existing implementation of tail calls in \coffeescript\footnote{TCO in CoffeeScript, \url{https://gist.github.com/adrusi/1905351}}. It runs \mintinline{coffeescript}{traverseAdjacentFaces} as long as \mintinline{coffeescript}{recur} is called each pass. First, the length of the queue is checked. If there a no more edges waiting to be processed, we can jump out of the recursion and continue searching for new groups (Listing \ref{lst:iteratefaces}). Otherwise, we first get the normal of the face from which we came. Next, we extract the new face from the edge and get the face's normal as well. After checking the faces' coplanarity, we signal that there may be more elements in the queue by calling \mintinline{coffeescript}{recur}.
+Listing \ref{lst:coplanarcheck} shows what happens when testing if the faces are coplanar. \mintinline{coffeescript}{isAngleZero} calculates the angle between the normals and compares it to zero. This is done even if the new face was already visited. If the faces are not coplanar, the edge is added to the group's outer edges. In case of coplanarity, we now check if the face was visited. If it wasn't, it's added to the face group. Additionally, an entry is added to the \mintinline{coffeescript}{faceToFaceGroup} lookup table and the face is marked as visited. After fetching the face's edges, they are pushed into the queue.
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -112,8 +117,8 @@ if @isAngleZero(faceNormal, nextFaceNormal)
     @faceToFaceGroup[nextFaceIndex] = faceGroupIndex
     faceVisited[nextFaceIndex] = true
     adjacentEdges = @faceVertexMesh.getEdgesFromFace(nextFaceIndex)
-    for edge in adjacentEdges
-      edgeQueue.push({ edge, faceIndex: nextFaceIndex })
+    for nextEdge in adjacentEdges when not Util.arrayEquals edge, nextEdge
+      edgeQueue.push({ edge: nextEdge, faceIndex: nextFaceIndex })
 else
   outerEdgeGroup.push(edge)
 \end{minted}
@@ -121,32 +126,7 @@ else
 \label{lst:coplanarcheck}
 \end{listing}
 
-\begin{listing}[ht]
-\begin{minted}[
-linenos
-]{coffeescript}
-# https://gist.github.com/adrusi/1905351
-tco = (fn) -> (args...) ->
-  @recured = false
-  @args = []
-  @recur = (args...) =>
-    @recured = true
-    @args = args
-
-  returnVal = fn.apply @, args
-  while true
-    if @recured
-      tempArgs = @args
-      @args = undefined
-      @recured = false
-      returnVal = fn.apply @, tempArgs
-    else
-      return returnVal
-\end{minted}
-\caption{Tail call optimization helper function.}
-\label{lst:tco}
-\end{listing}
-
+After all faces have been processed and assigned a group, the \mintinline{coffeescript}{faceGroups}, \mintinline{coffeescript}{faceGroupNormals} and \mintinline{coffeescript}{outerEdgeGroups} are injected into the face-vertex mesh, along with the \mintinline{coffeescript}{faceToFaceGroup} lookup table.
 
 \subsection{Shape Finder / Deus}
 
@@ -158,7 +138,7 @@ sdfjkljklsdfsdfjkl
 
 \section{Finding inherent plates}
 
-In order to find inherent plates in a mesh, the first step is to find all shapes which are parallel and check if the distance between them fits one of the given plate thicknesses.
+In order to find inherent plates in a mesh, the first step is to find all shapes which are parallel and check if the distance between them fits one of the given plate thicknesses (Listing \ref{lst:platecand}).
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -168,35 +148,55 @@ candidates = []
 for shape1, index1 in shapes
     for shape2, index2 in shapes when index1 < index2
         if normals parallel and surfaces facing apart
-            if distance between shape1, shape2 in plate thicknesses
+            if checkPlateThickness shape1, shape2
                 candidates.push { shape1, shape2 }
 return candidates
 \end{minted}
 \caption{Plate candidate pseudo code.}
-\label{lst:coffeescript}
+\label{lst:platecand}
 \end{listing}
 
 While the testing for normal parallelism is done with built-in vector functions, the check if the surfaces are facing apart uses a vertex of each of the surfaces and calculates the angle of the resulting vector to one of the normals. If this angle is smaller than 90\textdegree, the surfaces are indeed facing apart. The distance between the surfaces is calculated by creating a three.js plane from one of the shapes and computing the plane-to-point distance towards one of the other shape's points.
 
-After finding these plate candidates, the shapes which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate. Now, the intersection of both shapes is calculated. This is done by using the already calculated mapping of vertices into the x-y-plane. The resulting intersection is transformed back into 3D-space using the rotation matrix of the base shape. With the resulting shapes, plates are created.
+After finding these plate candidates, the shapes which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate, as shown in Listing \ref{lst:faceintersect}. Now, the intersection of both shapes is calculated. This is done by using the already calculated mapping of vertices into the x-y-plane. The resulting intersection is transformed back into 3D-space using the rotation matrix of the base shape. With the resulting shapes, plates are created.
 
-% \begin{center}Listing XYZ: Plate creation
-% \begin{lstlisting}
-% shape2CloserToOrigin = abs(shape2.zValue) < abs(shape1.zValue)
-% polygon1 = create2DPolygon(shape1)
-% polygon2 = create2DPolygon(shape2)
-% intersection = polygon1.intersect polygon2
-% shapes = parseToShapes(intersection)
-% plates = parseToPlates(shapes)
-% return plates
-% \end{lstlisting}
-% \end{center}
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+shape2CloserToOrigin = abs(shape2.zValue) < abs(shape1.zValue)
+polygon1 = create2DPolygon(shape1)
+polygon2 = create2DPolygon(shape2)
+intersection = polygon1.intersect polygon2
+shapes = parseToShapes(intersection)
+plates = parseToPlates(shapes)
+return plates
+\end{minted}
+\caption{Face intersection for creating inherent plates.}
+\label{lst:faceintersect}
+\end{listing}
 
 This step uses the jsclipper library for intersecting the shapes. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
 \section{Extruding plates}
 
-blabla
+The extrusion of plates is a simpler approach, which is shown in Listing \ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded against the face's normal direction. The plane constant of the plates base plane is the same as the z-value of the shapes x-y-representation. After checking the shape's area, the new plate is created.
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+createPlateFromShape: (shape) ->
+  thickness = -@plateThicknesses[0]
+  planeConstant = shape.edgeLoops[0].xyPlaneVertices[0].z
+  if shape.getContour().computeArea() > @areaThreshold
+    return new Plate shape, thickness, planeConstant
+  else
+    return null
+\end{minted}
+\caption{Extruding a plate from a shape.}
+\label{lst:extrude}
+\end{listing}
 
 \section{Removing contained plates / Dimitri}
 
@@ -204,31 +204,271 @@ dfgdfgdfgdfgdfg
 
 \section{Stacking plates}
 
-blablabla
+As an alternative approach, plates can be stacked. This method does not directly use the models surfaces. However, they can be used for optimization.
+The main function for stacking is shown in Listing \ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. After clipping the models faces with these planes, the resulting edges are merged into edge loops, which are used for creating shapes and, as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotaion in order to align them with the model. 
 
-% Hey Lukas hier ist Klara, habe eine alternative methode für algorithms darstellen, die finde ich persönlich übersichtlicher.
-% HIer ein Beispiel:
-% \begin{algorithm}[H]
-% \DontPrintSemicolon
-% 	\KwData{this text}
-% 	\KwResult{how to write algorithm with \LaTeX2e }
-% 	initialization\;
-% 	\While{not at end of this document}{
-% 	read current\;
-% 	\eIf{understand}{
-% 	go to next section\;
-% 	current section becomes this one\;
-% 	}{
-% 	go back to the beginning of current section\;
-% 	}
-%      \For{all I know}{
-%      look at this link to learn more about \LaTeX2e:\;
-%      http://ctan.space-pro.be/tex-archive/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf\;
-%      }
-% 	}
-%    \caption{How to write algorithms}
-% Kannst ja mal überlegen, wir sollten uns aber auf eins von beiden einigen
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+findStackedPlates: (model, shapes) ->
+  return new Promise (resolve) =>
+    rotationMatrix = @findRotation shapes
+    model.getClone().then((clone) =>
+      @model = @rotateModel clone, rotationMatrix
+      @planes = @getClippingPlanes()
+      @clipFacesAgainstPlanes @model.model.mesh.faces
+      @mergeEdgesInPlanes()
+      @shapeGroups = @createShapes()
+      @polygonGroups = @createPolygons()
+      @shafts = @findShafts()
+      @shapes = @clipShafts()
+      plates = @createPlates().filter((p) -> p?)
+      shaftPlates = @createShaftPlates()
+      plates = plates.concat shaftPlates
+      plates = @rotatePlatesBack plates, rotationMatrix
+      resolve plates
+    )
+\end{minted}
+\caption{Plate stacking main function.}
+\label{lst:stackedmain}
+\end{listing}
 
-% \end{algorithm}
+\subsection{Rotating the model}
+
+In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing \ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+findRotation: (shapes) ->
+  maxArea = 0
+  rotationMatrix = new THREE.Matrix3()
+  shapes.forEach((shape) ->
+    area = shape.area || shape.getContour().computeArea()
+    if area > maxArea
+      maxArea = area
+      rotationMatrix = shape.rotationMatrix
+  )
+  return rotationMatrix
+\end{minted}
+\caption{Finding an optimal rotation.}
+\label{lst:findrotation}
+\end{listing}
+
+\subsection{Finding the clipping planes}
+
+Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a \threejs plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates-to-be, which is an approximation which works for most applications. The plane creation is shown in Listing \ref{lst:clippingplanes}.
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+getClippingPlanes: ->
+  planes = []
+  for i in [@minZ..@maxZ] by @thickness
+    planes.push {
+      plane: new THREE.Plane new THREE.Vector3(0, 0, 1), -(i + @thickness / 2)
+      edges: []
+    }
+  return planes
+\end{minted}
+\caption{Clipping plane generation.}
+\label{lst:clippingplanes}
+\end{listing}
+
+\subsection{Clipping the model's faces}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+clipFaceAgainstPlanes: (face) ->
+  planeIndex = @findClippingPlane(face)
+  if planeIndex > -1
+    @checkAdjacentPlanes(face, planeIndex)
+\end{minted}
+\caption{Clipping a face against all planes.}
+\label{lst:clipfaceplanes}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+findClippingPlane: (face) ->
+  stepWidth = @planes.length / 4.0
+  index = -1
+  currentIndex = @planes.length // 2
+  oldIndex = -1
+  while currentIndex isnt oldIndex and 0 <= currentIndex < @planes.length and index is -1
+    direction = @clipFaceAgainstPlane face, @planes[currentIndex]
+    if direction is 0
+      index = currentIndex
+    else
+      oldIndex = currentIndex
+      currentIndex += Math.round stepWidth * direction
+      stepWidth /= 2
+  return index
+\end{minted}
+\caption{Finding a plane which clips the face.}
+\label{lst:findplane}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+clipFaceAgainstPlane: (face, plane) ->
+  intersections = []
+  face.vertices.forEach((vertex, index) =>
+    start = vector(vertex)
+    end = vector(face.vertices[(index + 1) % 3])
+    line = new THREE.Line3(start, end)
+    intersection = plane.plane.intersectLine line
+    if intersection? then intersections.push intersection
+  )
+  # switch intersections.length
+\end{minted}
+\caption{Clipping a face against a plane.}
+\label{lst:clipfaceplane}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+getDirectionFromPlaneToFace: (face, plane) ->
+  sum = 0
+  face.vertices.forEach((vertex) ->
+    sum += vertex.z + plane.plane.constant
+  )
+  if sum is 0 then throw new Exception()
+  return sum / Math.abs sum
+\end{minted}
+\caption{Calculating the direction from a plane to a face.}
+\label{lst:facedirection}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+checkAdjacentPlanes: (face, index) ->
+  runIndex = index + 1
+  direction = 0
+  while(runIndex < @planes.length and direction is 0)
+    direction = @clipFaceAgainstPlane(face, @planes[runIndex++])
+  runIndex = index - 1
+  direction = 0
+  while(runIndex >= 0 and direction is 0)
+    direction = @clipFaceAgainstPlane(face, @planes[runIndex--])
+  return
+\end{minted}
+\caption{Checking if adjacent planes are clipping too.}
+\label{lst:checkadjacent}
+\end{listing}
+
+\subsection{Adding shafts}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+findShafts: ->
+  shaftCandidates = []
+  @polygonGroups.forEach((polygonGroup, level) =>
+    polygonGroup.forEach((polygon) =>
+      added = false
+      shaftCandidates.forEach((shaftCandidate) =>
+        if level > shaftCandidate.lastlevel + 1
+          shaftCandidate.finished = true
+        if not shaftCandidate.finished
+          if @tryAddingPolygonToShaftCandidate polygon, shaftCandidate
+            shaftCandidate.lastlevel = level
+            added = true
+      )
+      if not added
+        if Shaft.isIntersectionBigEnoughForShaft(polygon.polygon, @shaftData)
+          newShaftCandidate = Shaft.fromPolygon(
+            polygon
+            level
+            @shaftData
+          )
+          newShaftCandidate.polygons[0].shafts.push newShaftCandidate
+          @tryOverlappingShaftBackwards newShaftCandidate
+          shaftCandidates.push newShaftCandidate
+    )
+  )
+  @fixUnconnectedPlates shaftCandidates
+  @cleanUpShafts shaftCandidates
+  shaftCandidates.forEach((shaft) ->
+    shaft.createShaftContourAndCrossSection()
+  )
+  return shaftCandidates
+\end{minted}
+\caption{Finding shafts.}
+\label{lst:findshafts}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+fixUnconnectedPlates: (shaftCandidates) ->
+  @polygonGroups.forEach((polygonGroup, level) =>
+    polygonGroup.forEach((polygon) =>
+      connection = @isPolygonConnected polygon, level
+      if not connection.isConnected
+        expanded = false
+        direction = "DOWN"
+        if connection.shaftsFromAbove.length > 0
+        expanded = @tryExpandingShaftsInOneDirection(
+          connection.shaftsFromAbove, level, direction
+        )
+        if connection.shaftsFromBelow.length > 0
+          direction = "UP"
+          expanded = @tryExpandingShaftsInOneDirection(
+            connection.shaftsFromBelow, level, direction
+          )
+        if not expanded and Shaft.isIntersectionBigEnoughForShaft polygon.polygon, @shaftData
+          newShaftCandidate = Shaft.fromPolygon(
+            polygon
+            level
+            @shaftData
+          )
+          newShaftCandidate.polygons[0].shafts.push newShaftCandidate
+          @tryExpandingShaftAroundLevel(
+            newShaftCandidate
+            level
+            direction
+          )
+          shaftCandidates.push newShaftCandidate
+    )
+  )
+\end{minted}
+\caption{Fixing unconnected plates.}
+\label{lst:findshafts}
+\end{listing}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos
+]{coffeescript}
+cleanUpShafts: (shafts) ->
+  if shafts.length > 0
+    for i in [shafts.length - 1..0]
+      if shafts[i].polygons.length < 1
+        log.error "FOUND SHAFT WITH ZERO POLYGONS"
+      if shafts[i].polygons.length < 2
+        shafts[i].polygons.forEach((polygon) ->
+          polygon.shafts.splice polygon.shafts.indexOf(shafts[i]), 1
+        )
+        shafts.splice i, 1
+\end{minted}
+\caption{Fixing unconnected plates.}
+\label{lst:findshafts}
+\end{listing}
 
 \end{document}

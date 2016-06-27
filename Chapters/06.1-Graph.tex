@@ -143,6 +143,9 @@ If we now have a look at only the inner intersections of plates in a model we ca
 
 
 \section{Alternative Solutions}
+\subsection{Why this plate graph class structure and not another?}
+we wanted the graph to be easily traversable by being able to access all nodes and all connections.\\
+
 \subsection{Dustin: how he did it}
 \subsection{Dustins wrong/not specified angles}
 he didnt actually specify how he calculated the angles...
@@ -152,11 +155,30 @@ he didnt actually specify how he calculated the angles...
 \section{How we got there}
 \subsection{Floating Point inaccuracy}
 \subsection{Bruteforce finding lines}
+The first approach was gathering all lines from all plate boundaries and looking for intersects of any other line. This is a very costly calculation but less prone to rounding errors. \\
+\textbf{TODO: Find out if there was another bad thing about it like not finding all lines possible...}
+Later we continued on to using plane intersections which meant we only needed to work with all combinations of plates instead of all of its edges.
 \subsection{different line intersection algorithms}
+\subsection{previous angle calculation}
+\textbf{TODO: Probably move angle calculation section here and replace it with how we do it now: clip and based on that know the angle}
 
 \section{Future work}
-- find out if model is assemblable in the end
-- rejoining broken up plates (t-connection)
+\begin{itemize}
+    \item find out if model is assemblable in the end\\
+    A very important information about the final converted model is if it can actually be build. A user may not only need assembly instructions on how to actually build the model when cut but also if it is possible to do so. There may be a conflict when plate a needs to be put up before plate b but plate b also needs to be in the model before plate a. This should not happen or at least be mentioned to the user.
+    \item rejoining broken up plates (t-connection)\\
+    It can happen that during finding inherent plates some plates are broken by another. This should result in a t-junction. For this the plategraph has to recognize those broken-up plates and reunion them. \\
+    For this the following steps are necessary:
+    \begin{enumerate}
+        \item Iterate over all nodes and check if it has two or more neighbors. 
+        \item Test if the any of the neigbors are coplanar to each other. If so they are labeled as plates p1 and p2. Any other neighbor is labeled p3 or higher.
+        \item Check if p1 and p2 have the same thickness. If not start over with the next node
+        \item If they have the same thickness the intersections needs to be checked for parallelness and overlaps between p1 and p3 and p2 and p3.
+        \item When determined that p1 and p2 are actually one plate which is parted by p3 then they need to be unioned and marked for a t-junction to be handled in the next step.
+    \end{enumerate}
+    (not sure if this is all it takes maybe a plate is broken up more than once, meaning not only p1 and p2 might be coplanar)
+\end{itemize}
+
 
 
 

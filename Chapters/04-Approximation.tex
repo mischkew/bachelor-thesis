@@ -350,12 +350,12 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \subsubsection{Bucket System}
 
-The surface normals are sorted into buckets.
+The surface normals are sorted into buckets. Threshold $\phi$
 
-TODO: buckets sind minimal größer als threshold...
+\myNotes{TODO: buckets sind minimal größer als threshold...}
 
 
-All normals lie in the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (surfaces with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative. 
+All normals lie on the surface of the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative. 
 
 
 \begin{listing}[!h]
@@ -373,8 +373,36 @@ _normalInHemisphere: (normal) ->
 \label{lst:_normalInHemisphere}
 \end{listing}
 
+\begin{figure}
+    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-Rings.png}
+    \caption{rings_FromSide}
+    \label{fig:rings_FromSide}
+\end{figure}
 
-This hemisphere is separated into rings (only the surface needs to be considered since all normals starting in the origin end on the hemispheres surface). Each ring covers the threshold angle in $z$-direction:
+\begin{figure}
+    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-RingsFromTop.png}
+    \caption{rings_FromTop}
+    \label{fig:rings_FromTop}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=0.4\columnwidth]{Images/PrismCl-RingAngle.png}
+    \caption{ringAngle}
+    \label{fig:ringAngle}
+\end{figure}
+
+
+This hemisphere is separated into rings. Each ring covers the threshold angle in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. The correlating angle of a normal is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}:
+
+\begin{equation*}
+    \sin{\alpha} = \frac{z}{ \sqrt{x^{2} + y^{2}} }
+\end{equation*}
+
+with \\
+$ x, y, z := $ normal coordinates\\
+
+
+The angle $\alpha$ is represented as a multiple of the threshold angle to get the actual ring index:
 
 \begin{equation*}
     I_{Ring} = \floor*{ 
@@ -390,6 +418,7 @@ $I_{Ring} := $ ring index \\
 $ x, y, z := $ normal coordinates \\
 $ t := $ bucket threshold \\
 
+The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring index is calculated as follows:
 
 \begin{equation*}
     I_{MaxRing} = \floor*{
@@ -402,6 +431,21 @@ with \\
 $I_{MaxRing} := $ maximum ring index \\
 $ t := $ bucket threshold \\
 
+
+Each ring is seperated into buckets which cover the threshold angle as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto to xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This 
+
+\begin{figure}
+    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
+    \caption{buckets}
+    \label{fig:PrismCl-buckets}
+\end{figure}
+
+
+\begin{figure}
+    \includegraphics[width=1.0\columnwidth]{Images/PrismCl-Projection.png}
+    \caption{projection}
+    \label{fig:projection}
+\end{figure}
 
 % (Plate) - Shape - EdgeLoop - Architektur und Funktionalität
 % (Clipping)
