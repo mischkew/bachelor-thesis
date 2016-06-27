@@ -4,7 +4,7 @@
 \newcommand\myNotes[1]{\textcolor{red}{#1}}
 \newcommand{\note}[1]{\myNotes{#1}}
 \newcommand{\class}[1]{\emph{#1}}
-\newcommand{\name}[1]{\texit{#1}}
+\newcommand{\name}[1]{\textit{#1}}
 
 % put this into the intro
 % \platener is a web application,
@@ -23,8 +23,11 @@ first, we present {\convertify} in
 Section~\ref{sec:framework-convertify}. {\convertify} is the
 web-framework in which {\platener} is implemented. Secondly, we
 explain the details of {\platener} in
-Section~\ref{sec:application-platener}.\\
-\\
+Section~\ref{sec:application-platener}.
+
+\note{weiss nicht ganz was die zwei naechsten absaetze
+  bringen...}
+
 With a framework like {\convertify} we can implement generic
 {\threedmodel} manipulation web-applications. {\threedmodel}
 manipulation means restructuring the model geometry in such a way,
@@ -35,11 +38,12 @@ computer screens. Such manipulations include converting the
 3D-printed parts and
 {\lego}-assembled\footnote{\url{http://www.lego.com}} parts. Thus,
 applications like
-{\brickify} can be built with {\convertify}.\\
-\\
+{\brickify} can be built with {\convertify}.
+
 {\platener} is an application implemented in the framework {\convertify}.
 Using a framework helps us focusing on the algorithmic challenges of
 converting arbitrary {\threedmodel}s into physical, laser-cut output.
+\note{letzter satz: sagt nichts aus?}
 
 \section{Computer Graphics in Web-Environments}
 \label{sec:cg-web}
@@ -56,16 +60,16 @@ graphs in Section~\ref{sub:render-and-graph}.
 
 This section explains which data structures and disk-formats are used
 to represent {\threedmodel}s. First, we explain the terminology of
-meshes. Secondly, we look at the {\stlfile} format\\
-\\
+meshes. Secondly, we look at the {\stlfile} format.
+
 The model geometry is represented by a set of connected polygons,
 approximating the model surface. These connected polygons form a mesh.
 Figure~\ref{} shows a mesh. To benefit from hardware acceleration, we use
 triangles as polygons. A triangle in the mesh is called face. Each
 face is described by a list of three coordinates in 3D-space. Such a
 coordinate is called vertex \cite[p.~3]{cg-intro}. An edge is the line
-between two connected vertices.\\
-\\
+between two connected vertices.
+
 We only support geometry which is arranged in two-manifold meshes.
 Two-manifoldness is a constraint on the mesh, which requires each egde
 to exactly touch two neighboring faces. Figure~\ref{}\myNotes{add figure}
@@ -74,8 +78,8 @@ follows then, that each triangular face has to have three adjacent
 faces. Thus, the constraint enforces the mesh to be a fully connected
 graph without holes \cite[p.~28]{master-thesis}. We require
 two-manifoldness to make
-sophisticated assumption when designing the conversion algorithms.\\
-\\
+sophisticated assumption when designing the conversion algorithms.
+
 The Standard Tessellation Language (STL) format is a common file
 format for {\threedmodel} representation in the context of
 {\threedprinting}. We support the {\stlfile} format, because our goal
@@ -114,8 +118,10 @@ an identical vertex. We use the library {\meshlib} to create an
 indexed face-vertex-mesh from the possibly ambiguous {\stlfile}. With
 {\meshlib} we can convert the face-vertex-mesh representation to a
 {\threejs} geometry. With a {\threejs} geometry, we can render a
-{\threedmodel} in {\convertify}.\\
-\\
+{\threedmodel} in {\convertify}.
+
+\note{threejs introduction}
+
 To support a variety of {\threedprinter} optimized models, we use the
 {\stlfile} format. We import the files with the {\meshlib} library.
 The imported face-vertex-mesh structure is then converted for usage
@@ -126,15 +132,16 @@ representation is displayed on the screen.
 \label{sub:render-and-graph}
 
 To understand how {\convertify} and {\platener} work, we have to
-familiarize with the concepts of rendering and scene graphs first. \\
-\\
-A typical pattern any graphics software cannot live without is the
+familiarize with the concepts of rendering and scene graphs first.
+
+\note{why is it a loop then?}
+A typical pattern any graphics software is the
 render loop. Rendering is the process of turning the {\threedmodel}
 representation into an array of pixels which can be displayed on the
 screen~\cite[p.~2]{intro-cg}. The render loop pattern consists of
 three steps: processing input, updating the {\threedmodel}
 representation and rendering~\cite{gamedev-gameloop}.
-Figure~\ref{fig:render-loop} shows an exemplary flow.\\
+Figure~\ref{fig:render-loop} shows an exemplary flow.
 
 \begin{figure}[h]
   \centering
@@ -173,23 +180,28 @@ is recognized by {\convertify} is part of a scene graph.
   \label{fig:scene-graph}
 \end{figure}
 
-To enable full-fledged rendering results with sophisticated visual
-effects in web-browsers, we have to use the Web Graphics Library
-(WebGL). With the use of WebGL we can process data on the GPU and
-execute special effects code (shader code)~\cite{mdn-webgl}.
-\\
-On top of WebGL we use {\threejs}\footnote{\url{http://threejs.org}}.
-{\threejs} is a {\javascript} library, which wraps the WebGL API to
-make the usage of WebGL simpler. It provides a scene graph
+\note{when intro of WebGl here, than give a footnote, else
+  put into introduction} We use the Web Graphics Library
+(WebGL), because we want our rendering results to have
+sophisticated visual effects. With the use of WebGL we can
+process data on the GPU and execute special effects code
+(shader code) in web-browsers~\cite{mdn-webgl}.
+
+On top of WebGL we use
+{\threejs}\footnote{\url{http://threejs.org}}. {\threejs} is
+a {\javascript} library, which wraps the WebGL API to make
+the usage of WebGL simpler. It provides a scene graph
 implementation. {\threejs}
-data representations are used throughout {\convertify}.\\
-\\
-The framework {\convertify} uses common computer graphics patterns
-like render loops and scene graphs. With the help of WebGL and
-{\threejs} we are able to bring these concepts into a web-environment.
+data representations are used throughout {\convertify}.
+
+The framework {\convertify} uses common computer graphics
+patterns like render loops and scene graphs. With the help
+of WebGL and {\threejs} we are able to bring these concepts
+into a web-environment.
 
 \section{The Framework: Convertify}
 \label{sec:framework-convertify}
+\note{THE FRAMEWORK thingy sounds weird}
 
 In this section we present {\convertify}, a web-framework for working
 with {\threedmodel}s in {\threejs}. The framework is based on
@@ -238,6 +250,7 @@ emitted system events to interact with the WebGL scene.
 \citeauthor{brickify-thesis} refers to these callbacks as
 \class{PluginHooks} or just hooks.
 
+\note{what is a bundle doing here, better intro}
 User interfaces are implemented within the same code package. This
 does not separate the web-interface from the scene features. Thus, it
 is hard to observe and apply changes to the system. The
@@ -403,7 +416,7 @@ the {\convertify} framework has to implement a custom \class{Dispatcher}.
 % - *full fledged applications will implement a mediator to organize
 % feature communication*
 
-\section{The Application is Implemented with the Framework: Platener}
+\section{The Application is Implemented in the Framework: Platener}
 \label{sec:application-platener}
 
  % - Section overview
@@ -520,17 +533,21 @@ used to render the visualizations of the
 
 \subsubsection{Fabrication Methods of {\platener}}
 
-The \name{PlatenerPipeline} plugin is the main computation unit.
-The \class{Plugin} defines multiple {\fabmethod}s
-Multiple computation steps, which can manipulate the input
-model, are chained after another to produce 2D- or
-3D-output. For example, construction plans in the format of
-{\svgfile}s are such an output, see Figure~\ref{}
-\note{construction plans figure}.
+\note{maybe too much recursion in the following paragraphs...}
+The \name{PlatenerPipeline} plugin is the main computation
+unit. The \class{Plugin} defines multiple {\fabmethod}s.
+Each {\fabmethod} contains multiple computation steps. These
+computation steps are chained after another and manipulate
+the input model to produce 2D- or 3D-output. For example,
+construction plans in the format of {\svgfile}s are such an
+output, see Figure~\ref{} \note{construction plans figure}.
 Section~\ref{sec:platener-pipeline-plugin} explains the
-architecture of the \name{PlatenerPipeline} plugin in detail.
+architecture of the \name{PlatenerPipeline} plugin in
+detail.
 
-\paragraph
+\note{this section explains...}
+
+\paragraph{}
 
 A {\fabmethod} is a conversion approach of a {\threedmodel}.
 It defines a linear process of analyzing the {\threedmodel}
@@ -545,9 +562,11 @@ algorithms as \class{Pipeline}. Each algorithm in the
 \class{PipelineStep} works on the face-vertex-mesh of the
 model. The last \class{PipelineStep} returns a directly
 exportable data format, in our case a {\zipfile} containing
-the 2D-construction plans and meta-information. {\platener}
-provides three {\fabmethod}s. The following paragraphs
-present each method briefly.
+the 2D-construction plans. \class{PipelineSteps} are
+independent from the {\fabmethod} and thus, can be shared
+between different {\fabmethod}s. {\platener} provides three
+{\fabmethod}s. The following paragraphs present each method
+briefly.
 
 \paragraph{Plate Method}
 
@@ -606,74 +625,69 @@ model. In Chapter~\ref{} \note{ref the chapter!} we give
 details about the random algorithm, which classifies the
 primitives.
 
-\paragraph
+\paragraph{}
 
 \note{summary}
 
-\subsubsection{Pipeline Steps Compute State}
+\subsubsection{Pipeline Steps Compute Immutable State}
 \note{rework that heading}
 
+\note{fabmethod thingy is not clear...}
+\note{pipeline executes steps...}
 Each {\fabmethod} assembles a \class{Pipeline} from
-\class{PipelineSteps}. Note, that the \class{PipelineSteps}
-are merely computation units. All visual output is done in
-the \name{NodeVisualizer} plugin. \class{PipelineSteps} are
-independent from the {\fabmethod} and thus, can be shared
-between different {\fabmethod}s.
+\class{PipelineSteps}. We call the state of a data structure
+taken at a given point in time a snapshot. To improve the
+development and debugging experience, we not only pass the
+results of the \class{PipelineStep} to the following step,
+but we also preserve a snapshot of the data. A snapshot of
+the computed data is used to render a visual representation
+of the data. The visual representation gives a clear
+understanding of the data and thus enhances the development
+and debugging experience. In this section we explain how the
+\class{Pipeline} processes the results of
+\class{PipelineSteps} and takes snapshots of the data. Note,
+that the \class{PipelineSteps} are merely computation units.
+All visual output is done in the \name{NodeVisualizer}
+plugin.
 
-%   \item improve debugging experience (trace errors in decouple computation
-%     units, also its hard to see how vertices are from
-%     looking at the memory, --> see next bullet)
-%   \item store state of each step separately, to later render a debugging view of
-%     the state (like timetravel for manipulations on the model)
-
-% - needs-figure, needs-ref :: Immutable PipelineState allows timetravel visual debugging
-% - Subsection summary
+\note{pipeline runs pipeline steps... or maybe have this in
+  the fabmethod section}
 
 
+As the algorithms of different \class{PipelineSteps} work
+with same data structures, we have to create copies of the
+data. Otherwise a latter \class{PipelineStep} will alter the
+data in the snapshot of a previous \class{PipelineStep}.
+Thus, the \name{NodeVisualizer} plugin renders corrupted
+visuals for the previous step. Figure~\ref{} \note{figure of
+corrupted shapes vs noncorrupted shapes} shows how the
+surface reconstruction step, which comes early in the
+\class{Pipeline}, is effected by the creation of finger
+joints.
 
-% \item Pipeline Steps
+% - needs-figure, needs-ref :: Immutable PipelineState
+% allows timetravel visual debugging
 
-% \item Immutable Pipeline State
+The data that is passed between the \class{PipelineSteps} is
+encapsulated in a \class{PipelineState}. The
+\class{PipelineState} contains all data structures that are
+ever to be computed by all \class{PipelineSteps}. It is
+essentially a container for every computation result.
 
-%   \begin{enumerate}
-%   \item Overview/ Purpose
-%     \begin{itemize}
-%     \item no unwanted mutations (nice persisting of intermediate results from
-%       pipelinesteps)
-%     \item later steps work on data form previous steps
-%     \item code was not written immutable throughout the project -> changing data
-%       will result in wrong visualizations of previous steps by the node
-%       visualizer, because rendering performs AFTER all computations are done
-%     \end{itemize}
+The \class{PipelineState} is an clonable data structure. A
+cloneable data structure can be copied, so that any changes
+to the copy will not affect the original and vice-versa.
+Figure~\ref{} \note{steps and snapshots flow} illustrates
+how snapshots are obtained between two
+\class{PipelineSteps}. The encapsulated data in the state
+can be hierarchical and complex. By providing a fully
+cloneable data structure, we ensure that modifications to
+the data by latter \class{PipelineSteps} do not modify
+previous copies of the data. A snapshot is obtained by
+cloning the \class{PipelineState} after the execution of a
+\class{PipelineStep}.
 
-%   \item Immutability
-%     \begin{itemize}
-%     \item \myNotes{explain principle. have more pros and cons.}
-%     \item structural data sharing -> unfortunately, not for us yet, but thats
-%       the concept :)
-%     \item http://jlongster.com/Using-Immutable-Data-Structures-in-JavaScript
-%     \item http://stackoverflow.com/questions/10034537/persistent-vs-immutable-data-structure
-%     \item enforces certain code style, mutability may be easier to write
-%     \item slow downs maybe (performance)
-%     \end{itemize}
-
-%   \item Implementation Details
-%     \begin{itemize}
-%     \item PipelineState class
-%     \item mutable and immutable state properties
-%     \item providing a clone method for stored properties, because code throughout the project shall
-%       not necessarily be written immutable (hard to obey, --> cg dev orientated,
-%       c++ is not immutable)
-%     \item immutable properties implement the clonable protocol
-%     \item provide immutable in one spot -> state creation
-%     \item define a schema (all props always available, having defaults) ->
-%       reduce faults when accessing data
-%     \item add listing which defines the schema for stacked plates
-%     \item accessing undefined values will give us a warning (again, like
-%       protocols enforcing interface structure, reducing faulty data access)
-%     \item somehow a persistence api (see stackoverflow link)
-%     \end{itemize}
-%   \end{enumerate}
+\note{Subsection summary}
 
 % \item Pipeline Implementation
 
@@ -704,22 +718,45 @@ between different {\fabmethod}s.
 \label{sec:client-to-application}
 
 
+% - Subsection overview
+
+
+%     - needs-figure :: Application is separated into
+%     Packages
+
+%     - needs-figure :: Client code connects all plugin
+%     features with a user interface
+
+%     - Use Framework to wire up everything, but not part of the
+%       framework (Bundle and Protocols come in handy, Client code
+%       implements a Dispatcher instance = the mediator)
+%     - We have a WebApp and a Server package, which are both Client
+%       code, because we have two types of applications
+%     - the WebApp is an online service deployed for use by Makers
+%     - the CLI tool is a service for batch processing or integration
+%       with other applications
+
+% **** The WebApp Package Builds a Cross-platform Web Page
+
+%      - Subsubsection overview
+%      - needs-ref :: Web Interfaces are built with HTML and CSS
+%      - needs-ref :: The React library | copy from AOP paper
+%      - needs-ref, needs-figure :: The Redux library (Dump Components and Smart Containers)
+%      - needs-figure :: Using Redux dispatch in the Dispatcher
+%      - Subsubsection summary
+
+% **** The Server Package Allows Headless Batch Processing of Models
+
+%      - Subsubsection overview
+%      - A CLI tool runs in nodejs
+%      - needs-ref :: Processing objects without opening a browser (isomorphic code)
+%      - Processing multiple objects in sequence
+%      - Integration with tools to be built in future
+%      - Subsubsection summary
+
 
 
 \iffalse
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 \section{Architecture Overview}
