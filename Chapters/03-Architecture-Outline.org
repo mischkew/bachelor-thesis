@@ -98,7 +98,6 @@
    - Section overview
    - Application is built with Convertify (integration with lifecycle events
      and rendering engine)
-   - needs-figure :: Application is separated into Packages
    - Plugins provide scene feature
    - Client Code to integrate plugins, system and user interfaces
 
@@ -127,6 +126,7 @@
 *** The Client Package Connects All Features Into an Application
 
     - Subsection overview
+    - needs-figure :: Application is separated into Packages
     - needs-figure :: Client code connects all plugin features with a user interface
     - Use Framework to wire up everything, but not part of the
       framework (Bundle and Protocols come in handy, Client code

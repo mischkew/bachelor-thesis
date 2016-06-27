@@ -290,9 +290,6 @@ We present a plugin system that reacts to system events during the
 application's lifecycle. Additionally, we present a method, which organizes
 communication between \class{Plugins}.
 
-\subsubsection{Plugins Interact with the Internal System via
-  Lifecycle Events}
-
 % - Plugin definition in Convertify
 % - *feature for web gl scene and reaction on changes of the scene*
 % - *full fledged applications will implement a set of plugins to
@@ -306,6 +303,9 @@ scene. Any full fledged application implements a set of
 \class{Plugins} to provide the scene functionality. E.g. a concrete
 conversion strategy provided by {\platener} is implemented by a
 single \class{Plugin}.
+
+\subsubsection{Plugins Interact with the Internal System via
+  Lifecycle Events}
 
 % - needs-ref :: Lifecycle events in Convertify (= PluginHooks of
 % Brickify, Convertify vs. Plugins)
@@ -338,6 +338,11 @@ plugin integrates with {\convertify}.
 \subsubsection{Organizing Plugin Communication with a
   Dispatcher}
 
+% - needs-ref :: mediator organizes communication
+% - needs-figure :: mediator between dispatched system events and
+%                   plugins (internal handling of system events
+%                   before reaching plugins)
+
 As {\convertify} manages multiple plugins, which either
 represent computation logic or render components, we have to
 know exactly when each of these plugins will interact with the
@@ -348,8 +353,9 @@ According to \citeauthor{gof}, the \name{mediator} pattern is a
 behavioral software design pattern. The mediator encapsulates
 interconnections of components. It acts as a communication hub and
 coordinates its clients. The client components are loosely coupled as
-as they do not refer to each other explicitly. The mediator takes away
-that necessity \cite[p. ?]{gof}\note{fix citing, lookup page}.
+the clients communicate with the mediator instead of communicating
+with each other directly. With a mediator we can model many-to-many
+relationships \cite[p. ?]{gof}.\note{fix citing, lookup page}.
 % https://sourcemaking.com/design_patterns/mediator
 
 The \class{Dispatcher} implements every \class{PluginHook}. All system
@@ -361,110 +367,346 @@ order of \class{PluginHook} executions explicitly, because for
 different events, different \class{Plugins} have to run first. E.g.
 {\platener} wants to process the model data before it is rendered when
 a user adds a node to the scene. But it wants to destroy the
-visualization before releasing all the computed data.
+visualization before releasing all the computed data. We cannot solve
+this problem, by dispatching all events to all plugins in the same order.
 
-These hooks are registered at the \emph{Dispatcher}, which is
-responsible for dispatching the lifecycle events to the plugins
-in a predefined order\myNotes{, see chapter ??}. Beside
-\emph{PluginHooks}, a \emph{Plugin} can expose \emph{Protocols}
-to interact with the system. \emph{Protocols} are described in
-\myNotes{chapter ??}.
-
-
-
-\subsubsection{The Dispatcher is a Mediator}
-
-The Dispatcher loads and initializes a set of configured plugins. It organizes
-the communication between plugins and client, plugins and server and plugins and
-plugins in a single place, as shown in
-Figure~\ref{fig:architecture_overview_dispatcher}. The \emph{PluginLoader}
-instantiates each plugin and exposes all defined \emph{PluginHooks} to the
-\emph{Dispatcher}. \myNotes{this is all similar to brickify, ref please}
-
-Convertify fires lifecycle events on which the plugins can react. The mediator
-knows an explicit execution order for each plugin when a lifecycle event is
-fired. Figure~\ref{fig:architecture_dispatcher_pipeline} shows in detail how the
-\emph{PlatenerPipeline} plugin and the \emph{Dispatcher} communicate via events.
-Codewise, the \emph{Dispatcher} implements each plugin hook and remits the event
-to the loaded plugins.
-
-
-Listing \ref{lst:client-disp-hooks} shows, how the
-\emph{ClientDispatcher} \myNotes{client dispatcher explained??}
-handles the \textit{init}, \textit{onNodeAdd} and
-\textit{onNodeRemove} hooks. By remitting events manually, we have
-fine-grained control about the execution order. This is necessary,
-because we want to invoke the \emph{PlatenerPipeline} plugin,
-computing the construction plans, before rendering the results via
-the \emph{NodeVisualizer} plugin. Also we have to remove the
-\emph{NodeVisualizer} results before deleting the data, to avoid
-reference errors. For both \emph{PluginHooks} the plugins are
-executed in a different ordering.
-
-
-To allow communication between plugins themselves or plugins and
-Client, we use \emph{Protocols} because \emph{PluginHooks} are not
-flexible enough. A \emph{Protocol} defines an interface, which has
-to be implemented by a \textit{delegate}. Via
-delegation\footnote{\url{http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html}}
-we define callbacks which are invoked by Plugins on the Dispatcher.
-The Dispatcher then notifies server, client or other plugins.
-Furthermore, \emph{Protocols} can add a set of methods to the
-Dispatcher via meta programming.
-
-Listing \ref{lst:solutionselectiondelegate} shows the definition of
-the SolutionSelectionDelegate protocol. It requires its implementing
-class to provide the methods \textit{evaluationDidStart},
-\textit{evalutionOfMethodDidFinish}, \textit{evaluationDidFinish},
-\textit{evaluationDidFail} and
-\textit{evaluationDidFailWithSolutions}. Listing
-\ref{lst:client_dispatcher_protocol} shows the
-\emph{ClientDispatcher} implementing the
-\textit{evaluationDidFinish} method. By providing the callbacks, the
-Dispatcher knows about the current state of the conversion and its
-completion. For example, we render all solutions after their
-computation. To satisfy the SolutionSelectionDelegate protocol, the
-Dispatcher also implements the remaining methods.
-
-
-
-\subsubsection{The Dispatcher is the Single Source of Truth}
-\label{sec:disp-single-source}
+To model many-to-many relationships between \class{Plugins} and
+\class{Plugins}, we enhance the \class{Dispatcher} with
+\class{Protocols}. \class{Protocols} define mixins on the
+\class{Dispatcher} which allow delegation of functionality from the
+\class{Dispatcher} to a \class{Plugin}. A mixin adds functionality to
+an object by object composition\cite{}\note{give a reference for
+  mixins}. The delegation pattern achieves the results of multiple
+inheritance by object composition. A delegating object calls external
+functionality on a delegate object, which is available through a
+predefined interface \cite{delegation}\note{source for delegation}. In
+our case, the \class{Dispatcher} is the delegating object and the
+\class{Plugin} is the delegate. The \class{Protocol} helps to define
+the interface between the \class{Dispatcher} and a \class{Plugin}. Two
+\class{Plugins} now communicate with each other via the
+\class{Dispatcher}. One \class{Plugin} calls functionality on the
+\class{Dispatcher} which was exposed by a \class{Protocol}. The
+\class{Protocol} ensures that the \class{Dispatcher} delegates an
+action to another \class{Plugin}. Figure~\ref{}\note{figure plugin
+  communication} shows how the mediator connects two \class{Plugins}.
+% http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html
+% https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html
 
 When applications grow, it is hard to observe all messaging between
-components at once. With the \emph{Dispatcher}, we control all
-communication between the packages at one place. Without implicit
-ordering of callback executions, we can trace erroneous behavior
-fast. The design of a singleton controlling the application's
-lifecycle is known from frameworks in mobile application
-development, like Android\ref{??} or iOS\ref{??}.
+components at once. With the \class{Dispatcher}, we wire up all
+communication with \class{Plugins} at one place. Due to explicit
+ordering of callback executions, we have fine-grained control for each
+\class{Plugin}. \class{Protocols} define clean interfaces for
+inter-\class{Plugin} communication. Each application implemented with
+the {\convertify} framework has to implement a custom \class{Dispatcher}.
 
-The usage of \emph{Protocols} helps developers keep track of
-interfaces between components. We enforce this concept, because
-\javascript is a dynamically typed programming language. Statically
-typed programming languages pay out, when projects grow large.
-Unexpected type and interface errors happen less often. Because of
-the web-environment and previous work, we are bound to
-\coffeescript. Thus, we emphasize explicit structuring of interfaces
-via \emph{Protocols}.
-
-% - needs-ref :: mediator organizes communication
-% - needs-figure :: mediator between dispatched system events and
-%                   plugins (internal handling of system events
-%                   before reaching plugins)
 % - *full fledged applications will implement a mediator to organize
 % feature communication*
 
-    % - Subsection summary
-
-
-
-\section{The Application: Platener}
+\section{The Application is Implemented with the Framework: Platener}
 \label{sec:application-platener}
 
+ % - Section overview
+ % - Application is built with Convertify (integration with lifecycle events
+ %   and rendering engine)
+ % - needs-figure :: Application is separated into Packages
+ % - Plugins provide scene feature
+ % - Client Code to integrate plugins, system and user interfaces
+
+{\platener} is a web-application, that converts 3D-printable models
+into laser-cuttable equivalents. This section describes the
+implementation of {\platener} within the {\convertify} framework. The
+application integrates with the system events and rendering engine of
+{\convertify}. {\platener} uses several \class{Plugins} to bring its
+features to the WebGL scene. Section~\ref{sec:platener-uses-plugins}
+describes these plugins briefly.
+Section~\ref{sec:platener-pipeline-plugin} shows architectural details
+to the most important \class{Plugin}: the \name{PlatenerPipeline}
+plugin. This \class{Plugin} implements different conversion strategies
+for {\threedmodel}s. In Section~\ref{sec:client-to-application} we
+explain how the application combines user interfaces with the
+\class{Dispatcher} and the \class{Plugins}.
+
+\subsection{Platener Uses Plugins to Implement Its Features}
+\label{sec:platener-uses-plugins}
+
+The \class{Plugins} composed into {\platener} provide its
+computation logic and WebgGL scene rendering. We will give a
+brief introduction of each plugin in the following
+paragraphs.
+
+\subsubsection{Platener Pipeline Plugin}
+
+The \name{PlatenerPipeline} plugin is the main computation unit.
+The \class{Plugin} defines multiple {\fabmethod}s. A
+{\fabmethod} is a conversion approach of a \threedmodel.
+Multiple computation steps, which can manipulate the input
+model, are chained after another to produce 2D- or
+3D-output. For example, construction plans in the format of
+{\svgfile}s are such an output, see Figure~\ref{}
+\note{construction plans figure}.
+Section~\ref{sec:platener-pipeline-plugin} explains the
+architecture of the \name{PlatenerPipeline} plugin in detail.
+
+\subsubsection{Node Visualizer Plugin}
+
+We visualize the results of the \name{PlatenerPipeline}
+plugin in the WebGL view. The \name{NodeVisualizer} plugin
+renders the results of each computation step of each
+{\fabmethod} respectively. With the help of this
+\class{Plugin} we debug the results of the computation steps
+visually. As explained in Section~\ref{}\note{section
+  walkthrough}, we select a single visualization at a
+time to inspect the results of the step associated with the
+visualization. Figure~\ref{}\note{a) model} shows a
+head-mounted display in the \name{Plate} step.
+Figure~\ref{}\note{b) button} shows the selection of that
+visualization in the user interface.
+
+\subsubsection{Scorer Plugin}
+
+We run multiple {\fabmethod}s sequentially. Then, we choose
+the best fitted conversion as output. Thus each {\fabmethod}
+is scored by a method-specific scoring algorithm. This
+\clas{Plugin} provides such scoring algorithms.
+
+\subsubsection{Coordinate System Plugin}
+
+This plugin provides orientation enhancements for the WebGL
+scene. Rendering xyz-axes and a an axis-aligned grid, users
+can grasp alignment and dimensions of {\threedmodel}s.
+Figure \ref{fig:architecture_overview_coordinate_system}
+shows the coordinate system in the WebGL view. The
+Coordinate System is taken from \emph{Brickify} as
+is\cite{}\note{ref chapter in brickify}.
+
+\begin{figure}
+  \includegraphics[width=1\columnwidth]{03-architecture_overview_coordinate_system}
+  \caption{An empty scene showing the coordinate system.}
+  \label{fig:architecture_overview_coordinate_system}
+\end{figure}
+
+\subsubsection{Isolated Testing Plugin}
+
+While we worked on different stages of a sequentially
+executed {\fabmethod} in parallel, we needed a mechanism to
+test each component of the {\fabmethod} before its
+preceeding or succeeding components were completely
+implemented. The Isolated Testing plugin provides an
+isolated environment, which allows to execute a single
+component of a {\fabmethod} with pre-defined input.
+
+\subsection{The PlatenerPipeline Plugin Computes the Model
+  Conversions}
+\label{sec:platener-pipeline-plugin}
+
+% - Subsection overview
+
+The \name{PlatenerPipeline} is the main computation unit of
+{\platener}. It contains algorithms and data structures to
+bring the {\threedmodel} into a 2D-representation suitable
+for a {\lasercutter}. In this section we dive into details
+about the computation process. First we look at {\platener}'s
+three {\fabmethod}s and their composition from computation steps.
+Then we present the \class{PipelineState}, a data structure
+which allows to store a snapshot of the computation state in
+between two computation steps. The \class{PipelineState} is
+used to render the visualizations of the
+\name{NodeVisualizer} plugin.
+
+% - needs-figure :: Pipelining Approach to subdivide the problem space
+% - PipelineSteps as single computation units
+% - Several Pipeline Steps make up a Fabrication Method
+
+\subsubsection{Fabrication Methods of {\platener}}
+
+The \name{PlatenerPipeline} plugin is the main computation unit.
+The \class{Plugin} defines multiple {\fabmethod}s
+Multiple computation steps, which can manipulate the input
+model, are chained after another to produce 2D- or
+3D-output. For example, construction plans in the format of
+{\svgfile}s are such an output, see Figure~\ref{}
+\note{construction plans figure}.
+Section~\ref{sec:platener-pipeline-plugin} explains the
+architecture of the \name{PlatenerPipeline} plugin in detail.
+
+\paragraph
+
+A {\fabmethod} is a conversion approach of a {\threedmodel}.
+It defines a linear process of analyzing the {\threedmodel}
+and thereby creating a suitable equivalent of the model,
+consisting of plates only. A {\fabrication} method divides
+the conversion problem into smaller problems. Thus, it
+provides a set of algorithms, which are executed
+sequentially. Each algorithm works with the results of the
+previously executed algorithm. We refer to the sequence of
+algorithms as \class{Pipeline}. Each algorithm in the
+\class{Pipeline} is called \class{PipelineStep}. The first
+\class{PipelineStep} works on the face-vertex-mesh of the
+model. The last \class{PipelineStep} returns a directly
+exportable data format, in our case a {\zipfile} containing
+the 2D-construction plans and meta-information. {\platener}
+provides three {\fabmethod}s. The following paragraphs
+present each method briefly.
+
+\paragraph{Plate Method}
+
+This {\fabmethod} does hull and surface reconstructions of
+the input model. We produce a set of plates which are
+connected via finger joints to approximate the original
+{\threedmodel}. Therefore, we first detect the outlines of
+all surfaces in the model. Then, we search for existing
+plates based on that surfaces. For example two parallel
+surfaces form an \name{inherent} plate, when they are about
+three to five millimeters apart. After we found all
+\name{inherent} plates, we construct plates from the
+remaining surfaces by \name{extruding} the planar shapes.
+Then we connect the plates with finger joints where they
+touch each other. Figure~\ref{} \note{add fingerjoint
+  figure} shows plates connected with finger joints.
+Figure~\ref{} \note{pipeline steps, like dustin figure}
+depicts the important \class{PipelineSteps} of the
+\name{Plate Method}.
+
+\note{ref to chapters which explain the algorithms to that
+  method in detail}
+
+\paragraph{Stacked Plates Method}
+
+This {\fabmethod} does volume reconstructions of the input
+model. We stack plates onto each other to approximate the
+shape of the original model, see Figure~\ref{} \note{add
+  figure stacked model}. This preserves the look and feel of
+the model. We slice the model into equally thick layers,
+which form the plates. The plates are then connected via
+shafts to simplify the assembly process.
+
+\note{ref to chapters which explain the algorithms to that
+  method in detail}
+
+\paragraph{Classifier Method}
+
+This is an advanced conversion approach, combining intense
+mesh analysis and sophisticated construction techniques of
+known geometries. This {\fabmethod} will be more robust when
+converting models with noisy mesh data, e.g {\threedmodel}s
+with lots of texture on their surface. We analyze the model
+for primitive geometries using random algorithms. Primitive
+geometries are planes, prisms, boxes, cylinders or spheres.
+The model is structured into an hierarchical graph
+structure, similar to a scene graph, consisting of these
+primitive geometries only. For each of these primitives we
+know a conversion approach to plates, which will then give
+better results for the conversion of the whole input model.
+The \name{Classifier Method} is a proposal and still work in
+progress. We can currently classify a subset of the
+primitive geometries. Figure~\ref{} \note{add figure with
+  classifiers} shows the classification of a cylinder in a
+model. In Chapter~\ref{} \note{ref the chapter!} we give
+details about the random algorithm, which classifies the
+primitives.
+
+\paragraph
+
+\note{summary}
+
+\subsubsection{Pipeline Steps Compute State}
+\note{rework that heading}
+
+Each {\fabmethod} assembles a \class{Pipeline} from
+\class{PipelineSteps}. Note, that the \class{PipelineSteps}
+are merely computation units. All visual output is done in
+the \name{NodeVisualizer} plugin. \class{PipelineSteps} are
+independent from the {\fabmethod} and thus, can be shared
+between different {\fabmethod}s.
+
+%   \item improve debugging experience (trace errors in decouple computation
+%     units, also its hard to see how vertices are from
+%     looking at the memory, --> see next bullet)
+%   \item store state of each step separately, to later render a debugging view of
+%     the state (like timetravel for manipulations on the model)
+
+% - needs-figure, needs-ref :: Immutable PipelineState allows timetravel visual debugging
+% - Subsection summary
 
 
 
+% \item Pipeline Steps
+
+% \item Immutable Pipeline State
+
+%   \begin{enumerate}
+%   \item Overview/ Purpose
+%     \begin{itemize}
+%     \item no unwanted mutations (nice persisting of intermediate results from
+%       pipelinesteps)
+%     \item later steps work on data form previous steps
+%     \item code was not written immutable throughout the project -> changing data
+%       will result in wrong visualizations of previous steps by the node
+%       visualizer, because rendering performs AFTER all computations are done
+%     \end{itemize}
+
+%   \item Immutability
+%     \begin{itemize}
+%     \item \myNotes{explain principle. have more pros and cons.}
+%     \item structural data sharing -> unfortunately, not for us yet, but thats
+%       the concept :)
+%     \item http://jlongster.com/Using-Immutable-Data-Structures-in-JavaScript
+%     \item http://stackoverflow.com/questions/10034537/persistent-vs-immutable-data-structure
+%     \item enforces certain code style, mutability may be easier to write
+%     \item slow downs maybe (performance)
+%     \end{itemize}
+
+%   \item Implementation Details
+%     \begin{itemize}
+%     \item PipelineState class
+%     \item mutable and immutable state properties
+%     \item providing a clone method for stored properties, because code throughout the project shall
+%       not necessarily be written immutable (hard to obey, --> cg dev orientated,
+%       c++ is not immutable)
+%     \item immutable properties implement the clonable protocol
+%     \item provide immutable in one spot -> state creation
+%     \item define a schema (all props always available, having defaults) ->
+%       reduce faults when accessing data
+%     \item add listing which defines the schema for stacked plates
+%     \item accessing undefined values will give us a warning (again, like
+%       protocols enforcing interface structure, reducing faulty data access)
+%     \item somehow a persistence api (see stackoverflow link)
+%     \end{itemize}
+%   \end{enumerate}
+
+% \item Pipeline Implementation
+
+%   \begin{enumerate}
+%   \item the pipeline works as follows...
+%     \begin{itemize}
+%     \item Pipeline class
+%     \item pipe interface for Step factories (compare listing above, stacked method)
+%     \item create state factory -> use composition to persist intermediate results
+%       (state is later accessed by node visualizer)
+%     \item reduce approach -> pipe last state into next step to produce new state
+%     \item show a listing of pseudo code, explaining how the pipeline works
+%     \item benchmarking (measure time for intermediate steps vs whole processing)
+%     \end{itemize}
+
+%   \item it can be reused (because pipelining is a generic concept)
+%     \begin{itemize}
+%     \item classifier graph (classification method)
+%     \item isolated testing (injectable pipeline)
+%     \end{itemize}
+%   \end{enumerate}
+
+% \end{enumerate}
+
+
+\subsection{The Client Package Connects All Features Into an
+  Application}
+\label{sec:client-to-application}
+
+
+
+
+\iffalse
 
 
 
@@ -1642,6 +1884,9 @@ single component of a {\fabmethod} with pre-defined input.
   \item \myNotes{measure times for conversions and evaluate}
   \end{itemize}
 \end{enumerate}
+
+
+\fi
 
 \end{document}
 
