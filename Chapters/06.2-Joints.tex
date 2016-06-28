@@ -3,6 +3,7 @@
 
 %************************************************
 \chapter{Joint Computation}\label{ch:joints}
+\newcommand{\TODO}[1]{\textcolor{red}{\\ \textbf{TODO:} #1 \\}}
 %************************************************
 
 % Use active Voice (we do….)
@@ -13,7 +14,7 @@
 % Hübsche Bildchen zum anschaulichen Erklären!! (ebenfalls konsistent halten: gleich geformte labels etc.)
 
 \section{Joint computation}
-\textbf{TODO: buy green and orange (or at least two different colors) of acrylic for demo objects and pictures in the paper}
+\TODO{buy green and orange (or at least two different colors) of acrylic for demo objects and pictures in the paper}
 \paragraph{Overview Paragraph: what will be achieved, why is it necessary}
 When an object consisting of multiple parts is lasercutted it needs to have connectors. Those can be elements like screws, nails and glue. Or the plates already come along with connectors. Those can be for example fingerjoints which, when well calibrated, do not need any external material to hold together. \\
 Whenever possible we want to provide connections like that because a user needs less effort, when components work directly out of the lasercutter. This is why we provide three types of joints which are added to the determined plates.
@@ -84,7 +85,7 @@ The general procedure of creating joints is achieved in three steps: First we ca
 \end{enumerate}
 
 \section{Different Fingerjoint types}
-\textbf{TODO: Bilder noch so anpassen, dass nur females/males zu sehen und in echt, wie sie zusammen stecken}\\
+\TODO{Bilder noch so anpassen, dass nur females/males zu sehen und in echt, wie sie zusammen stecken}\\
 We support three types of joints. Each have benefits when used for specific material in a special use case. We allow the user to choose the type of material which then affects the choice of joints in the converted model.
 \subsubsection{Fingerjoint template}
 \includegraphics[width=0.5\columnwidth]{Images/fingerjoints.png}
@@ -105,7 +106,7 @@ We usually use fingerjoints for acrylic and wood.
 
 \subsubsection{Dovetail template}
     \includegraphics[width=0.5\columnwidth]{Images/schwalbe.png}
-    \textbf{TODO: Image of wood dovetails where this joint is derived from.}\\
+    \TODO{Image of wood dovetails where this joint is derived from.}\\
     Typically a dovetail joint is used in woodwork. It helps to ensure that when there was a pulling force on both wooden plates that the joints would all hold onto the other plate.\\
     But in order to create the female joints the wood needs to be cut in an angle. This is not possible without inadequately high time and power consumption. See the upcoming section 'alternative solution' for information on how to lasercut the female part of a dovetail.
     \paragraph{How these joints look like}
@@ -115,7 +116,7 @@ We usually use fingerjoints for acrylic and wood.
     \paragraph{adjustJointHeight}
     Not only the width has to be adjusted but also the height needs to be adapted to the plates connection. Depending on the angle of the plates the joints need to be longer or shorter accordingly unless the angle is 90. With an angle of 90 the height is simply the thickness of the plates. \\
     Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. \\
-    \textbf{TODO: verify the height computation and provide image}\\
+    \TODO{verify the height computation and provide image}\\
     Something weird happened: I seem to have dismissed dustins calculations and try to use trigonometry. But either i cannot find the triangle i was working with or the angle in the triangle is not necissarily the angle between the plates!! Figure that out!! And make image of the trigonomety if it was correct (I remember to have done stuff on tinkercad to come to the idea maybe that helps)\\
     I really believe that I was working with a wrong angle and that this angle would be 90-alpha when alpha is smaller than 90 degrees but i dont know how to get the other angle...\\ maybe just take dustins calculations.
 
@@ -124,7 +125,7 @@ We usually use fingerjoints for acrylic and wood.
         \item Snap fits we already tried. Hard to implement because enough space needs to be given when cutting the spring.
         \item how to lasercut the female part of a dovetail with alot of effort!\\
         In order to achieve different depths of cutting you can set the lasercutter to use lower power. This is usually used for engraving which also does not cut through the material.\\  
-        \textbf{TODO: Name Lasercut like a boss here and include the image of the gradient which defines the power of the laser.}\\
+        \TODO{Name Lasercut like a boss here and include the image of the gradient which defines the power of the laser.}\\
         By coloring a part in the svg-file in a gradient from white to black this part will be cut in an angle. The more white the less power.
         \item other joint type: pettis joint (fingerjoint with screws)
         \item slot joinery technique when overlapping plates had to be rejoined
