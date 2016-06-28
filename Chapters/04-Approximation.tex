@@ -1,4 +1,22 @@
 \documentclass[../ClassicThesis.tex]{subfiles}
+
+\newcount\colveccount
+\newcommand*\colvec[1]{
+        \global\colveccount#1
+        \begin{pmatrix}
+        \colvecnext
+}
+\def\colvecnext#1{
+        #1
+        \global\advance\colveccount-1
+        \ifnum\colveccount>0
+                \\
+                \expandafter\colvecnext
+        \else
+                \end{pmatrix}
+        \fi
+}
+
 \begin{document}
 
 %************************************************
@@ -141,7 +159,7 @@ So if you want to weld a set of vertices, you can call \emph{preprocessVertices}
 
 \subsubsection{Implementation}
 
-\myNotes{TODO: Implementation}
+\myNotes{TODO: reread and rewrite start}
 
 \emph{VertexWelding} builds a list of weighted vertices during preprocessing. Each new vertex is either merged with an existing one or added to the list. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure \ref{fig:weightedVertex}. Then all points of a given set have to be replaced while \emph{getCorrespondingVertex} returns the respective vertex for each requested point. 
 
@@ -178,7 +196,7 @@ $ V_{new} := $ the new vertex which is added \\
 $ w := $ the weight of the \emph{WeightedVertex}
 
 
-\myNotes{TODO: reread und rewrite}
+\myNotes{TODO: reread und rewrite end}
 
 \paragraph{Vertex Replacement}
 
@@ -318,7 +336,8 @@ For instance, this may occur in \myNotes{CurvedShapes (richtige Bezeichnung einz
 
 \subsection{passende Überschrift zu: Alternative Methoden und warum diese Methode gewählt, vllt sogar: future work}
 
-\myNotes{TODO: reread und rewrite}
+\myNotes{TODO: reread und rewrite this subsection.
+Der Text muss irgendwie 'wissenschaftlicher' werden: Quellen?? -> hab ich nicht wirklich welche...}
 
 Different approaches for welding are sorting into an octree and hashing. 
 
@@ -334,6 +353,8 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \paragraph{binary space partition}
 
+\myNotes{TODO: binary space partition}
+
 
 
 
@@ -343,10 +364,14 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \section{Hole Detection - in Plates Kapitel}
 
-\section{Prism Classifier - in Classifier Kapitel}
+
 \chapter{Classifiers}
 \section{primitives}
 \subsection{Prism - Dimitri}
+
+\myNotes{Diese subsection wird im Classifier-Kapitel eingefügt}
+
+\myNotes{TODO: Herangehensweise erklären, etc.}
 
 \subsubsection{Bucket System}
 
@@ -392,7 +417,7 @@ _normalInHemisphere: (normal) ->
 \end{figure}
 
 
-This hemisphere is separated into rings. Each ring covers the threshold angle in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. The correlating angle of a normal is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}:
+This hemisphere is separated into rings. Each ring covers the threshold angle in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. The correlating angle $\alpha$ of a normal $(x, y, z)$ which is used to determine the ring index is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}:
 
 \begin{equation*}
     \sin{\alpha} = \frac{z}{ \sqrt{x^{2} + y^{2}} }
@@ -400,39 +425,68 @@ This hemisphere is separated into rings. Each ring covers the threshold angle in
 
 with \\
 $ x, y, z := $ normal coordinates\\
+$ \alpha := $ angle between normal and $(x, y, 0)$\\
 
 
-The angle $\alpha$ is represented as a multiple of the threshold angle to get the actual ring index:
+The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to get the actual ring index $I_{Ring}$:
 
 \begin{equation*}
     I_{Ring} = \floor*{ 
                     \arcsin{ 
                         \frac{z}{ \sqrt{ x^{2} + y^{2} } } 
                     } 
-                    / t 
+                    / \phi 
                 }
 \end{equation*}
 
 with \\
 $I_{Ring} := $ ring index \\
 $ x, y, z := $ normal coordinates \\
-$ t := $ bucket threshold \\
+$ \phi := $ bucket threshold \\
 
-The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring index is calculated as follows:
+The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
 
 \begin{equation*}
     I_{MaxRing} = \floor*{
                     \frac{\pi}{2}
-                    / t
+                    / \phi
                   }
 \end{equation*}
 
 with \\
 $I_{MaxRing} := $ maximum ring index \\
-$ t := $ bucket threshold \\
+$ \phi := $ bucket threshold \\
 
 
-Each ring is seperated into buckets which cover the threshold angle as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto to xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This 
+The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends on index and threshold:
+
+\begin{equation}
+\label{equ:AlphaIRing}
+    {\alpha}_{I_{Ring}} = (I_{Ring} + 0.5) * \phi
+\end{equation}
+
+with \\
+asdfasdf\\
+
+
+Figure \myNotes{figure einzusetzen} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$:
+
+\begin{equation}
+    \label{equ:XA}
+    \cos{{\alpha}_{I_{Ring}}} = \frac{ \colvec{3}{1}{0}{0} * \colvec{3}{x_{a}}{0}{z_{I_{Ring}}} }{ \vert \colvec{3}{1}{0}{0} \vert * \vert \colvec{3}{x_{a}}{0}{z_{I_{Ring}}} \vert } = \colvec{3}{1}{0}{0} * \colvec{3}{x_{a}}{0}{z_{I_{Ring}}}
+    = x_{a}
+\end{equation}
+
+\begin{equation}
+\label{equ:ZIRing}
+\begin{split}
+    1 = \vert \colvec{3}{x}{0}{z_{I_{Ring}}} \vert = \sqrt{ x^{2} + z_{I_{Ring}}^{2} } \\
+    => z_{I_{Ring}} = \sqrt{1 - x^{2}} = \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
+\end{split}
+\end{equation}
+
+
+Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
@@ -446,6 +500,67 @@ Each ring is seperated into buckets which cover the threshold angle as shown in 
     \caption{projection}
     \label{fig:projection}
 \end{figure}
+
+
+\begin{equation}
+    \label{equ:VecA}
+    \vec{a} = (x_{a}, 0, z_{I_{Ring}})
+\end{equation}
+
+\begin{equation}
+    \label{equ:VecAStrich}
+    \vec{a}' = (x_{a}, 0)
+\end{equation}
+
+\begin{equation}
+    \vec{b} = (x_{b}, y_{b}, z_{I_{Ring}})
+    \label{equ:VecB}
+\end{equation}
+
+\begin{equation}
+    \vec{b}' = (x_{b}, y_{b})
+    \label{equ:VecBStrich}
+\end{equation}
+
+\begin{equation}
+    \label{equ:Projection1}
+    \cos{\phi} = \frac{\vec{a} * \vec{b}}{|\vec{a}| * |\vec{b}|} = \vec{a} * \vec{b} \stackrel{(\ref{equ:VecA}) + (\ref{equ:VecB})}{=} x_{a} * x_{b} + z_{I_{Ring}}^{2}
+\end{equation}
+
+\begin{equation}
+    \label{equ:XB}
+   (\ref{equ:Projection1}) => x_{b} = \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a} }
+\end{equation}
+
+\begin{equation}
+\begin{split}
+    \label{equ:YpsilonB}
+    & 1 = |\vec{a}| = |\vec{b}| \\
+    & => \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } = \sqrt{ x_{b}^{2} + y_{b}^{2} + z_{I_{Ring}}^{2} } \\
+    & => y_{b} = \sqrt{ x_{a}^{2} - x_{b}^{2} }
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+    \cos{\gamma}& = \frac{\vec{a}' * \vec{b}'}{|\vec{a}'| * |\vec{b}'|}
+    = \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} +  y_{b}^{2} } } \\
+    & \stackrel{(\ref{equ:YpsilonB})}{=} \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} - x_{b}^{2} +  x_{a}^{2} } }
+    = \frac{ x_{a} * x_{b} }{ x_{a} * x_{a} }
+    = \frac{ x_{b} }{ x_{a} } \\
+    & \stackrel{(\ref{equ:XB})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a}^{2} }
+    \stackrel{(\ref{equ:XA})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
+    & \stackrel{(\ref{equ:ZIRing})}{=} \frac{ \cos{\phi} - ( 1 - cos^{2}{{\alpha}_{I_{Ring}}} ) }{ \cos^{2}{{\alpha}_{I_{Ring}}} }
+    = \frac{ \cos^{2}{{\alpha}_{I_{Ring}}} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } + \frac{ \cos{\phi} - 1 }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
+    & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} }
+\end{split}
+\end{equation}
+
+
+\myNotes{TODO: Beta berechnen erklären}
+
+
+
 
 % (Plate) - Shape - EdgeLoop - Architektur und Funktionalität
 % (Clipping)

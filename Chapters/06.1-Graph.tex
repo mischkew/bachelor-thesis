@@ -2,6 +2,7 @@
 \begin{document}
 %************************************************
 \chapter{Adjacency Plategraph / Klara}\label{ch:graph}
+\newcommand{\TODO}[1]{\textcolor{red}{\\ \textbf{TODO:} #1 \\}}
 %************************************************
 
 % Use active Voice (we do….)
@@ -42,8 +43,8 @@ As a prerequisite the step \ref{ch:plates} needs to find inherent or create extr
 \subsection{Finding intersections}
 % \subparagraph{concrete explanation, functions used/example code etc.}
 When two planes intersect there is an intersection line. Since we work with plates which equal 2 parallel planes we expect to find up to 4 intersection lines.\\
-Firstly, we retrieve the direction vector(\emph{dir}) of any intersection line between two plates by calculating the cross vector of both normals.\\
-% TODO: include citation
+Firstly, we retrieve the direction vector(\emph{dir}) of any intersection line between two plates by calculating the cross vector of both normals.
+\TODO{include citation}
 In order to retrieve all possible intersection lines of two plates we calculate four possible plane-plane intersections \cite{planePlaneIntersection} of 
 \begin{itemize}
 \item the two main sides of the plates
@@ -59,12 +60,25 @@ First, a possible position vector has to be found which lies on both planes.
 $$ p = \frac{d_1 * n_{2}^{2} - d_2 * (n_1 * n_2)}{n_{1}^{2} * n_{2}^{2} - (n_1 * n_2)^{2}} * n_1 + \frac{d_2*n_1^2 - d_1*(n_1 * n_2)}{n_1^2 * n_2^2 - (n_1 * n_2)^2} * n_2 $$
 
 On the basis of a position vector an intersection line can be computed.
-% TODO: make this nicer
+\TODO{make this nicer}
 $$ line = p*x + dir$$
 
-Now that all lines are found we have to test if the lines actually go through both plates. In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates.\\
+Now that all lines are found we have to test if the lines actually go through both plates. \TODO{this is not correct, in future work we have to make sure that the plates actually touch!} In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates.\\
 In order to find the boundaries of the lines we calculate the intersections of the lines with all boundary edges of the plates.\\
 \includegraphics[width=.5\columnwidth]{Images/HeadAllBoundaries.png}
+
+
+\subsection{Marking the main line}
+As already mentioned when plates intersect there can be up to four intersection lines. But for the following steps we need to define which of them is the most important one for adding fingerjoints and for being able to calculate the correct angle. The line we need to choose has to touch both plates and be only as long as wide the fingerjoints need to spread.
+\TODO{Image of the four lines and showing which one should always be the main line}
+Our assumption for finding the main line is the following:\\
+If an intersection line does not lie on an outer boundary of the shape then it is the main line.
+\TODO{Image explaining our assumption}
+\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}
+When the intersectionlines intersect with any points on main side of the first plate and with any on the second plate then the line is marked as not main. 
+
+\TODO{Alternatives: why not use middle axis going through joints? Good-bad-evaluation}
+\TODO{write in future work why this assumption is crap and how we will handle this}
 
 \subsection{Determine angles between plates}
 In order to generate nicely fitting joints in the following step and for grouping plates the angles are necessary.\\
@@ -72,7 +86,7 @@ Firstly, we determine the angle between the according planes.\\
 plane normals: u, v\\
 angle between planes: $\theta$
 $$ cos(\theta) = \frac{u \cdot v}{|u| * |v|}$$
-But we are not talking about infinitely large planes instead we want the angle which is enclosed by the finitely large plates. Therefore we need to adjust the angle in some cases dependent on the direction in which the normals are pointing.
+But we are not talking about infinitely large planes instead we want the angle which is enclosed by the finitely large plates. Therefore we need to adjust the angle in some cases dependent on the direction in which the normals are pointing. We know which sides of the plates are enclosing the angle thanks to the previous main line calculation.
 % figure which shows when angle is right, but also one case when it is not right
 \begin{figure}[h]
 
@@ -90,10 +104,8 @@ For an angle to be in need to be adjusted the following conditions need to be sa
     \item Their directions are both positive OR both negative
 \end{itemize}
 
-
-
 \subsection{Truncating intersection lines}
-Now that all lines are known we need to shorten the lines so that no other lines overlap with it. If this step is missing then the following step for creating joints will run in to problems that the joints overlap each other.\\
+Now that all lines are known we need to shorten the lines so that no other lines overlap with it. If this step is missing then the following step for creating joints will run in to problems because the joints overlap each other.\\
 If we now have a look at only the inner intersections of plates in a model we can identify the overlaps.
 \begin{figure}[t]
 \includegraphics[width=.5\columnwidth]{Images/HeadInnerBoundaries.png}
@@ -156,11 +168,11 @@ he didnt actually specify how he calculated the angles...
 \subsection{Floating Point inaccuracy}
 \subsection{Bruteforce finding lines}
 The first approach was gathering all lines from all plate boundaries and looking for intersects of any other line. This is a very costly calculation but less prone to rounding errors. \\
-\textbf{TODO: Find out if there was another bad thing about it like not finding all lines possible...}
+\TODO{Find out if there was another bad thing about it like not finding all lines possible...}
 Later we continued on to using plane intersections which meant we only needed to work with all combinations of plates instead of all of its edges.
 \subsection{different line intersection algorithms}
 \subsection{previous angle calculation}
-\textbf{TODO: Probably move angle calculation section here and replace it with how we do it now: clip and based on that know the angle}
+\TODO{Probably move angle calculation section here and replace it with how we do it now: clip and based on that know the angle}
 
 \section{Future work}
 \begin{itemize}
