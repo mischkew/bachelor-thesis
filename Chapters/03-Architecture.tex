@@ -25,25 +25,25 @@ web-framework in which {\platener} is implemented. Secondly, we
 explain the details of {\platener} in
 Section~\ref{sec:application-platener}.
 
-\note{weiss nicht ganz was die zwei naechsten absaetze
-  bringen...}
+% \note{weiss nicht ganz was die zwei naechsten absaetze
+%   bringen...}
 
-With a framework like {\convertify} we can implement generic
-{\threedmodel} manipulation web-applications. {\threedmodel}
-manipulation means restructuring the model geometry in such a way,
-that it can be used for a new purpose - apart from visualization on
-computer screens. Such manipulations include converting the
-{\threedmodel} for physical output devices like {\threedprinter}s or
-{\lasercutter}s. For example, {\brickify} creates models consisting of
-3D-printed parts and
-{\lego}-assembled\footnote{\url{http://www.lego.com}} parts. Thus,
-applications like
-{\brickify} can be built with {\convertify}.
+% With a framework like {\convertify} we can implement generic
+% {\threedmodel} manipulation web-applications. {\threedmodel}
+% manipulation means restructuring the model geometry in such a way,
+% that it can be used for a new purpose - apart from visualization on
+% computer screens. Such manipulations include converting the
+% {\threedmodel} for physical output devices like {\threedprinter}s or
+% {\lasercutter}s. For example, {\brickify} creates models consisting of
+% 3D-printed parts and
+% {\lego}-assembled\footnote{\url{http://www.lego.com}} parts. Thus,
+% applications like
+% {\brickify} can be built with {\convertify}.
 
-{\platener} is an application implemented in the framework {\convertify}.
-Using a framework helps us focusing on the algorithmic challenges of
-converting arbitrary {\threedmodel}s into physical, laser-cut output.
-\note{letzter satz: sagt nichts aus?}
+% {\platener} is an application implemented in the framework {\convertify}.
+% Using a framework helps us focusing on the algorithmic challenges of
+% converting arbitrary {\threedmodel}s into physical, laser-cut output.
+% \note{letzter satz: sagt nichts aus?}
 
 \section{Computer Graphics in Web-Environments}
 \label{sec:cg-web}
@@ -62,23 +62,53 @@ This section explains which data structures and disk-formats are used
 to represent {\threedmodel}s. First, we explain the terminology of
 meshes. Secondly, we look at the {\stlfile} format.
 
-The model geometry is represented by a set of connected polygons,
-approximating the model surface. These connected polygons form a mesh.
-Figure~\ref{} shows a mesh. To benefit from hardware acceleration, we use
-triangles as polygons. A triangle in the mesh is called face. Each
-face is described by a list of three coordinates in 3D-space. Such a
-coordinate is called vertex \cite[p.~3]{cg-intro}. An edge is the line
-between two connected vertices.
+The model geometry is represented by a set of connected
+polygons, approximating the model surface. These connected
+polygons form a mesh. Figure~\ref{fig:term-mesh:mesh} shows
+a mesh. We use triangles as polygons, because then we
+benefit from hardware acceleration. A triangle in the mesh
+is called face. Each face is described by a list of three
+coordinates in 3D-space. Such a coordinate is called vertex
+\cite[p.~3]{cg-intro}. An edge is the line between two
+connected vertices. Figure~\ref{fig:term-mesh:face}
+illustrates the terminology.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{03-architecture-boat}
+    \caption{A triangle mesh of a rowboat.}
+    \label{fig:term-mesh:mesh}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{03-architecture-mesh-terminology}
+    \caption{A single face with vertices and edges.}
+    \label{fig:term-mesh:face}
+  \end{subfigure}
+  \caption{Terminology of a Mesh}
+  \label{fig:term-mesh}
+\end{figure}
 
 We only support geometry which is arranged in two-manifold meshes.
 Two-manifoldness is a constraint on the mesh, which requires each egde
-to exactly touch two neighboring faces. Figure~\ref{}\myNotes{add figure}
+to exactly touch two neighboring faces. Figure~\ref{fig:non-manifold}
 shows a comparison of a manifold and non-manifold part of a mesh. It
 follows then, that each triangular face has to have three adjacent
 faces. Thus, the constraint enforces the mesh to be a fully connected
 graph without holes \cite[p.~28]{master-thesis}. We require
 two-manifoldness to make
 sophisticated assumption when designing the conversion algorithms.
+
+\note{make own figure for non-manifold mesh}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-non-manifold}
+  \caption{A non-manifold cutout of a mesh.}
+  \label{fig:non-manifold}
+\end{figure}
 
 The Standard Tessellation Language (STL) format is a common file
 format for {\threedmodel} representation in the context of
@@ -93,22 +123,22 @@ Listing~\ref{alg:stl-file} shows an {\stlfile} in ASCII encoding. For
 saving disk-space, the file is mostly stored in a binary format
 \cite[p.~8]{stl-file}.
 
-% \begin{algorithm}
-%   \caption{General format of a STL-file in ASCII encoding.}
-%   \label{alg:stl-file}
-%   \algblock[Name]{solid}{endsolid}
-%   \begin{algorithmic}
-%     \solid \textit{name}\\
-%     facet normal \textit{n1} \textit{n2} \textit{n3}\\
-%       outer loop\\
-%        vertex \textit{p1x} \textit{p1y} \textit{p1z}\\
-%        vertex \textit{p2x} \textit{p2y} \textit{p2z}\\
-%        vertex \textit{p3x} \textit{p3y} \textit{p3z}\\
-%       endloop\\
-%      endfacet\\
-%     \endsolid \textit{name}
-%   \end{algorithmic}
-% \end{algorithm}
+\begin{listing}
+\centering
+\begin{CVerbatim}
+solid name
+ facet normal n1 n2 n3
+  outer loop
+   vertex p1x p1y p1z
+   vertex p2x p2y p2z
+   vertex p3x p3y p3z
+  endloop
+ endfacet
+endsolid name
+\end{CVerbatim}
+\caption{General format of a STL-file in ASCII encoding.}
+\label{alg:stl-file}
+\end{listing}
 
 Reconstructing the original {\threedmodel} from an {\stlfile} does not
 always result in one-to-one solution. The vertices are stored with
@@ -119,8 +149,6 @@ indexed face-vertex-mesh from the possibly ambiguous {\stlfile}. With
 {\meshlib} we can convert the face-vertex-mesh representation to a
 {\threejs} geometry. With a {\threejs} geometry, we can render a
 {\threedmodel} in {\convertify}.
-
-\note{threejs introduction}
 
 To support a variety of {\threedprinter} optimized models, we use the
 {\stlfile} format. We import the files with the {\meshlib} library.
@@ -134,13 +162,15 @@ representation is displayed on the screen.
 To understand how {\convertify} and {\platener} work, we have to
 familiarize with the concepts of rendering and scene graphs first.
 
-\note{why is it a loop then?}
-A typical pattern any graphics software is the
-render loop. Rendering is the process of turning the {\threedmodel}
-representation into an array of pixels which can be displayed on the
-screen~\cite[p.~2]{intro-cg}. The render loop pattern consists of
-three steps: processing input, updating the {\threedmodel}
-representation and rendering~\cite{gamedev-gameloop}.
+A typical pattern in graphics software is the render loop.
+Rendering is the process of turning the {\threedmodel}
+representation into an array of pixels which can be
+displayed on the screen~\cite[p.~2]{intro-cg}. We have to
+render the {\threedmodel} in a continuous loop, because we
+do not want to produce a single static image. The render
+loop pattern consists of three steps: processing input,
+updating the {\threedmodel} representation and
+rendering~\cite{gamedev-gameloop}.
 Figure~\ref{fig:render-loop} shows an exemplary flow.
 
 \begin{figure}[h]
@@ -180,142 +210,295 @@ is recognized by {\convertify} is part of a scene graph.
   \label{fig:scene-graph}
 \end{figure}
 
-\note{when intro of WebGl here, than give a footnote, else
-  put into introduction} We use the Web Graphics Library
-(WebGL), because we want our rendering results to have
-sophisticated visual effects. With the use of WebGL we can
-process data on the GPU and execute special effects code
-(shader code) in web-browsers~\cite{mdn-webgl}.
-
-On top of WebGL we use
-{\threejs}\footnote{\url{http://threejs.org}}. {\threejs} is
-a {\javascript} library, which wraps the WebGL API to make
-the usage of WebGL simpler. It provides a scene graph
-implementation. {\threejs}
-data representations are used throughout {\convertify}.
 
 The framework {\convertify} uses common computer graphics
 patterns like render loops and scene graphs. With the help
 of WebGL and {\threejs} we are able to bring these concepts
 into a web-environment.
 
-\section{The Framework: Convertify}
+
+\section{Convertify}
 \label{sec:framework-convertify}
-\note{THE FRAMEWORK thingy sounds weird}
 
-In this section we present {\convertify}, a web-framework for working
-with {\threedmodel}s in {\threejs}. The framework is based on
-previous work by \citeauthor{brickify-thesis}. We explain the work and
-concepts of \citeauthor{brickify-thesis} in
-Section~\ref{sec:based-brickify}. Then we outline, how we incorporated
-the previous work into {\convertify} in
-Section~\ref{sec:reuses-brickify} and Section~\ref{sec:plugin-system}.
+In this section we present {\convertify}, a web-framework
+for working with {\threedmodel}s. We will explain core
+features of {\convertify} in
+Section~\ref{sec:convertify-core-features.}. Then we will
+dive into its plugin system in
+Section~\ref{sec:plugin-system}. {\convertify} is based on
+previous work by \citeauthor{brickify-thesis}. We will give
+a short comparison of their work with {\convertify} in
+Section~\ref{sec:brickify-comparison}.
 
-\subsection{The Framework is Based on Brickify}
-\label{sec:based-brickify}
 
-The framework {\convertify} is based on the application {\brickify}
-by \citeauthor{brickify-thesis}. {\brickify} is a web-application
-which converts {\threedmodel}s into a hybrid model, consisting of
-{\lego} bricks and fewer 3D-printable parts. The previous work
-provides features like rendering or scene graphs, which can be
-shared with {\convertify}. In this section we present important
-design decisions of {\brickify}, which will help understanding how
-our framework
-works.
+% We explain the work and
+% concepts of \citeauthor{brickify-thesis} in
+% Section~\ref{sec:based-brickify}. Then we outline, how we
+% incorporated the previous work into {\convertify} in
+% Section~\ref{sec:reuses-brickify} and
+% Section~\ref{sec:plugin-system}.
 
-{\brickify} implements a flat scene graph using \class{Nodes}. Each
-\class{Node} references an input model, has a {\threejs} object and
-transforms. The {\threejs} object is a \class{THREE.Object3D}. This
-is a generic object, which can be rendered into a WebGL scene with
-{\threejs}. This \class{THREE.Object3D} will be displayed on the
-screen by {\brickify}. The transforms describe spatial properties
-like position, scale or rotation and are applied to the {\threejs}
-node. Note, that \class{Nodes} represent entities in the scene, but
-only {\threejs} nodes can actually be rendered.
+\subsection{Introduction to the Core System of {\convertify}}
+\label{sec:convertify-core-features}
 
-The \class{Nodes} are part of a \class{Scene}. The \class{Renderer}
-sets up a WebGL context and initializes {\threejs}. Then the
-\class{SceneManager} passes all active \class{Scenes} to the
-\class{Renderer}, which will traverse the flat scene graph and
-render each attached \class{THREE.Object3D}.
-Figure~\ref{}\myNotes{add figure} shows how these classes interact.
-During that loading and render process, {\brickify} emits system
-events, e.g. change events to the scene graph (\textit{onNodeAdd},
-\textit{onNodeRemove}).
+In this section we present the core system of {\convertify}.
+{\convertify} helps to build WebGL applications by providing
+abstractions to the rendering engine and by composing
+features into plugins. We will focus on important design
+decisions, which are scene management, rendering and
+plugins.
 
-{\brickify} decomposes its features into \class{Plugins}. A
-\class{Plugin} provides a set of methods which can be called upon
-emitted system events to interact with the WebGL scene.
-\citeauthor{brickify-thesis} refers to these callbacks as
-\class{PluginHooks} or just hooks.
+\subsubsection{{\threedmodel}s Are Managed in a Flat Scene
+  Graph}
 
-\note{what is a bundle doing here, better intro}
-User interfaces are implemented within the same code package. This
-does not separate the web-interface from the scene features. Thus, it
-is hard to observe and apply changes to the system. The
-interface code uses a \class{Bundle} as an entry point to the plugin
-and scene system. The \class{Bundle} starts \class{Plugins} and loads
-{\threedmodels} from the filesystem into the application.
+A flat scene graph is a scene graph with only one level of
+hierarchy. Thus, our entities in the scene graph do not have
+any children. We only need a flat scene graph, because we
+only have to manage and access the input models.
 
-{\brickify} provides abstractions for scene management and rendering.
-Plugins interact with the internal system via hooks. The separation of
-{\lego}-conversion features from the rendering engine bring clear
-interfaces. We encountered several hick-ups with this architecture
-when we tried to organize the communication between several plugins.
-In the following sections, we outline our improvements to the internal
-system of {\brickify}. In Section~\ref{sec:reuses-brickify} we talk
-about components which could be reused with minor adaptions.
-Section~\ref{sec:plugin-system} presents the necessary changes to the
-plugin system.
+We implement the flat scene graph using \class{Nodes}.
+\class{Nodes} are abstract objects, which represent an
+entity in our scene graph. Each \class{Node} references an
+input model and transforms. The input model is a
+face-vertex-mesh, that is either used for rendering or used
+by algorithms for further computation. Transforms
+describe spatial properties like position, scale or
+rotation.
 
-\subsection{The Framework Reuses Ideas and Components of Brickify}
-\label{sec:reuses-brickify}
+All \class{Nodes} are part of a \class{Scene}. A
+\class{Scene} holds reference of \class{Nodes}, so we can
+access the input models for later usage. \class{Nodes} are
+added to or removed from the \class{Scene} via the
+\class{SceneManager}. Figure~\ref{fig:scene-graph} shows how
+these classes relate.
 
-{\brickify} provides a set of core feature any WebGL application can
-make use of. This includes components like the render loop, scene
-management and plugin loading. {\convertify} has the goal to provide
-these essential components to help implementing WebGL application
-fast-forwardly. The implementation of such applications should be
-independent from any user interface code or required frontend
-libraries, avoiding additional vendor-locks to {\threejs}. In this
-section we explain, how we reached this goal.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-scene-graph}
+  \caption{Relation of scene graph components}
+  \label{fig:scene-graph}
+\end{figure}
 
-\myNotes{work on that section}
-re-uses render loop, scene management, plugin loading, bundle
+\subsubsection{{\threedobject}s Are Rendered with
+  {\threejs}}
 
-changes were: in project structure and ui code <> lots of mixing with
-ui code (convertify does not have any ui code out of the box. that
-will be part of the application that uses convertify)
+% A \class{Scene} contains all \class{Nodes} that reference an
+% input model.
+Though \class{Nodes} represent entities in the scene of
+{\convertify}, only {\threejs} objects can actually be
+rendered. Such {\threejs} objects are instances of
+\class{THREE.Object3D}\footnote{\url{http://threejs.org/docs/#Reference/Core/Object3D}}.
+This is a generic object, which can be rendered into a WebGL
+scene. These \class{THREE.Object3D} will be displayed on the
+screen. The scene graph of {\threejs} is not flat. A
+\class{THREE.Object3D} can have a hierarchy of objects of
+any size.
 
-To make {\convertify} a multi-purpose WebGL framework, we stripped
-away any interwoven interface code from the \class{Renderer},
-\class{SceneManager} and \class{Bundle}. We also used the plugin
-system of {\brickify}. The applied changes to the plugin system are
-described in the following section.
+We use a \class{Renderer} to bring {\threejs} entities to
+the screen. The \class{Renderer} sets up a WebGL context and
+initializes {\threejs}. {\convertify} associates each
+\class{Node} with one or more \class{THREE.Object3D}. The
+\class{Renderer} traverses the hierarchy of each associated
+\class{THREE.Object3D} and renders it. The \class{Node}
+transforms are thereby applied to the {\threejs} entities.
 
-\subsection{The Framework Provides an Enhanced Plugin System}
+Figure~\ref{fig:nodes-and-three} shows the
+\class{THREE.Object3D} in the context of \class{Nodes} and
+the \class{Renderer}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-scene-graph}
+  \caption{\class{Nodes} and associated \class{THREE.Object3D}}
+  \label{fig:nodes-and-three}
+\end{figure}
+
+\subsubsection{Convertify Emits System Events}
+
+During the loading and render process, {\convertify} emits
+system events. A system event notifies subscribers about
+changes of the state of {\convertify} during its lifecycle.
+Such changes can be touch or pointer interactions with
+rendered models in the scene (\name{onPointerEvent}) or
+change events to the scene graph (\name{onNodeAdd},
+\name{onNodeRemove}). Figure~\ref{lifecycle} shows the full
+lifecycle and event loop of {\convertify}.
+
+\begin{figure}[h]
+  \centering
+  %\includegraphics[width=0.6\textwidth]{03-architecture-lifecycle}
+  \caption{The complete lifecycle of {\convertify}}
+  \label{fig:lifecycle}
+\end{figure}
+
+\subsubsection{{\convertify} Integrates Additional Features
+  Via Plugins}
+
+{\convertify} loads additional features into its system via
+\class{Plugins}. \class{Plugins} encourage to decompose
+feature sets into independent components. A \class{Plugin}
+is a separate code package, that adds features for the WebGL
+scene or algorithmic computation units. Therefore, it
+provides a set of methods which can be called upon emitted
+system events. We refer to these callbacks as
+\class{PluginHooks} or simply hooks. We will look at the
+details of \class{Plugins} and plugin communication in
+Section~\ref{sec:plugin-system}.
+
+
+% User
+% interfaces are implemented within the same code package.
+% This does not separate the web-interface from the scene
+% features. Thus, it is hard to observe and apply changes to
+% the system. The interface code uses a \class{Bundle} as an
+% entry point to the plugin and scene system. The
+% \class{Bundle} starts \class{Plugins} and loads
+% {\threedmodels} from the filesystem into the application.
+
+% {\brickify} provides abstractions for scene management and
+% rendering. Plugins interact with the internal system via
+% hooks. The separation of {\lego}-conversion features from
+% the rendering engine bring clear interfaces. We encountered
+% several hick-ups with this architecture when we tried to
+% organize the communication between several plugins. In the
+% following sections, we outline our improvements to the
+% internal system of {\brickify}. In
+% Section~\ref{sec:reuses-brickify} we talk about components
+% which could be reused with minor adaptions.
+% Section~\ref{sec:plugin-system} presents the necessary
+% changes to the plugin system.
+
+% The framework {\convertify} is based on the application
+% {\brickify} by \citeauthor{brickify-thesis}. {\brickify}
+% provides features like rendering or the scene graph, which
+% are use by {\convertify}.
+
+
+% \subsection{The Framework is Based on Brickify}
+% \label{sec:based-brickify}
+
+% \note{refromulate this section into a related work section}
+% \note{then put all details from the chapter into the next
+%   section, where we explain how convertify actually works}
+
+% The framework {\convertify} is based on the application {\brickify}
+% by \citeauthor{brickify-thesis}. {\brickify} is a web-application
+% which converts {\threedmodel}s into a hybrid model, consisting of
+% {\lego} bricks and fewer 3D-printable parts. The previous work
+% provides features like rendering or scene graphs, which can be
+% shared with {\convertify}. In this section we present important
+% design decisions of {\brickify}, which will help understanding how
+% our framework
+% works.
+
+% {\brickify} implements a flat scene graph using \class{Nodes}. Each
+% \class{Node} references an input model, has a {\threejs} object and
+% transforms. The {\threejs} object is a \class{THREE.Object3D}. This
+% is a generic object, which can be rendered into a WebGL scene with
+% {\threejs}. This \class{THREE.Object3D} will be displayed on the
+% screen by {\brickify}. The transforms describe spatial properties
+% like position, scale or rotation and are applied to the {\threejs}
+% node. Note, that \class{Nodes} represent entities in the scene, but
+% only {\threejs} nodes can actually be rendered.
+
+% \note{introduce the terms more smoothly. also what is a
+%   scene graph in this context?}
+
+% The \class{Nodes} are part of a \class{Scene}. The \class{Renderer}
+% sets up a WebGL context and initializes {\threejs}. Then the
+% \class{SceneManager} passes all active \class{Scenes} to the
+% \class{Renderer}, which will traverse the scene graph and
+% render each attached \class{THREE.Object3D}.
+% Figure~\ref{fig:scene-graph} shows how these classes interact.
+% During that loading and render process, {\brickify} emits system
+% events, e.g. change events to the scene graph (\textit{onNodeAdd},
+% \textit{onNodeRemove}).
+
+% \note{FIGURE: look up how interactions really are! maybe
+%   show emission of events also, maybe class diagram is not
+%   suitable?}
+
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{03-architecture-scene-graph}
+%   \caption{Interaction of scene graph components.}
+%   \label{fig:scene-graph}
+% \end{figure}
+
+% {\brickify} decomposes its features into \class{Plugins}. A
+% \class{Plugin} provides a set of methods which can be called upon
+% emitted system events to interact with the WebGL scene.
+% \citeauthor{brickify-thesis} refers to these callbacks as
+% \class{PluginHooks} or just hooks.
+
+% \note{what is a bundle doing here, better intro}
+% User interfaces are implemented within the same code package. This
+% does not separate the web-interface from the scene features. Thus, it
+% is hard to observe and apply changes to the system. The
+% interface code uses a \class{Bundle} as an entry point to the plugin
+% and scene system. The \class{Bundle} starts \class{Plugins} and loads
+% {\threedmodels} from the filesystem into the application.
+
+% {\brickify} provides abstractions for scene management and rendering.
+% Plugins interact with the internal system via hooks. The separation of
+% {\lego}-conversion features from the rendering engine bring clear
+% interfaces. We encountered several hick-ups with this architecture
+% when we tried to organize the communication between several plugins.
+% In the following sections, we outline our improvements to the internal
+% system of {\brickify}. In Section~\ref{sec:reuses-brickify} we talk
+% about components which could be reused with minor adaptions.
+% Section~\ref{sec:plugin-system} presents the necessary changes to the
+% plugin system.
+
+% \subsection{The Framework Reuses Ideas and Components of Brickify}
+% \label{sec:reuses-brickify}
+
+% {\brickify} provides a set of core feature any WebGL application can
+% make use of. This includes components like the render loop, scene
+% management and plugin loading. {\convertify} has the goal to provide
+% these essential components to help implementing WebGL application
+% fast-forwardly. The implementation of such applications should be
+% independent from any user interface code or required frontend
+% libraries, avoiding additional vendor-locks to {\threejs}. In this
+% section we explain, how we reached this goal.
+
+% \myNotes{work on that section}
+% re-uses render loop, scene management, plugin loading, bundle
+
+% changes were: in project structure and ui code <> lots of mixing with
+% ui code (convertify does not have any ui code out of the box. that
+% will be part of the application that uses convertify)
+
+% To make {\convertify} a multi-purpose WebGL framework, we stripped
+% away any interwoven interface code from the \class{Renderer},
+% \class{SceneManager} and \class{Bundle}. We also used the plugin
+% system of {\brickify}. The applied changes to the plugin system are
+% described in the following section.
+
+\subsection{{\convertify} Provides a Plugin System}
 \label{sec:plugin-system}
 
 % - Subsection overview
 
-We present a plugin system that reacts to system events during the
-application's lifecycle. Additionally, we present a method, which organizes
-communication between \class{Plugins}.
+In this section, we present a plugin system that reacts to
+{\convertify}'s system events. Additionally, we present a
+method, which organizes communication between
+\class{Plugins}.
 
 % - Plugin definition in Convertify
 % - *feature for web gl scene and reaction on changes of the scene*
 % - *full fledged applications will implement a set of plugins to
 % provide functionality and web-ui code to provide interface*
 
-A \class{Plugin} bundles an exchangeable set of features which will
-interact with the WebGL scene or will react on changes to the scene.
-Such features are touch interactions with the rendered model or
-starting computation on the model data when it is added to the
-scene. Any full fledged application implements a set of
-\class{Plugins} to provide the scene functionality. E.g. a concrete
-conversion strategy provided by {\platener} is implemented by a
-single \class{Plugin}.
+A \class{Plugin} bundles an exchangeable set of features
+which will interact with the WebGL scene or will react on
+changes to the scene. Such features are touch interactions
+with the rendered model or computation on the model data
+when a \class{Node} is added to the scene. Any full fledged
+application implements a set of \class{Plugins} to provide
+the scene functionality. E.g. a concrete conversion strategy
+provided by {\platener} is implemented by a single
+\class{Plugin}.
 
 \subsubsection{Plugins Interact with the Internal System via
   Lifecycle Events}
@@ -325,28 +508,30 @@ single \class{Plugin}.
 % - needs-figure :: Example Plugin, interacting via PluginHooks
 % - System dispatches events (where do events come from?)
 
-Similar to {\brickify} we emit system events from internal components.
-Figure \ref{fig:}\myNotes{add system events figure} depicts the
-system's lifecycle and the emitted events. The subscribers to system
-events are \class{Plugins}. Each event can be handled by a
-\class{PluginHook}, if a \class{Plugin} implements it. To implement a
-\class{PluginHook} each \class{Plugin} registers a callback for that
-event. These callbacks get called when the event is dispatched by the
-system. Thus, \class{Plugins} can react to each event and apply their
-own functionality to the scene or even the model geometry. With this
-we emphasize compact computation units in plugins, which can still
+{\convertify} emits system events from internal components.
+Figure \ref{fig:lifecycle} depicts the system's lifecycle
+and the emitted events. The subscribers to system events are
+\class{Plugins}. Each event can be handled by a
+\class{PluginHook}, if a \class{Plugin} implements it. To
+implement a \class{PluginHook} each \class{Plugin} registers
+a callback for that event. These callbacks get called when
+the event is dispatched by the system. Thus, \class{Plugins}
+can react to each event and apply their own functionality to
+the scene or even the model geometry. With this we emphasize
+compact computation units in plugins, which can still
 interact freely with the system.
 
-We have a short look at the \name{PlatenerPipeline} plugin, to
-illustrate an exemplary work flow of plugins. The
-\name{PlatenerPipeline} plugin is a \class{Plugin} implemented in
-{\platener}. It reads the model data after a {\threedmodel} was
-loaded into the scene. Then it processes the data to create a
-{\lasercutter} conversion. When the model is deleted from the scene
-by a user, the plugin releases the processed data. This plugin does
-not react to further user interactions, like clicking or rotating
-the model. Figure \ref{} \myNotes{plugin example flow} shows how this
-plugin integrates with {\convertify}.
+To better illustrate the work flow of plugins, we have a
+short look at an example plugin. The \name{PlatenerPipeline}
+plugin is a \class{Plugin} implemented in {\platener}. The
+\class{Plugin} reads the model data from a \class{Node}
+after a {\threedmodel} was loaded into the scene. Then it
+processes the data to create a {\lasercutter} conversion.
+When the model is deleted from the scene by a user, the
+plugin releases the processed data. This plugin does not
+react to further user interactions, like clicking or
+rotating the model. Figure \ref{} \myNotes{plugin example
+  flow} shows how this plugin integrates with {\convertify}.
 
 \subsubsection{Organizing Plugin Communication with a
   Dispatcher}
@@ -371,37 +556,46 @@ with each other directly. With a mediator we can model many-to-many
 relationships \cite[p. ?]{gof}.\note{fix citing, lookup page}.
 % https://sourcemaking.com/design_patterns/mediator
 
-The \class{Dispatcher} implements every \class{PluginHook}. All system
-events are emitted to the \class{Dispatcher} first, before the
-\class{Dispatcher} will remit them to the \class{Plugins}. With this
-component in the middle, we can control the order in which the events
-will be received by the \class{Plugins}. We have to determine the
-order of \class{PluginHook} executions explicitly, because for
-different events, different \class{Plugins} have to run first. E.g.
-{\platener} wants to process the model data before it is rendered when
-a user adds a node to the scene. But it wants to destroy the
-visualization before releasing all the computed data. We cannot solve
-this problem, by dispatching all events to all plugins in the same order.
+The \class{Dispatcher} implements every \class{PluginHook}.
+All system events are emitted to the \class{Dispatcher}
+first, before the \class{Dispatcher} will remit them to the
+\class{Plugins}. In our case the \class{Dispatcher} is the
+mediator, where as the \class{Plugins} are the mediator's
+clients. With this component in the middle, we can control
+the order in which the events will be received by the
+\class{Plugins}. We have to determine the order of
+\class{PluginHook} executions explicitly, because for
+different events, different \class{Plugins} have to run
+first. E.g. {\platener} wants to process the model data
+before it is rendered when a user adds a node to the scene.
+But it wants to destroy the visualization before releasing
+all the computed data. We cannot solve this problem, by
+dispatching all events to all plugins in the same order.
 
-To model many-to-many relationships between \class{Plugins} and
-\class{Plugins}, we enhance the \class{Dispatcher} with
+To model many-to-many relationships between \class{Plugins}
+and \class{Plugins}, we enhance the \class{Dispatcher} with
 \class{Protocols}. \class{Protocols} define mixins on the
-\class{Dispatcher} which allow delegation of functionality from the
-\class{Dispatcher} to a \class{Plugin}. A mixin adds functionality to
-an object by object composition\cite{}\note{give a reference for
-  mixins}. The delegation pattern achieves the results of multiple
-inheritance by object composition. A delegating object calls external
-functionality on a delegate object, which is available through a
-predefined interface \cite{delegation}\note{source for delegation}. In
-our case, the \class{Dispatcher} is the delegating object and the
-\class{Plugin} is the delegate. The \class{Protocol} helps to define
-the interface between the \class{Dispatcher} and a \class{Plugin}. Two
-\class{Plugins} now communicate with each other via the
-\class{Dispatcher}. One \class{Plugin} calls functionality on the
-\class{Dispatcher} which was exposed by a \class{Protocol}. The
-\class{Protocol} ensures that the \class{Dispatcher} delegates an
-action to another \class{Plugin}. Figure~\ref{}\note{figure plugin
-  communication} shows how the mediator connects two \class{Plugins}.
+\class{Dispatcher} which allow delegation of functionality
+from the \class{Dispatcher} to a \class{Plugin}. A mixin
+adds functionality to an object by object
+composition\cite{}\note{give a reference for mixins}. The
+delegation pattern achieves the results of multiple
+inheritance by object composition. The delegation pattern
+speaks of delegating objects and delegates. A delegating
+object calls external functionality on a delegate object,
+which is available through a predefined interface
+\cite{delegation}\note{source for delegation}. In our case,
+the \class{Dispatcher} is the delegating object and the
+\class{Plugin} is the delegate. The \class{Protocol} helps
+to define the interface between the \class{Dispatcher} and a
+\class{Plugin}. Two \class{Plugins} now communicate with
+each other via the \class{Dispatcher}. One \class{Plugin}
+calls functionality on the \class{Dispatcher} which was
+exposed by a \class{Protocol}. The \class{Protocol} ensures
+that the \class{Dispatcher} delegates an action to another
+\class{Plugin}. Figure~\ref{}\note{figure plugin
+  communication} shows how the mediator connects two
+\class{Plugins}.
 % http://best-practice-software-engineering.ifs.tuwien.ac.at/patterns/delegation.html
 % https://developer.apple.com/library/ios/documentation/General/Conceptual/DevPedia-CocoaCore/Delegation.html
 
@@ -410,13 +604,16 @@ components at once. With the \class{Dispatcher}, we wire up all
 communication with \class{Plugins} at one place. Due to explicit
 ordering of callback executions, we have fine-grained control for each
 \class{Plugin}. \class{Protocols} define clean interfaces for
-inter-\class{Plugin} communication. Each application implemented with
-the {\convertify} framework has to implement a custom \class{Dispatcher}.
+inter-\class{Plugin} communication.
+
+% Each application implemented with
+% the {\convertify} framework has to implement a custom
+% \class{Dispatcher}.
 
 % - *full fledged applications will implement a mediator to organize
 % feature communication*
 
-\section{The Application is Implemented in the Framework: Platener}
+\section{Platener Is Implemented In {\convertify}}
 \label{sec:application-platener}
 
  % - Section overview
@@ -426,19 +623,22 @@ the {\convertify} framework has to implement a custom \class{Dispatcher}.
  % - Plugins provide scene feature
  % - Client Code to integrate plugins, system and user interfaces
 
-{\platener} is a web-application, that converts 3D-printable models
-into laser-cuttable equivalents. This section describes the
-implementation of {\platener} within the {\convertify} framework. The
-application integrates with the system events and rendering engine of
-{\convertify}. {\platener} uses several \class{Plugins} to bring its
-features to the WebGL scene. Section~\ref{sec:platener-uses-plugins}
-describes these plugins briefly.
-Section~\ref{sec:platener-pipeline-plugin} shows architectural details
-to the most important \class{Plugin}: the \name{PlatenerPipeline}
-plugin. This \class{Plugin} implements different conversion strategies
-for {\threedmodel}s. In Section~\ref{sec:client-to-application} we
-explain how the application combines user interfaces with the
-\class{Dispatcher} and the \class{Plugins}.
+{\platener} is a web-application, that converts 3D-printable
+models into laser-cuttable equivalents. This section
+describes the implementation of {\platener} within the
+{\convertify} framework. Therefore, {\platener} integrates
+with the system events and rendering engine of
+{\convertify}. As proposed in the preceding section, it uses
+several \class{Plugins} to bring its features to the WebGL
+scene. Section~\ref{sec:platener-uses-plugins} describes
+these plugins briefly.
+Section~\ref{sec:platener-pipeline-plugin} shows
+architectural details to the most important \class{Plugin}:
+the \name{PlatenerPipeline} plugin. This \class{Plugin}
+implements different conversion strategies for
+{\threedmodel}s. In Section~\ref{sec:client-to-application}
+we explain how the application combines user interfaces with
+the \class{Dispatcher} and the \class{Plugins}.
 
 \subsection{Platener Uses Plugins to Implement Its Features}
 \label{sec:platener-uses-plugins}
@@ -450,38 +650,97 @@ paragraphs.
 
 \subsubsection{Platener Pipeline Plugin}
 
-The \name{PlatenerPipeline} plugin is the main computation unit.
-The \class{Plugin} defines multiple {\fabmethod}s. A
-{\fabmethod} is a conversion approach of a \threedmodel.
-Multiple computation steps, which can manipulate the input
-model, are chained after another to produce 2D- or
-3D-output. For example, construction plans in the format of
-{\svgfile}s are such an output, see Figure~\ref{}
-\note{construction plans figure}.
+\note{do not talk about fabmethods yet!}
+
+The \name{PlatenerPipeline} plugin does the major work on
+converting {\threedmodels} to 2D-plates. The plugin defines
+multiple conversion approaches. A conversion is an
+approximation of the original model with plates.
+Figure~\ref{fig:conversion:plate} and
+Figure~\ref{fig:conversion:stacked} show two conversion
+results. This plugin generates a set of 2D-paths, so that
+the conversion can be produced with a {\lasercutter}. The
+paths are depicted in Figure~\ref{fig:conversion:paths}.
 Section~\ref{sec:platener-pipeline-plugin} explains the
-architecture of the \name{PlatenerPipeline} plugin in detail.
+architecture of the \name{PlatenerPipeline} plugin in
+detail.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[a]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{}
+    \caption{A box converted with hull approximation.}
+    \label{fig:conversion:plate}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{}
+    \caption{A box converted with stacked approximation.}
+    \label{fig:conversion:stacked}
+  \end{subfigure}
+  \begin{subfigure}[c]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{}
+    \caption{2D-paths of the box converted with hull approximation.}
+    \label{fig:conversion:paths}
+  \end{subfigure}
+  \caption{Results of the \name{PlatenerPipeline} plugin.}
+  \label{fig:conversion}
+\end{figure}
+
+% The \name{PlatenerPipeline} plugin is the main computation unit.
+% The \class{Plugin} defines multiple {\fabmethod}s. A
+% {\fabmethod} is a conversion approach of a \threedmodel.
+% Multiple computation steps, which can manipulate the input
+% model, are chained after another to produce 2D- or
+% 3D-output. For example, construction plans in the format of
+% {\svgfile}s are such an output, see Figure~\ref{}
+% \note{construction plans figure}.
+% Section~\ref{sec:platener-pipeline-plugin} explains the
+% architecture of the \name{PlatenerPipeline} plugin in detail.
 
 \subsubsection{Node Visualizer Plugin}
 
 We visualize the results of the \name{PlatenerPipeline}
 plugin in the WebGL view. The \name{NodeVisualizer} plugin
-renders the results of each computation step of each
-{\fabmethod} respectively. With the help of this
-\class{Plugin} we debug the results of the computation steps
-visually. As explained in Section~\ref{}\note{section
-  walkthrough}, we select a single visualization at a
-time to inspect the results of the step associated with the
-visualization. Figure~\ref{}\note{a) model} shows a
-head-mounted display in the \name{Plate} step.
-Figure~\ref{}\note{b) button} shows the selection of that
-visualization in the user interface.
+renders the results of each conversion and its intermediate
+computation steps respectively. With the help of this we
+debug the results of the computation visually. As explained
+in Section~\ref{}\note{section walkthrough}, we select a
+single visualization at a time to inspect the results of the
+step associated with the visualization.
+Figure~\ref{fig:steps:plate} shows a head-mounted display in
+the \name{Plate} step. Figure~\ref{fig:steps:ui} shows the
+selection of that visualization in the user interface.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[a]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{}
+    \caption{A head-mounted display, consisting of plates only.}
+    \label{fig:steps:plate}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{}
+    \caption{The selection of the intermediate plate step in
+      the user interface.}
+    \label{fig:steps:ui}
+  \end{subfigure}
+  \label{fig:steps}
+  \caption{Visual debugging of intermediate conversion results.}
+\end{figure}
 
 \subsubsection{Scorer Plugin}
 
-We run multiple {\fabmethod}s sequentially. Then, we choose
-the best fitted conversion as output. Thus each {\fabmethod}
-is scored by a method-specific scoring algorithm. This
+We run multiple conversion approaches sequentially. Then, we choose
+the best fitted conversion as output. Thus each conversion
+is scored by a scoring algorithm. This
 \clas{Plugin} provides such scoring algorithms.
+
+\subsubsection{Solution Selection Plugin}
+
+This plugin utilizes the \name{Platener Pipeline} plugin and
+the \name{Scorer} plugin to run and evaluate all conversion
+approaches. It outputs the result of the conversion with the
+best score.
 
 \subsubsection{Coordinate System Plugin}
 
@@ -501,13 +760,14 @@ is\cite{}\note{ref chapter in brickify}.
 
 \subsubsection{Isolated Testing Plugin}
 
-While we worked on different stages of a sequentially
-executed {\fabmethod} in parallel, we needed a mechanism to
-test each component of the {\fabmethod} before its
-preceeding or succeeding components were completely
-implemented. The Isolated Testing plugin provides an
+While we developed on different stages of a sequentially
+executed conversion approach in parallel, we needed a
+mechanism to test each component of the conversion before
+its preceeding or succeeding components were completely
+implemented. The \name{IsolatedTesting} plugin provides an
 isolated environment, which allows to execute a single
-component of a {\fabmethod} with pre-defined input.
+intermediate computation step of a conversion approach with
+pre-defined input.
 
 \subsection{The PlatenerPipeline Plugin Computes the Model
   Conversions}
@@ -519,10 +779,12 @@ The \name{PlatenerPipeline} is the main computation unit of
 {\platener}. It contains algorithms and data structures to
 bring the {\threedmodel} into a 2D-representation suitable
 for a {\lasercutter}. In this section we dive into details
-about the computation process. First we look at {\platener}'s
-three {\fabmethod}s and their composition from computation steps.
-Then we present the \class{PipelineState}, a data structure
-which allows to store a snapshot of the computation state in
+about the computation process. First we look at
+{\platener}'s three conversion approaches. Then, we explain
+the composition of conversion approaches from computation
+steps into a \class{Pipeline} data structure. Finally, we
+present the \class{PipelineState}, a data structure which
+allows to take a snapshot of the computation state in
 between two computation steps. The \class{PipelineState} is
 used to render the visualizations of the
 \name{NodeVisualizer} plugin.
@@ -531,75 +793,108 @@ used to render the visualizations of the
 % - PipelineSteps as single computation units
 % - Several Pipeline Steps make up a Fabrication Method
 
-\subsubsection{Fabrication Methods of {\platener}}
+\subsubsection{{\platener} Presents Three Conversion
+  Approaches}
 
-\note{maybe too much recursion in the following paragraphs...}
-The \name{PlatenerPipeline} plugin is the main computation
-unit. The \class{Plugin} defines multiple {\fabmethod}s.
-Each {\fabmethod} contains multiple computation steps. These
-computation steps are chained after another and manipulate
-the input model to produce 2D- or 3D-output. For example,
-construction plans in the format of {\svgfile}s are such an
-output, see Figure~\ref{} \note{construction plans figure}.
-Section~\ref{sec:platener-pipeline-plugin} explains the
-architecture of the \name{PlatenerPipeline} plugin in
-detail.
+The \name{PlatenerPipeline} plugin facilitates conversion
+approaches. We call such a conversion approach
+\class{\fabmethod}.
+%A {\fabmethod} is a conversion approach of a {\threedmodel}.
+It defines a linear process of analyzing a {\threedmodel}
+and thereby creates a suitable equivalent of the model,
+consisting of plates only. A \class{\fabrication} method
+divides the conversion problem into smaller problems. Thus,
+it provides a set of algorithms, which are executed
+sequentially. Each algorithm solves a single subproblem. The
+algorithms work on results of previously executed
+algorithms. We refer to a sequence of algorithms as
+\class{Pipeline}. Each algorithm in the \class{Pipeline} is
+an intermediate computation step, called
+\class{PipelineStep}. The first \class{PipelineStep} works
+on the face-vertex-mesh of the model. The last
+\class{PipelineStep} returns a directly exportable data
+format, in our case a {\zipfile} containing the
+2D-construction plans. The composition of
+\clas{PipelineSteps} into a \class{Pipeline} is shown in
+Figure~\ref{fig:pipeline-from-steps}. \class{PipelineSteps}
+are independent from the \class{\fabmethod} and thus, can be
+shared between different \class{{\fabmethod}s}. {\platener}
+provides three \class{{\fabmethod}s}. The following paragraphs
+present each method briefly.
 
-\note{this section explains...}
-
-\paragraph{}
-
-A {\fabmethod} is a conversion approach of a {\threedmodel}.
-It defines a linear process of analyzing the {\threedmodel}
-and thereby creating a suitable equivalent of the model,
-consisting of plates only. A {\fabrication} method divides
-the conversion problem into smaller problems. Thus, it
-provides a set of algorithms, which are executed
-sequentially. Each algorithm works with the results of the
-previously executed algorithm. We refer to the sequence of
-algorithms as \class{Pipeline}. Each algorithm in the
-\class{Pipeline} is called \class{PipelineStep}. The first
-\class{PipelineStep} works on the face-vertex-mesh of the
-model. The last \class{PipelineStep} returns a directly
-exportable data format, in our case a {\zipfile} containing
-the 2D-construction plans. \class{PipelineSteps} are
-independent from the {\fabmethod} and thus, can be shared
-between different {\fabmethod}s. {\platener} provides three
-{\fabmethod}s. The following paragraphs present each method
-briefly.
+\begin{figure}[h]
+\centering
+\begin{verbatim}
+- show multiple pipeline steps with inlets/ outlets of
+pipeline state
+- make clear, that a pipeline step is an algorithm, solving
+a sub problem
+- pipeline like a swimming lane, where pipeline steps
+connect
+- a model comes in
+- a construction plan falls out (zip file)
+\end{verbatim}
+\caption{A \class{Pipeline} is composed from
+  \class{PipelineSteps}}
+\label{fig:pipeline-from-steps}
+\end{figure}
 
 \paragraph{Plate Method}
 
-This {\fabmethod} does hull and surface reconstructions of
-the input model. We produce a set of plates which are
-connected via finger joints to approximate the original
-{\threedmodel}. Therefore, we first detect the outlines of
-all surfaces in the model. Then, we search for existing
-plates based on that surfaces. For example two parallel
-surfaces form an \name{inherent} plate, when they are about
-three to five millimeters apart. After we found all
-\name{inherent} plates, we construct plates from the
+This \class{\fabmethod} does hull and surface
+reconstructions of the input model. We produce a set of
+plates which are connected via finger joints to approximate
+the original {\threedmodel}. Therefore, we first detect the
+outlines of all surfaces in the model. Then, we search for
+existing plates based on that surfaces. For example two
+parallel surfaces form an \name{inherent} plate, when they
+are about three to five millimeters apart. After we found
+all \name{inherent} plates, we construct plates from the
 remaining surfaces by \name{extruding} the planar shapes.
 Then we connect the plates with finger joints where they
-touch each other. Figure~\ref{} \note{add fingerjoint
-  figure} shows plates connected with finger joints.
-Figure~\ref{} \note{pipeline steps, like dustin figure}
-depicts the important \class{PipelineSteps} of the
-\name{Plate Method}.
+touch each other. Figure~\ref{fig:model-fingers} shows
+plates connected with finger joints.
+Figure~\ref{fig:overview-plate-steps} depicts the important
+\class{PipelineSteps} of the \name{Plate Method}.
+\note{remake this figure with our steps}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-box-fingers}
+  \caption{A model built from plates, connected with finger
+    joints.}
+  \label{fig:model-fingers}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1\textwidth]{03-architecture-pipeline-steps-overview}
+  \caption{An overview of computation steps that are applied
+    to the model, so that it can be built from plates..}
+  \label{fig:overview-plate-steps}
+\end{figure}
+
 
 \note{ref to chapters which explain the algorithms to that
   method in detail}
 
 \paragraph{Stacked Plates Method}
 
-This {\fabmethod} does volume reconstructions of the input
-model. We stack plates onto each other to approximate the
-shape of the original model, see Figure~\ref{} \note{add
-  figure stacked model}. This preserves the look and feel of
-the model. We slice the model into equally thick layers,
-which form the plates. The plates are then connected via
-shafts to simplify the assembly process.
+This \class{\fabmethod} does volume reconstructions of the
+input model. We stack plates onto each other to approximate
+the shape of the original model, see
+Figure~\ref{fig:stacked-rabbit}. This preserves the look and
+feel of the model. We slice the model into equally thick
+layers, which form the plates. The plates are then connected
+via shafts to simplify the assembly process.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-rabbit-stacked}
+  \caption{A rabbit model converted to plates with
+    stacking.}
+  \label{fig:stacked-rabbit}
+\end{figure}
 \note{ref to chapters which explain the algorithms to that
   method in detail}
 
@@ -607,63 +902,133 @@ shafts to simplify the assembly process.
 
 This is an advanced conversion approach, combining intense
 mesh analysis and sophisticated construction techniques of
-known geometries. This {\fabmethod} will be more robust when
-converting models with noisy mesh data, e.g {\threedmodel}s
-with lots of texture on their surface. We analyze the model
-for primitive geometries using random algorithms. Primitive
-geometries are planes, prisms, boxes, cylinders or spheres.
-The model is structured into an hierarchical graph
-structure, similar to a scene graph, consisting of these
-primitive geometries only. For each of these primitives we
-know a conversion approach to plates, which will then give
-better results for the conversion of the whole input model.
-The \name{Classifier Method} is a proposal and still work in
-progress. We can currently classify a subset of the
-primitive geometries. Figure~\ref{} \note{add figure with
-  classifiers} shows the classification of a cylinder in a
-model. In Chapter~\ref{} \note{ref the chapter!} we give
-details about the random algorithm, which classifies the
-primitives.
+known geometries. This \class{\fabmethod} will be more
+robust when converting models with noisy mesh data, e.g
+{\threedmodel}s with lots of texture on their surface. We
+analyze the model for primitive geometries using random
+algorithms. Primitive geometries are planes, prisms, boxes,
+cylinders or spheres. The model is structured into an
+hierarchical graph structure, similar to a scene graph,
+consisting of these primitive geometries only. For each of
+these primitives we know a conversion approach to plates,
+which will then give better results for the conversion of
+the whole input model. The \name{Classifier Method} is a
+proposal and still work in progress. We can currently
+classify a subset of the primitive geometries.
+Figure~\ref{fig:tiki-cylinder} shows the classification of a
+cylinder in a model. In Chapter~\ref{} \note{ref the
+  chapter!} we give details about the random algorithm,
+which classifies the primitives.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{03-architecture-tiki-cylinder}
+  \caption{A classified cylinder in a model with textures.
+    The yellow points, show the outline of the actual model.}
+  \label{fig:tiki-cylinder}
+\end{figure}
 
 \paragraph{}
 
 \note{summary}
 
-\subsubsection{Pipeline Steps Compute Immutable State}
-\note{rework that heading}
+\subsubsection{Pipeline Steps Compute Cloneable State}
 
-\note{fabmethod thingy is not clear...}
-\note{pipeline executes steps...}
-Each {\fabmethod} assembles a \class{Pipeline} from
-\class{PipelineSteps}. We call the state of a data structure
-taken at a given point in time a snapshot. To improve the
-development and debugging experience, we not only pass the
-results of the \class{PipelineStep} to the following step,
-but we also preserve a snapshot of the data. A snapshot of
-the computed data is used to render a visual representation
-of the data. The visual representation gives a clear
-understanding of the data and thus enhances the development
-and debugging experience. In this section we explain how the
-\class{Pipeline} processes the results of
-\class{PipelineSteps} and takes snapshots of the data. Note,
-that the \class{PipelineSteps} are merely computation units.
-All visual output is done in the \name{NodeVisualizer}
-plugin.
+Each \class{\fabmethod} assembles a \class{Pipeline} from
+\class{PipelineSteps}. \class{PipelineSteps} work on the
+data of previous computation steps and pass the data to the
+next compution steps. To improve the development and
+debugging experience, we not only pass the results of the
+\class{PipelineStep} to the following step, but we also
+preserve a snapshot of the data. We call the state of a
+given data structure at a given point in time a snapshot. A
+snapshot of the computed data is used to render a visual
+representation of the data. The visual representation gives
+a clear understanding of the data and thus enhances the
+development and debugging experience. In this section we
+explain how the \class{Pipeline} takes snapsots of the
+results of \class{PipelineSteps}. Note, that the
+\class{PipelineSteps} are merely computation units. All
+visual output is done in the \name{NodeVisualizer} plugin.
 
-\note{pipeline runs pipeline steps... or maybe have this in
-  the fabmethod section}
-
-
-As the algorithms of different \class{PipelineSteps} work
-with same data structures, we have to create copies of the
-data. Otherwise a latter \class{PipelineStep} will alter the
-data in the snapshot of a previous \class{PipelineStep}.
-Thus, the \name{NodeVisualizer} plugin renders corrupted
-visuals for the previous step. Figure~\ref{} \note{figure of
-corrupted shapes vs noncorrupted shapes} shows how the
-surface reconstruction step, which comes early in the
+When we take a snapshot of the results of a
+\class{PipelineStep}, we ensure, that modifications of a
+latter \class{PipelineStep} will not alter the data in the
+snapshot of a previous \class{PipelineStep}. Otherwise, the
+\name{NodeVisualizer} plugin renders corrupted visuals for
+the previous step. Figure~\ref{fig:corrupt} shows how the surface
+reconstruction step, which comes early in the
 \class{Pipeline}, is effected by the creation of finger
 joints.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[a]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{03-architecture-box-shapes}
+    \caption{The shapes of a box.}
+    \label{fig:corrupt:shapes}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{03-architecture-box-shapes-with-fingers}
+    \caption{Corrupted shapes of a box, showing the finger joints.}
+    \label{fig:corrupt:shapes-fingers}
+  \end{subfigure}
+  \begin{subfigure}[c]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{03-architecture-box-fingers}
+    \caption{A box with finger joints.}
+    \label{fig:corrupt:fingers}
+  \end{subfigure}
+  \caption{Modifications to shallow copies of the data
+    corrupt the visualizations.}
+  \label{fig:corrupt}
+\end{figure}
+
+We create deep copies of the data structures, to persist the
+data of the snapshots. A deep copy of a data structure, is a
+clone of all fields of that data structure. That means if a
+data structure references dynamically allocated memory, we
+do not clone the reference of the allocated memory to the
+copy of the data structure. Instead, we allocate new memory
+and duplicate the data to the newly allocated memory. Thus,
+we make sure modifications on the copy do not alter the
+original. Listing~\ref{lst:deep-copy} shows the effects of a
+deep copy.
+
+\begin{listing}[h]
+\begin{minted}[
+linenos
+]{coffeescript}
+data = createDynamicMemoryWith('foo')
+copy = data.copy()
+
+# both structures have the same copied data
+data.dynamicMemory # = foo
+copy.dynamicMemory # = foo
+
+# alter the dynamically allocated memory
+changeFooToBar(copy.dynamicMemory)
+
+# a shallow copy will effect both,
+# the data and the copy
+copy.dynamicMemory # = bar
+data.dynamicMemory # = bar
+
+# a deep copy prevents this effect
+data = createDynamicMemoryWith('foo')
+deepCopy = data.deepCopy()
+
+data.dynamicMemory # = foo
+copy.dynamicMemory # = foo
+
+changeFooToBar(copy.dynamicMemory)
+
+copy.dynamicMemory # = bar
+data.dynamicMemory # = foo
+\end{minted}
+\caption{A {\coffeescript} example showing the effects of a deep copy
+  of data.}
+\label{lst:deep-copy}
+\end{listing}
 
 % - needs-figure, needs-ref :: Immutable PipelineState
 % allows timetravel visual debugging
@@ -674,20 +1039,23 @@ encapsulated in a \class{PipelineState}. The
 ever to be computed by all \class{PipelineSteps}. It is
 essentially a container for every computation result.
 
-The \class{PipelineState} is an clonable data structure. A
-cloneable data structure can be copied, so that any changes
-to the copy will not affect the original and vice-versa.
+A snapshot is obtained by cloning the \class{PipelineState}
+after the execution of a \class{PipelineStep}. The
+\class{PipelineState} is an clonable data structure. A
+cloneable data structure can be copied. We provide a deep
+copy for the \class{PipelineState}, so that any changes to
+the copy will not affect the original and vice-versa.
 Figure~\ref{} \note{steps and snapshots flow} illustrates
 how snapshots are obtained between two
 \class{PipelineSteps}. The encapsulated data in the state
-can be hierarchical and complex. By providing a fully
-cloneable data structure, we ensure that modifications to
-the data by latter \class{PipelineSteps} do not modify
-previous copies of the data. A snapshot is obtained by
-cloning the \class{PipelineState} after the execution of a
-\class{PipelineStep}.
+can be hierarchical and complex. We provide a fully
+cloneable data structure. That means, any nested data
+structure in the \class{PipelineState} implements a
+cloneable interface and supports deep copies. Thus, we
+ensure that modifications to any nested data by latter
+\class{PipelineSteps} do not modify previous copies of the
+data.
 
-\note{Subsection summary}
 
 % \item Pipeline Implementation
 
@@ -716,13 +1084,41 @@ cloning the \class{PipelineState} after the execution of a
 \subsection{The Client Package Connects All Features Into an
   Application}
 \label{sec:client-to-application}
-
+\note{concrete heading: platener instead of application}
 
 % - Subsection overview
 
+This section describes the code packages of {\platener}.
+Furthermore, we explain the how {\convertify} is used by
+{\platener} and how the user interface is connected to the
+\class{Plugins}.
 
 %     - needs-figure :: Application is separated into
 %     Packages
+
+
+\begin{figure}
+  \includegraphics[width=1\columnwidth]{03-architecture_overview_current}
+  \caption{Main Packages of the Platener Architecture}
+  \label{fig:architectureOverviewCurrent}
+\end{figure}
+
+{\platener} is divided into the code packages {\convertify},
+\name{Plugins} and \name{Client}.
+Figure~\ref{fig:architectureOverviewCurrent} shows the
+package diagram. Each package takes over a set of distinct
+responsibilities.
+
+\note{too generic here?}
+
+The {\convertify} package is a framework, providing a
+rendering engine and plugin management. The \name{Plugins}
+package provides an exchangeable set of features for the
+WebGL scene. The \name{Client} package gives the look and
+feel of {\platener}. This package contains frontend
+components, which make up the {\userinterface}. Also, a
+\class{Dispatcher} is implemented in this package,
+configuring the communication of plugins.
 
 %     - needs-figure :: Client code connects all plugin
 %     features with a user interface
@@ -730,6 +1126,7 @@ cloning the \class{PipelineState} after the execution of a
 %     - Use Framework to wire up everything, but not part of the
 %       framework (Bundle and Protocols come in handy, Client code
 %       implements a Dispatcher instance = the mediator)
+
 %     - We have a WebApp and a Server package, which are both Client
 %       code, because we have two types of applications
 %     - the WebApp is an online service deployed for use by Makers
@@ -755,6 +1152,199 @@ cloning the \class{PipelineState} after the execution of a
 %      - Subsubsection summary
 
 
+% \subsection{Package Responsibilities}
+
+%  ensuring decoupled
+% components. Thus a flexible, maintainable system is created.
+
+% \emph{Convertify} provides generic tools which support plugins in manipulating
+% {\threedmodel}s. This includes utilities for vector analysis as well as
+% rendering routines and scene management. The application lifecycle can be
+% initiated and observed via a \emph{Bundle}. A Bundle represents an instance of
+% the application's computation unit. The Client and Server packages run a Bundle.
+
+% \emph{Plugins} provide an exchangeable set of features which are used by the
+% Client and Server package. A Plugin interacts with the Scene and its
+% {\threedmodel}s via lifecycle events. E.g. a concrete conversion strategy
+% provided by Platener is implemented by a single Plugin. Plugin features can be
+% enabled for Client, Server or both.
+
+% The \emph{Client} package gives the look and feel of the application. This
+% package contains frontend components. The developer can choose any template
+% engine\footnote{\url{http://www.sitepoint.com/overview-javascript-templating-engines/}}
+% which serves the application's purpose. So the Client wires up the
+% {\userinterface} and the computation logic.
+
+% The \emph{Server} package is the headless\footnote{A headless web-application
+%   runs without the graphical user interface of browsers.} counterpart to the
+% Client package. A Command Line Interface enables the user to run the application
+% without a browser. The Server also satisfies requests from the Client, such as
+% caching and loading models in a RESTful
+% interaction\footnote{\url{http://www.drdobbs.com/web-development/restful-web-services-a-tutorial/240169069}}.
+
+% % \begin{itemize}
+% % \item convertify: generic tools, helpers for 3d rendering, scene management,
+% %   model manipulation, platener independent
+% % \item client: look and feel, ux user interactions, wiring up/ firing up
+% %   computations, implemented for platener
+% % \item server: model storage/ cache, REST interaction, headless version of
+% %   client, CLI-tool chain, implemented for platener
+% % \item plugins: conversion specific computation and logic units, addons for
+% %   frontend and backend, platener independent
+% % \end{itemize}
+
+
+% \subsection{Decoupling the Software into Packages}
+
+% Decoupling the software into packages builds a robust system. Computation logic
+% and UX components are kept apart, which allows isolated testing.
+
+% \subsubsection{Dispatcher and Bundle on Client and Server}
+
+% \myNotes{maybe put this up, so we understand earlier what the ClientDispatcher
+%   is}
+
+% The Server and Client package handle lifecycle events differently and use
+% different protocols. That is because the Client package has to handle rendering
+% and user interaction. The Server package merely computes the manipulated models
+% and is used for batch processing of {\threedmodel}s. Therefore, we need two
+% Dispatcher implementations for the client and for the server.
+
+% A Bundle is the entry point for any client or server code. As the name
+% indicates, a Bundle bundles all application code into a single instance. It
+% references the specific \emph{ClientDispatcher} or \emph{ServerDispatcher},
+% which are implemented in the Client or Server package respectively. Thus we can
+% control the system by invoking protocol interfaces. The ClientBundle is exposed
+% to the Client package. The ServerBundle is exposed to the ServerPackage.
+
+% \section{Client Package}
+% % ************************************************
+
+% \subsection{Overview - Custom Frontend Code}
+
+% \begin{itemize}
+% \item when convertify framework, client is freespace to evolve yaself
+% \item look and feel of the application
+% \item task: connect logic to ui (speak with dispatcher) and build ui
+% \item free choice of frontend framework (we take redux + react), but nothing
+%   against jquery or angular or backbone or ...
+% \item e.g. laser origami or brickify would choose a completely different
+%   implementation of client -> custom per application
+% \item react by facebook, redux by dan abramov, like flux architecure -> uni
+%   directional dataflow, explicit state changes, data driven -> reduce side
+%   effects and be efficient in coding and trace down errors easily
+% \item \myNotes{diagram which shows benefits of flux architecture vs no flux
+%     arch, look at intro vids for redux from dan abramov}
+% \end{itemize}
+
+% \subsection{React Templates}
+
+% \begin{itemize}
+% \item show html tree graph and how data communication goes wild when talking
+%   with siblings
+% \item ideally dumb components (dont know where data is coming from, just display
+%   it)
+% \item stateless, components directory
+% \item WIP: before no redux, so there are some mixed up components left :S
+% \item show short example how a dump component looks like, \myNotes{listing!}
+% \end{itemize}
+
+% \subsection{Redux Data-driven Control Flow}
+
+% \begin{enumerate}
+% \item Redux `dispatch` and state
+%   \begin{itemize}
+%   \item one state container
+%   \item functional, no side effects
+%   \item maybe copy or reference redux description (just explain why its awesome)
+%   \item injected into react via context
+%   \end{itemize}
+
+% \item Smart Containers
+%   \begin{itemize}
+%   \item connect to state
+%   \item containers know where data is from (vs dump components)
+%   \item fitler and preprocess raw data, setup interaction events to trigger
+%     actions
+%   \item give data and callbacks to a component (they setup the actual ui, but
+%     contain no visible elements themselves)
+%   \item \myNotes{listing show how to connect and use component from other
+%       listing}
+%   \end{itemize}
+
+% \item Manage Async Plugin Hell
+%   \begin{itemize}
+%   \item as described before, plugin data is not available on load
+%   \item we can use Dispatcher and redux dispatch combined
+%   \item protocols -> state change in plugins -> dispatch -> state change in
+%     frontend
+%   \item no polling or observing of data, fully reactive (system -> client communication)
+%   \item as client has access to bundle, we can call interfaces exposed by
+%     protocols (client -> system communication)
+%   \end{itemize}
+% \end{enumerate}
+
+% \section{Server Package}
+% % ************************************************
+
+% \subsection{Overview - Custom Server Code}
+
+% \begin{itemize}
+% \item like client, can have custom implementations
+% \item we have caching and cli (headless version of application)
+% \item requires isomorphic code: execute on client and server equally
+% \item \myNotes{isomorphic means...}
+% \item threejs, polyfills, \myNotes{...}
+% \end{itemize}
+
+% \subsection{Model Cache}
+
+% \begin{itemize}
+% \item idea: build up repository of models when users interact with it
+% \item taken from brickify: uploading meshlib version of model
+% \end{itemize}
+
+% \subsection{Test Pipeline}
+
+% \begin{enumerate}
+% \item WHY do we have a Test Pipeline?
+%   \begin{itemize}
+%   \item robustness tests
+%   \item batch processing
+%   \item headless version for integration with other projects
+%   \item failure detection because of diversity of objects
+%   \end{itemize}
+
+% \item Headless Conversion of Objects
+%   \begin{itemize}
+%   \item run solutionselection plugin also
+%   \item but dispatcher is setup a bit differently
+%   \item no recomputation, no grid, no visualizer
+%   \item scene manager will not render anything (unless, WIP we exchange webgl
+%     rendering with headlessgl to produce screenshots of each conversion)
+%   \item cli tool -> safe results into directories
+%   \end{itemize}
+
+% \item Reports
+%   \begin{itemize}
+%   \item = extended console logs
+%   \item show how conversion was going
+%   \item display failures, status, progress
+%   \item in the end: sum up + give stats
+%   \item WIP: current problems: not all conversions are garbage collected
+%     correctly, will run out of memory after some conversions -.- (maybe nobody
+%     has to know about that)
+%   \end{itemize}
+
+% \item Benchmarks
+%   \begin{itemize}
+%   \item xxx testmodels
+%   \item we proposed mostly stacked as the best solution
+%   \item too many arbitrary forms hindered plate conversion
+%   \item just shows conversion stats (maybe all models vs box category only)
+%   \item \myNotes{measure times for conversions and evaluate}
+%   \end{itemize}
+% \end{enumerate}
 
 \iffalse
 

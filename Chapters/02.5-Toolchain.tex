@@ -31,6 +31,24 @@
 
 \section{Technologies and Libraries}
 
+
+\note{when intro of WebGl here, than give a footnote, else
+  put into introduction}
+
+We use the Web Graphics Library (WebGL), because we want our
+rendering results to have sophisticated visual effects. With
+the use of WebGL we can process data on the GPU and execute
+special effects code (shader code) in
+web-browsers~\cite{mdn-webgl}.
+
+On top of WebGL we use
+{\threejs}\footnote{\url{http://threejs.org}}. {\threejs} is
+a {\javascript} library, which wraps the WebGL API to make
+the usage of WebGL simpler. It provides a scene graph
+implementation. {\threejs} data representations are used
+throughout {\convertify}.
+
+
 \begin{itemize}
 \item web service -> necessarily javascript
 \item coffeescript preprocessing, no es6 because previous code base

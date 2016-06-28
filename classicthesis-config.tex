@@ -16,6 +16,15 @@
 \usepackage{subcaption}
 \expandafter\def\csname ver@subfig.sty\endcsname{}
 
+
+\usepackage{fancyvrb}
+\usepackage{setspace}
+
+
+\newenvironment{CVerbatim}
+ {\singlespacing\center\BVerbatim}
+ {\endBVerbatim\endcenter}
+
 \usepackage[utf8]{inputenc}
 
 % ****************************************************************************************************
@@ -182,7 +191,8 @@ Lukas Wagner
         \usepackage{graphicx}
         \DeclareGraphicsExtensions{.pdf,.png,.jpg,.ai}
     \DeclareGraphicsRule{.ai}{pdf}{.ai}{}
-\graphicspath{{Images/}{../Images/}}
+    \graphicspath{{Images/}{../Images/}}
+    \usepackage{svg}
 
 % ********************************************************************
 % Setup the style of the backrefs from the bibliography
