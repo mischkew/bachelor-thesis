@@ -114,11 +114,21 @@ We usually use fingerjoints for acrylic and wood.
 
 \subsection{adjusting fingerjoints length when plates are angled}
     \paragraph{adjustJointHeight}
-    Not only the width has to be adjusted but also the height needs to be adapted to the plates connection. Depending on the angle of the plates the joints need to be longer or shorter accordingly unless the angle is 90. With an angle of 90 the height is simply the thickness of the plates. \\
-    Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. \\
-    \TODO{verify the height computation and provide image}\\
-    Something weird happened: I seem to have dismissed dustins calculations and try to use trigonometry. But either i cannot find the triangle i was working with or the angle in the triangle is not necissarily the angle between the plates!! Figure that out!! And make image of the trigonomety if it was correct (I remember to have done stuff on tinkercad to come to the idea maybe that helps)\\
-    I really believe that I was working with a wrong angle and that this angle would be 90-alpha when alpha is smaller than 90 degrees but i dont know how to get the other angle...\\ maybe just take dustins calculations.
+    Not only the width has to be adjusted but also the height needs to be adapted to the plates connection. Depending on the angle of the plates the joints need to be longer or shorter accordingly.\\
+    This problem can be solved by using trigonometry within the geometry of the overlap of the plates.\\
+    If the plates overlap they always create a parallelogram. The length of the long diagonal is the key to finding the appropriate length for the joints.\\
+    \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-newJointHeight1.jpg}\\
+    We have already calculated the angle between the plates earlier and can now use it to find the lengths a and b by the help of trigonometry:\\
+    $$ a = t_1 / sin(180 - \alpha)$$
+    $$ b = t_2 / sin(180 - \alpha)$$\\
+    \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-newJointHeight2.jpg}\\
+    This helps us to calculate the length of the diagonal:
+    $$ d = \sqrt{a^2 + b^2 - 2ab * cos(\alpha)}$$
+    Finally, the triangle which helps us retrieve the length for the fingerjoints can be constructed. \\
+    \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-newJointHeight3.jpg}\\
+    $$ jointHeight = \sqrt{e^2 - a^2} $$
+    
+    
 
 \section{Alternative solutions / related work}
     \begin{itemize}
@@ -129,6 +139,8 @@ We usually use fingerjoints for acrylic and wood.
         By coloring a part in the svg-file in a gradient from white to black this part will be cut in an angle. The more white the less power.
         \item other joint type: pettis joint (fingerjoint with screws)
         \item slot joinery technique when overlapping plates had to be rejoined
+        \item Wrong fingerjoint height adjustment:\\
+        Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. \\
     \end{itemize}
     
     

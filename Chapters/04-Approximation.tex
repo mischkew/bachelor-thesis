@@ -375,7 +375,11 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \subsubsection{Bucket System}
 
-The surface normals are sorted into buckets. Threshold $\phi$
+The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$ whose \myNotes{(whose ist falsch, was muss da hin?)} calculation is explained later in this text.
+
+\begin{equation*}
+    \vec{n} = \colvec{3}{x}{y}{z}
+\end{equation*}
 
 \myNotes{TODO: buckets sind minimal größer als threshold...}
 
@@ -417,15 +421,14 @@ _normalInHemisphere: (normal) ->
 \end{figure}
 
 
-This hemisphere is separated into rings. Each ring covers the threshold angle in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. The correlating angle $\alpha$ of a normal $(x, y, z)$ which is used to determine the ring index is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}:
+This hemisphere is separated into rings. Each ring covers the threshold angle $\phi$ in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. Each normal is sorted into a ring by its correlating angle $\alpha$ which is used to determine the ring index. It is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}: the angle between $\vec{n}$ and $(x,y,0)$:
 
 \begin{equation*}
-    \sin{\alpha} = \frac{z}{ \sqrt{x^{2} + y^{2}} }
+\begin{split}
+    \sin{\alpha} & = \frac{z}{ \sqrt{x^{2} + y^{2}} } \\
+    => \alpha  & = \arcsin{ \frac{z}{ \sqrt{x^{2} + y^{2}} } }
+\end{split}
 \end{equation*}
-
-with \\
-$ x, y, z := $ normal coordinates\\
-$ \alpha := $ angle between normal and $(x, y, 0)$\\
 
 
 The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to get the actual ring index $I_{Ring}$:
@@ -439,11 +442,6 @@ The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to
                 }
 \end{equation*}
 
-with \\
-$I_{Ring} := $ ring index \\
-$ x, y, z := $ normal coordinates \\
-$ \phi := $ bucket threshold \\
-
 The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
 
 \begin{equation*}
@@ -453,35 +451,51 @@ The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring i
                   }
 \end{equation*}
 
-with \\
-$I_{MaxRing} := $ maximum ring index \\
-$ \phi := $ bucket threshold \\
 
 
 The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends on index and threshold:
 
 \begin{equation}
 \label{equ:AlphaIRing}
-    {\alpha}_{I_{Ring}} = (I_{Ring} + 0.5) * \phi
+    {\alpha}_{I_{Ring}} = (I_{Ring} + 0.5) * \phi \qquad \forall{ I_{Ring} \in [0, I_{MaxRing}] }
 \end{equation}
 
-with \\
-asdfasdf\\
 
 
-Figure \myNotes{figure einzusetzen} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$:
+Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value of $\vec{a}_{I_{Ring}}$.
+
+\begin{figure}
+    \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
+    \caption{middleZ}
+    \label{fig:middleZ}
+\end{figure}
+
+\begin{equation}
+\label{equ:VecX}
+    \vec{v}_{x} = (1, 0, 0)
+\end{equation}
+
+\begin{equation}
+\begin{split}
+    \label{equ:VecA}
+    \vec{a}_{I_{Ring}} = (x_{a}, 0, z_{I_{Ring}}) \qquad  & \forall{ I_{Ring} \in [0, I_{MaxRing}] } \\
+    & with \vert \vec{a}_{I_{Ring}} \vert = 1
+\end{split}
+\end{equation}
 
 \begin{equation}
     \label{equ:XA}
-    \cos{{\alpha}_{I_{Ring}}} = \frac{ \colvec{3}{1}{0}{0} * \colvec{3}{x_{a}}{0}{z_{I_{Ring}}} }{ \vert \colvec{3}{1}{0}{0} \vert * \vert \colvec{3}{x_{a}}{0}{z_{I_{Ring}}} \vert } = \colvec{3}{1}{0}{0} * \colvec{3}{x_{a}}{0}{z_{I_{Ring}}}
-    = x_{a}
+    \cos{{\alpha}_{I_{Ring}}} = \frac{ \vec{v}_{x} * \vec{a}_{I_{Ring}} }{ \vert \vec{v}_{x} \vert * \vert \vec{a}_{I_{Ring}} \vert }
+    \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} \vec{v}_{x} * \vec{a}_{I_{Ring}}
+    \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} x_{a}
 \end{equation}
 
 \begin{equation}
 \label{equ:ZIRing}
 \begin{split}
-    1 = \vert \colvec{3}{x}{0}{z_{I_{Ring}}} \vert = \sqrt{ x^{2} + z_{I_{Ring}}^{2} } \\
-    => z_{I_{Ring}} = \sqrt{1 - x^{2}} = \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
+    1 & = \vert \vec{a}_{I_{Ring}} \vert \stackrel{(\ref{equ:VecA})}{=} \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } \\
+    => z_{I_{Ring}} & = \sqrt{1 - x_{a}^{2}} 
+    \stackrel{(\ref{equ:XA})}{=} \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
 \end{split}
 \end{equation}
 
@@ -502,10 +516,7 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
 \end{figure}
 
 
-\begin{equation}
-    \label{equ:VecA}
-    \vec{a} = (x_{a}, 0, z_{I_{Ring}})
-\end{equation}
+
 
 \begin{equation}
     \label{equ:VecAStrich}
@@ -552,13 +563,32 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
     \stackrel{(\ref{equ:XA})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
     & \stackrel{(\ref{equ:ZIRing})}{=} \frac{ \cos{\phi} - ( 1 - cos^{2}{{\alpha}_{I_{Ring}}} ) }{ \cos^{2}{{\alpha}_{I_{Ring}}} }
     = \frac{ \cos^{2}{{\alpha}_{I_{Ring}}} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } + \frac{ \cos{\phi} - 1 }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
-    & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} }
+    & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } \\
+    => \gamma & = \arccos{( 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } )}
 \end{split}
 \end{equation}
 
+\begin{equation}
+\begin{split}
+    \cos{\beta} & = \frac{\vec{n}' * \vec{v_{x}'}}{|\vec{n}'| * |\vec{v_{x}'}|} = \frac{x}{\sqrt{x^{2} + y^{2}}} \\
+    => \beta & = \begin{cases}
+        \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y \geq 0 \\
+        2 \pi - \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y < 0
+    \end{cases}
+\end{split}
+\end{equation}
+
+da jetzt nur halbkreis, check auf y
+
+\begin{equation}
+    I_{Bucket} = \floor{\frac{\beta}{\gamma}}
+\end{equation}
+
+\begin{equation}
+    I_{MaxBucket} = \floor{\frac{2 \pi}{\gamma}}
+\end{equation}
 
 \myNotes{TODO: Beta berechnen erklären}
-
 
 
 
