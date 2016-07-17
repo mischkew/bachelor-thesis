@@ -160,6 +160,7 @@ If we now have a look at only the inner intersections of plates in a model we ca
 we wanted the graph to be easily traversable by being able to access all nodes and all connections.\\
 
 \subsection{Dustin: how he did it}
+Dustin used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Those indeces were corresponding to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.
 \subsection{Dustins wrong/not specified angles}
 he didnt actually specify how he calculated the angles...
 \subsection{Down sides}
