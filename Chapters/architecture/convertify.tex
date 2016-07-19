@@ -1,37 +1,50 @@
-\documentclass[../03-Architecture.tex]{subfiles}
+\documentclass[../../ClassicThesis.tex]{subfiles}
 \begin{document}
+
+\note{cross-platform/ headless capabilites chapter missing - then we
+  can introduce the separated client/ server package in the platener
+  chaper}
 
 \section{Convertify}
 \label{sec:framework-convertify}
 
 In this section we present {\convertify}, a web-framework for working
-with {\threedmodel}s. {\convertify} consists of three code packages:
-the {\convertify} package, a plugins package and a client package.
-Figure~\ref{fig:platener-package-diagram} shows a package diagram.
+with {\threedmodel}s. {\convertify} consists of three code packages: a
+frontend package, a backend package and a common package.
+Figure~\ref{fig:platener-package-diagram-overivew} shows a package
+diagram. The common package provides utilities that can be used by
+frontend and backend applications. Such utilities are maths helpers or
+the plugin manager. Secondly, there are two packages which integrate
+with either frontend or backend applications that use {\convertify}.
+The frontend package contains components for rendering and scene
+management. The backend packages provides similar components, which
+work without a DOM-tree. Thus, backend packages can be run in
+{\nodejs} and do not require a browser environment, see
+Section~\ref{sec:convertify-is-isomorphic}. The plugins package and
+the client package are not part of the {\convertify} framework. These
+packages are implemented by an application like {\platener}, which is
+based on {\convertify}. The plugins package provides an exchangeable
+set of features. A plugin interacts with the scene and its
+{\threedmodel}s via lifecycle events. The client package gives the
+look and feel of the application. This package contains frontend
+components. The client wires up the {\userinterface} and the
+computation logic.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=1\textwidth]{03-architecture-package-diagram}
+  \includegraphics[width=1\textwidth]{03-architecture-package-diagram-overview}
   \caption{Packages of {\convertify}}
-  \label{fig:platener-package-diagram}
+  \label{fig:platener-package-diagram-overview}
 \end{figure}
 
 We will explain core features of {\convertify} in
-Section~\ref{sec:convertify-core-features.}. Then we will dive into
+Section~\ref{sec:convertify-core-features}. Then we will dive into
 its plugin system in Section~\ref{sec:plugin-system}. {\convertify} is
-based on previous work by \citeauthor{brickify-thesis}. We will give a
+based on previous work by \citeauthor{bachelor-thesis}. We will give a
 short comparison of their work with {\convertify} in
 Section~\ref{sec:brickify-comparison}. We elaborate on the client
 package when we talk about our application {\platener} in
 Section~\ref{sec:application-platener}.
-
-
-% We explain the work and
-% concepts of \citeauthor{brickify-thesis} in
-% Section~\ref{sec:based-brickify}. Then we outline, how we
-% incorporated the previous work into {\convertify} in
-% Section~\ref{sec:reuses-brickify} and
-% Section~\ref{sec:plugin-system}.
 
 \subsection{Introduction to the Core System of {\convertify}}
 \label{sec:convertify-core-features}
@@ -82,7 +95,7 @@ these classes relate.
 Though \class{Nodes} represent entities in the scene of
 {\convertify}, only {\threejs} objects can actually be
 rendered. Such {\threejs} objects are instances of
-\class{THREE.Object3D}\footnote{\url{http://threejs.org/docs/#Reference/Core/Object3D}}.
+\class{THREE.Object3D}\footnote{\url{http://threejs.org/docs/\#Reference/Core/Object3D}}.
 This is a generic object, which can be rendered into a WebGL
 scene. These \class{THREE.Object3D} will be displayed on the
 screen. The scene graph of {\threejs} is not flat. A
@@ -118,14 +131,15 @@ transforms are thereby applied to the {\threejs} entities.
 \subsubsection{Convertify Emits System Events}
 \label{convertify-emits-events}
 
-During the loading and render process, {\convertify} emits
-system events. A system event notifies subscribers about
-changes of the state of {\convertify} during its lifecycle.
-Such changes can be touch or pointer interactions with
-rendered models in the scene (\name{onPointerEvent}) or
-change events to the scene graph (\name{onNodeAdd},
-\name{onNodeRemove}). Figure~\ref{lifecycle} shows the full
-lifecycle and event loop of {\convertify}.
+During the loading and render process, {\convertify} emits system
+events. A system event notifies subscribers about changes of the state
+of {\convertify} during its lifecycle. Such changes can be touch or
+pointer interactions with rendered models in the scene
+(\name{onPointerEvent}) or change events to the scene graph
+(\name{onNodeAdd}, \name{onNodeRemove}). Figure~\ref{fig:lifecycle} shows
+the full lifecycle and event loop of {\convertify}. Events concerning
+the scene management will have the \class{Node} as payload. Thus,
+other system components can access the \class{Node}.
 
 \begin{figure}[h]
   \centering
@@ -302,7 +316,8 @@ scene. Any full fledged application implements a set of
 conversion strategy provided by {\platener} is implemented by a single
 \class{Plugin}, the \name{PlatenerPipeline} plugin.
 Figure~\ref{fig:plugin-constellation} shows our seven plugins and how
-they relate to each other.
+they relate to each other. We give an overview for each plugin in
+Section~\ref{sec:platener-uses-plugins}.
 
 \begin{figure}[h]
   \centering
@@ -361,10 +376,10 @@ integrates with {\convertify} events.
 As {\convertify} manages multiple plugins, which either represent
 computation logic or render components, we have to know exactly when
 each of these plugins will interact with the system. As
-Figure~\ref{plugin-constellation} shows, the dependencies between
+Figure~\ref{fig:plugin-constellation} shows, the dependencies between
 plugins are hard to oversee. We propose a \class{Dispatcher}
 component, behaving similar to the \name{mediator} pattern.
-Figure~\ref{plugin-constellation-with-dispatcher} shows how the
+Figure~\ref{fig:plugin-constellation-with-dispatcher} shows how the
 dependencies between plugins are managed with a \class{Dispatcher}.
 
 \begin{figure}[h]
@@ -380,7 +395,7 @@ interconnections of components. It acts as a communication hub and
 coordinates its clients. The client components are loosely coupled as
 the clients communicate with the mediator instead of communicating
 with each other directly. With a mediator we can model many-to-many
-relationships \cite[p. ?]{gof}.\note{fix citing, lookup page}.
+relationships \cite[p. 273]{gof}.
 % https://sourcemaking.com/design_patterns/mediator
 
 
@@ -410,7 +425,7 @@ To model many-to-many relationships between \class{Plugins} and
 \class{Plugins}, we enhance the \class{Dispatcher} with
 \class{Protocols}. A \class{Protocol} is a mixin implemented by the
 \class{Dispatcher}. A mixin adds functionality to an object by object
-composition\cite{}\note{give a reference for mixins}. In {\javascript}
+composition\cite[p.~81]{js-design-patterns}. In {\javascript}
 we realize this with meta-programming. The \class{Protocol} then
 delegates functionality from the \class{Dispatcher} to a
 \class{Plugin}.
@@ -421,10 +436,10 @@ The delegation pattern achieves the results of multiple inheritance by
 object composition. The delegation pattern speaks of delegating
 objects and delegates. A delegating object calls external
 functionality on a delegate object, which is available through a
-predefined interface \cite{delegation}\note{source for delegation}. In
-our case, the \class{Dispatcher} is the delegating object and the
-\class{Plugin} is the delegate. The \class{Protocol} helps to define
-the interface between the \class{Dispatcher} and a \class{Plugin}. Two
+predefined interface \cite{delegation-pattern}. In our case, the
+\class{Dispatcher} is the delegating object and the \class{Plugin} is
+the delegate. The \class{Protocol} helps to define the interface
+between the \class{Dispatcher} and a \class{Plugin}. Two
 \class{Plugins} now communicate with each other via the
 \class{Dispatcher}. One \class{Plugin} calls functionality on the
 \class{Dispatcher} which was exposed by a \class{Protocol}. The
@@ -438,7 +453,7 @@ shows how the mediator connects two \class{Plugins}.
   \centering
   \includegraphics[width=1\textwidth]{03-architecture-protocol-and-plugin}
   \caption{Plugin~B can use features of Plugin~A by calling functionality of the \class{Protocol} implemented by the \class{Dispatcher}.}
-  \label{fig:protocol-and-plugin.}
+  \label{fig:protocol-and-plugin}
 \end{figure}
 
 When applications grow, it is hard to observe all messaging between
@@ -454,6 +469,63 @@ inter-\class{Plugin} communication.
 
 % - *full fledged applications will implement a mediator to organize
 % feature communication*
+
+\subsubsection{A \class{Bundle} Is the Entry Point for Applications Using {\convertify}}
+\label{sec:bundle-entry-point}
+
+{\convertify} provides a \class{Bundle} instance for its frontend and
+backend packages. A \class{Bundle} is the entry point for
+applications, that use {\convertify}. E.g {\platener} accesses the
+\class{Bundle} of the frontend package to initialize the web app with
+{\convertify}'s WebGL scene. The \class{Bundle} is a controller for
+{\convertify}. It loads models into the system and exposes controls
+for the scene. With this, we can animate the scene programmatically or
+sync the scenes of multiple {\convertify} instances. We need a bundle
+for both, frontend and backend package, because data access is done
+differently in browser environments and {\nodejs}.
+
+In the preceding section, we introduced a \class{Dispatcher}, which
+organizes the communication between plugins and {\convertify}. As
+{\convertify} is a framework, multiple applications can be realized
+with it. Now, every application wants to organize its plugins and
+event handlers differently. That is why, each application implements
+its own \class{Dispatcher} instance. The \class{Bundle} can be
+configured with such a \class{Dispatcher}.
+Figure~\ref{fig:bundle-dispatcher} shows how the \class{Bundle} in the
+context of an application.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.1\columnwidth]{03-architecture-bundle-dispatcher}
+  \caption{A \class{Bundle} is configured with a \class{Dispatcher}.}
+  \label{fig:bundle-dispatcher}
+\end{figure}
+
+% whats a bundle
+% bundle class
+
+% have it for frontend/ backend package (because loading files etc. is different in browser/ nodejs)
+% entry point, initialized with a dispatcher. dispatchers are written in application code.
+% so convertify behavior configured via bundle through custom dispatcher.
+
+% why have a bundle?
+
+% give controller for convertify eco system, used by applications, e.g platener
+% easy customization -> e.g. synching scenes of multiple instances of convertify -> animations/ controls/ loaded models
+
+
+\subsection{{\convertify} is a cross-platform isomorphic framework}
+\label{sec:convertify-is-isomorphic}
+
+\note{explain crossplatform}
+\note{same fro cross as for isomoprhic...}
+
+
+\note{explain isomorphic = headless}
+\note{explain what convertify can do when isomorphic}
+\note{explain how convertify is isomorphic}
+\note{explain why convertify is isomorphic (pros)}
+
 
 \subsection{{\convertify} is built on {\brickify}}
 \label{sec:brickify-comparison}
@@ -481,4 +553,13 @@ We support cross-platform browsers using WebGL technology. We allow
 mouse and touch interactions with the scene. This enables users to
 interact with {\convertify} from desktop or mobile systems.
 
+\note{could be integrated in other applications when used headless,
+  e.g. 3d editor for laser cutting}
+
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:

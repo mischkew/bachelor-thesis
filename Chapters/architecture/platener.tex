@@ -1,4 +1,4 @@
-\documentclass[../03-Architecture.tex]{subfiles}
+\documentclass[../../ClassicThesis.tex]{subfiles}
 \begin{document}
 
 \section{Platener Is Implemented In {\convertify}}
@@ -31,15 +31,16 @@ the \class{Dispatcher} and the \class{Plugins}.
 \subsection{Platener Uses Plugins to Implement Its Features}
 \label{sec:platener-uses-plugins}
 
-The \class{Plugins} composed into {\platener} provide its
-computation logic and WebgGL scene rendering. We will give a
-brief introduction of each plugin in the following
-paragraphs.
+The \class{Plugins} composed into {\platener} provide its computation
+logic and WebgGL scene rendering. We will give a brief introduction of
+each plugin in the following paragraphs.
+Figure~\ref{fig:plugin-constellation} shows all available plugins of
+{\platener}.
 
 \subsubsection{Platener Pipeline Plugin}
 
 The \name{PlatenerPipeline} plugin does the major work on
-converting {\threedmodels} to 2D-plates. The plugin defines
+converting {\threedmodel}s to 2D-plates. The plugin defines
 multiple conversion approaches. A conversion is an
 approximation of the original model with plates.
 Figure~\ref{fig:conversion:plate} and
@@ -100,12 +101,12 @@ selection of that visualization in the user interface.
 \begin{figure}[h]
   \centering
   \begin{subfigure}[a]{0.48\textwidth}
-    \includegraphics[width=\textwidth]{}
+    \includegraphics[width=\textwidth]{03-architecture-hmd-plates}
     \caption{A head-mounted display, consisting of plates only.}
     \label{fig:steps:plate}
   \end{subfigure}
   \begin{subfigure}[b]{0.48\textwidth}
-    \includegraphics[width=\textwidth]{}
+    \includegraphics[width=\textwidth]{03-architecture-hmd-interface}
     \caption{The selection of the intermediate plate step in
       the user interface.}
     \label{fig:steps:ui}
@@ -119,7 +120,7 @@ selection of that visualization in the user interface.
 We run multiple conversion approaches sequentially. Then, we choose
 the best fitted conversion as output. Thus each conversion
 is scored by a scoring algorithm. This
-\clas{Plugin} provides such scoring algorithms.
+\class{Plugin} provides such scoring algorithms.
 
 \subsubsection{Solution Selection Plugin}
 
@@ -136,7 +137,7 @@ can grasp alignment and dimensions of {\threedmodel}s.
 Figure \ref{fig:architecture_overview_coordinate_system}
 shows the coordinate system in the WebGL view. The
 Coordinate System is taken from \emph{Brickify} as
-is\cite{}\note{ref chapter in brickify}.
+is\cite[p.~92]{bachelor-thesis}.
 
 \begin{figure}
   \includegraphics[width=1\columnwidth]{03-architecture_overview_coordinate_system}
@@ -188,7 +189,7 @@ approaches. We call such a conversion approach
 %A {\fabmethod} is a conversion approach of a {\threedmodel}.
 It defines a linear process of analyzing a {\threedmodel}
 and thereby creates a suitable equivalent of the model,
-consisting of plates only. A \class{\fabrication} method
+consisting of plates only. A \class{\fabmethod}
 divides the conversion problem into smaller problems. Thus,
 it provides a set of algorithms, which are executed
 sequentially. Each algorithm solves a single subproblem. The
@@ -201,7 +202,7 @@ on the face-vertex-mesh of the model. The last
 \class{PipelineStep} returns a directly exportable data
 format, in our case a {\zipfile} containing the
 2D-construction plans. The composition of
-\clas{PipelineSteps} into a \class{Pipeline} is shown in
+\class{PipelineSteps} into a \class{Pipeline} is shown in
 Figure~\ref{fig:pipeline-from-steps}. \class{PipelineSteps}
 are independent from the \class{\fabmethod} and thus, can be
 shared between different \class{{\fabmethod}s}. {\platener}
@@ -210,16 +211,7 @@ present each method briefly.
 
 \begin{figure}[h]
 \centering
-\begin{verbatim}
-- show multiple pipeline steps with inlets/ outlets of
-pipeline state
-- make clear, that a pipeline step is an algorithm, solving
-a sub problem
-- pipeline like a swimming lane, where pipeline steps
-connect
-- a model comes in
-- a construction plan falls out (zip file)
-\end{verbatim}
+\includegraphics[width=1.1\textwidth]{03-architecture-pipeline}
 \caption{A \class{Pipeline} is composed from
   \class{PipelineSteps}}
 \label{fig:pipeline-from-steps}
@@ -227,36 +219,34 @@ connect
 
 \paragraph{Plate Method}
 
-This \class{\fabmethod} does hull and surface
-reconstructions of the input model. We produce a set of
-plates which are connected via finger joints to approximate
-the original {\threedmodel}. Therefore, we first detect the
-outlines of all surfaces in the model. Then, we search for
-existing plates based on that surfaces. For example two
-parallel surfaces form an \name{inherent} plate, when they
-are about three to five millimeters apart. After we found
-all \name{inherent} plates, we construct plates from the
-remaining surfaces by \name{extruding} the planar shapes.
-Then we connect the plates with finger joints where they
-touch each other. Figure~\ref{fig:model-fingers} shows
-plates connected with finger joints.
-Figure~\ref{fig:overview-plate-steps} depicts the important
-\class{PipelineSteps} of the \name{Plate Method}.
-\note{remake this figure with our steps}
+This \class{\fabmethod} does hull and surface reconstructions of the
+input model. We produce a set of plates which are connected via finger
+joints to approximate the original {\threedmodel}. Therefore, we first
+detect the outlines of all surfaces in the model. Then, we search for
+existing plates based on that surfaces. For example two parallel
+surfaces form an \name{inherent} plate, when they are about three to
+five millimeters apart. After we found all \name{inherent} plates, we
+construct plates from the remaining surfaces by \name{extruding} the
+planar shapes. Then, we connect the plates with finger joints where
+they touch each other. Figure~\ref{fig:overview-plate-steps} depicts
+the important \class{PipelineSteps} of the \name{Plate Method} and
+their visualizations.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.6\textwidth]{03-architecture-box-fingers}
-  \caption{A model built from plates, connected with finger
-    joints.}
-  \label{fig:model-fingers}
-\end{figure}
+% Figure~\ref{fig:model-fingers} shows
+% plates connected with finger joints.
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{03-architecture-box-fingers}
+%   \caption{A model built from plates, connected with finger
+%     joints.}
+%   \label{fig:model-fingers}
+% \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=1\textwidth]{03-architecture-pipeline-steps-overview}
   \caption{An overview of computation steps that are applied
-    to the model, so that it can be built from plates..}
+    to the model, so that it can be built from plates.}
   \label{fig:overview-plate-steps}
 \end{figure}
 
@@ -318,7 +308,7 @@ which classifies the primitives.
 
 \note{summary}
 
-\subsubsection{Pipeline Steps Compute Cloneable State}
+\subsubsection{Pipeline Steps Compute Cloneable States}
 
 Each \class{\fabmethod} assembles a \class{Pipeline} from
 \class{PipelineSteps}. \class{PipelineSteps} work on the
@@ -330,22 +320,57 @@ preserve a snapshot of the data. We call the state of a
 given data structure at a given point in time a snapshot. A
 snapshot of the computed data is used to render a visual
 representation of the data. The visual representation gives
-a clear understanding of the data and thus enhances the
-development and debugging experience. In this section we
-explain how the \class{Pipeline} takes snapsots of the
-results of \class{PipelineSteps}. Note, that the
+a clear understanding of the data and thus, enhances the
+development and debugging experience.  Note, that the
 \class{PipelineSteps} are merely computation units. All
 visual output is done in the \name{NodeVisualizer} plugin.
+
+The data, that is passed between the \class{PipelineSteps}, is
+encapsulated in a \class{PipelineState}. The
+\class{PipelineState} contains all data structures that are
+ever to be computed by all \class{PipelineSteps}. It is
+essentially a container for every computation result.
+
+The \class{PipelineState} is a cloneable data structure. A cloneable
+data structure can be copied. When the algorithm of a
+\class{PipelineStep} finishes, the \class{Pipeline} writes the results
+into the \class{PipelineState}. A snapshot is obtained by cloning the
+\class{PipelineState} after the execution of a \class{PipelineStep}.
+Figure~\ref{fig:pipeline-with-snapshots} illustrates how snapshots are
+obtained between the \class{PipelineSteps}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1.1\textwidth]{03-architecture-pipeline-with-snapshots}
+  \caption{The pipeline preserves deep copies of intermediate computation results.}
+  \label{fig:pipeline-with-snapshots}
+\end{figure}
+
+
+The encapsulated data in the state can be hierarchical and complex. We
+provide a fully cloneable data structure. That means, any nested data
+structure in the \class{PipelineState} implements a cloneable
+interface and supports copying as well. Thus, the clone of an instance
+of \class{PipelineState} is a deep copy.
+
+A deep copy of a data structure is a
+clone of all fields of that data structure. That means if a
+data structure references dynamically allocated memory, we
+do not clone the reference of the allocated memory to the
+copy of the data structure. Instead, we allocate new memory
+and duplicate the data to the newly allocated memory. Thus,
+we make sure modifications on the copy do not alter the
+original.
 
 When we take a snapshot of the results of a
 \class{PipelineStep}, we ensure, that modifications of a
 latter \class{PipelineStep} will not alter the data in the
 snapshot of a previous \class{PipelineStep}. Otherwise, the
-\name{NodeVisualizer} plugin renders corrupted visuals for
+\name{NodeVisualizer} plugin would render corrupted visuals for
 the previous step. Figure~\ref{fig:corrupt} shows how the surface
 reconstruction step, which comes early in the
-\class{Pipeline}, is effected by the creation of finger
-joints.
+\class{Pipeline}, would be effected by the creation of finger
+joints, when \class{PipelineSteps} are not deep clones.
 
 \begin{figure}[h]
   \centering
@@ -368,79 +393,6 @@ joints.
     corrupt the visualizations.}
   \label{fig:corrupt}
 \end{figure}
-
-We create deep copies of the data structures, to persist the
-data of the snapshots. A deep copy of a data structure, is a
-clone of all fields of that data structure. That means if a
-data structure references dynamically allocated memory, we
-do not clone the reference of the allocated memory to the
-copy of the data structure. Instead, we allocate new memory
-and duplicate the data to the newly allocated memory. Thus,
-we make sure modifications on the copy do not alter the
-original. Listing~\ref{lst:deep-copy} shows the effects of a
-deep copy.
-
-\begin{listing}[h]
-\begin{minted}[
-linenos
-]{coffeescript}
-data = createDynamicMemoryWith('foo')
-copy = data.copy()
-
-# both structures have the same copied data
-data.dynamicMemory # = foo
-copy.dynamicMemory # = foo
-
-# alter the dynamically allocated memory
-changeFooToBar(copy.dynamicMemory)
-
-# a shallow copy will effect both,
-# the data and the copy
-copy.dynamicMemory # = bar
-data.dynamicMemory # = bar
-
-# a deep copy prevents this effect
-data = createDynamicMemoryWith('foo')
-deepCopy = data.deepCopy()
-
-data.dynamicMemory # = foo
-copy.dynamicMemory # = foo
-
-changeFooToBar(copy.dynamicMemory)
-
-copy.dynamicMemory # = bar
-data.dynamicMemory # = foo
-\end{minted}
-\caption{A {\coffeescript} example showing the effects of a deep copy
-  of data.}
-\label{lst:deep-copy}
-\end{listing}
-
-% - needs-figure, needs-ref :: Immutable PipelineState
-% allows timetravel visual debugging
-
-The data that is passed between the \class{PipelineSteps} is
-encapsulated in a \class{PipelineState}. The
-\class{PipelineState} contains all data structures that are
-ever to be computed by all \class{PipelineSteps}. It is
-essentially a container for every computation result.
-
-A snapshot is obtained by cloning the \class{PipelineState}
-after the execution of a \class{PipelineStep}. The
-\class{PipelineState} is an clonable data structure. A
-cloneable data structure can be copied. We provide a deep
-copy for the \class{PipelineState}, so that any changes to
-the copy will not affect the original and vice-versa.
-Figure~\ref{} \note{steps and snapshots flow} illustrates
-how snapshots are obtained between two
-\class{PipelineSteps}. The encapsulated data in the state
-can be hierarchical and complex. We provide a fully
-cloneable data structure. That means, any nested data
-structure in the \class{PipelineState} implements a
-cloneable interface and supports deep copies. Thus, we
-ensure that modifications to any nested data by latter
-\class{PipelineSteps} do not modify previous copies of the
-data.
 
 
 % \item Pipeline Implementation
@@ -467,46 +419,199 @@ data.
 % \end{enumerate}
 
 
-\subsection{The Client Package Connects All Features Into an
-  Application}
-\label{sec:client-to-application}
-\note{concrete heading: platener instead of application}
+\subsection{Code Packages of {\platener}}
+\label{sec:code-packages-platener}
 
 % - Subsection overview
 
-This section describes the code packages of {\platener}.
-Furthermore, we explain the how {\convertify} is used by
-{\platener} and how the user interface is connected to the
-\class{Plugins}.
+% This section describes the code packages of {\platener}.
+% Furthermore, we explain how {\convertify} is used by
+% {\platener} and how the user interface is connected to the
+% \class{Plugins}.
 
 %     - needs-figure :: Application is separated into
 %     Packages
 
 
 \begin{figure}
-  \includegraphics[width=1\columnwidth]{03-architecture_overview_current}
+  \centering
+  \includegraphics[width=1.1\columnwidth]{03-architecture-package-diagram}
   \caption{Main Packages of the Platener Architecture}
-  \label{fig:architectureOverviewCurrent}
+  \label{fig:package-diagram}
 \end{figure}
 
 {\platener} is divided into the code packages {\convertify},
-\name{Plugins} and \name{Client}.
-Figure~\ref{fig:architectureOverviewCurrent} shows the
-package diagram. Each package takes over a set of distinct
-responsibilities.
+\name{Plugins} and \name{Client}. Figure~\ref{fig:package-diagram}
+shows the package diagram. Each package takes over a set of distinct
+responsibilities. The {\convertify} package is the framework,
+described above. The \name{Plugins} package provides an exchangeable
+set of features for the WebGL scene. The \name{Client} package gives
+the look and feel of {\platener}. It provides user interfaces for the
+web application in the frontend package and a command line interface
+in the backend package.
 
-\note{too generic here?}
+The {\convertify} code package is subdivided into three components,
+see Section~\ref{sec:framework-convertify}.
 
-The {\convertify} package is a framework, providing a
-rendering engine and plugin management. The \name{Plugins}
-package provides an exchangeable set of features for the
-WebGL scene. The \name{Client} package gives the look and
-feel of {\platener}. This package contains frontend
-components, which make up the {\userinterface}. Also, a
-\class{Dispatcher} is implemented in this package,
-configuring the communication of plugins.
+The plugins package contains seven plugins, where each plugin is a
+separate subpackage. The plugins implement the computational and
+render logic of {\platener}. We introduced these plugins in
+Section~\ref{sec:platener-uses-plugins}.
 
-\note{text is missing here}
+%     - We have a WebApp and a Server package, which are both Client
+%       code, because we have two types of applications
+%     - the WebApp is an online service deployed for use by Makers
+
+The client package of {\platener} is twofold. It contains a subpackage
+for the frontend and backend application.  The frontend application is a
+typical web application, made from React components, so users can
+convert 3D-models to laser cutters in their web browser. React is a
+{\javascript} library for building user interfaces. We will introduce
+React and our React setup in Section~\ref{sec:ui-with-react}. The
+backend application is a command line interface, running on {\nodejs}.
+With the backend application, users can batch-process a set of models
+without using a browser. We give details about the CLI-tool in
+Section~\ref{sec:cli-tool}. Also, we provide a server which manages a
+repository of 3D-models and their conversions.
+
+\subsection{The Frontend Package Connects Plugins and User Interfaces
+  Into a Web Application}
+\label{sec:client-to-application}
+
+
+% **** The WebApp Package Builds a Cross-platform Web Page
+
+%      - Subsubsection overview
+%      - needs-ref :: Web Interfaces are built with HTML and CSS
+%      - needs-ref :: The React library | copy from AOP paper
+%      - needs-ref, needs-figure :: The Redux library (Dumb Components and Smart Containers)
+%      - needs-figure :: Using Redux dispatch in the Dispatcher
+%      - Subsubsection summary
+
+\note{explain client bundle}
+The frontend package bundles React components, building the web
+application's user interface. It accesses {\convertify}'s
+\class{ClientBundle} to control the rendering engine and scene
+management as well as loading the plugins. Also, we implement
+\class{Dispatcher} in the frontend package, which wires up the plugin
+features with the user interface.
+
+\subsubsection{Building User Interfaces With the React Library}
+\label{sec:ui-with-react}
+
+React provides a powerful tool to build user interfaces for web and
+mobile applications \cite{React13}. As React is currently under active
+development the growing user base emphasizes its practical
+relevance\footnote{\url{http://facebook.github.io/react/blog/2015/03/30/community-roundup-26.html}}.
+
+React provides a virtual DOM consisting of lightweight representations
+of DOM nodes, called \name{Components} \cite{React13}. A Component is
+stateful and provides behavior, e.g. manages click interaction by a
+user. With focus on flexibility React allows composition of
+Components. Multiple Components may be nested into a parent Component.
+The parent Component passes state onto its children. Children can
+notify their parents by emitting events or executing callbacks. In
+short, in React data is passed from parent to children, while the
+event flow is directed from children to parent
+\cite{ReactDocComponents}. To enhance code readibility, React
+introduces the {\javascript} Syntax Extensions
+(JSX)\footnote{\url{https://facebook.github.io/jsx/}}. This code
+transpilation allows the usage of HTML-tag syntax to instantiate
+compositions of Components. As our setup is based on {\coffeescript},
+we use a {\coffeescript} variant of JSX, called
+CJSX\footnote{\url{https://github.com/jsdf/coffee-react-transform}}.
+Listing~\ref{lst:react-snippet} shows a React Component containing a CJSX
+snippet.
+
+\begin{listing}[h]
+\begin{minted}[
+linenos
+]{coffeescript}
+# instantiate a React Component
+RootComponent = React.createClass
+  # put this HTML-snippet into the DOM,
+  # when displaying this component
+  render: ->
+    return (
+      <section className="root">
+        {@props.children}
+      </section>
+    )
+\end{minted}
+\caption{A {\coffeescript} example showing a root component, wrapping
+  its children into an HTML-tag with a class name.}
+\label{lst:react-snippet}
+\end{listing}
+
+The real DOM is re-rendered as soon as React detects changes in the
+virtual representation of the DOM. This is done with reactive updates.
+This means the \textit{render} method of a Component is invoked again,
+when the Component's data changes. This causes React to \enquote{throw
+  away the entire UI and re-render it from
+  scratch}\footnote{\url{http://www.quora.com/How-is-Facebooks-React-JavaScript-library/answer/Lee-Byron?srid=3DcX}}
+\cite{React13}.
+
+
+\subsubsection{Managing Data Flow of React Components with the Redux
+  State Container}
+\label{sec:flow-with-redux}
+
+Redux\footnote{\url{http://redux.js.org/}} is a {\javascript} library,
+which aims to reduce complexity when managing state of frontend
+components with React. As each React Component is stateful, keeping
+track of state and updating state in the asynchronous browser
+environment is cumbersome. With Redux, we manage all state of our
+frontend application in one place, resulting in \enquote{a single
+  source of truth} \cite{redux}. This state is a read-only object
+tree, called store. All mutations to the store have to be applied by
+actions. An action is a plain object, comprising the intent of
+mutating the state \cite{redux}. Listing~\ref{sec:action-dispatch}
+shows such an action.
+
+\begin{listing}[h]
+\begin{minted}[
+linenos
+]{coffeescript}
+store.dispatch({
+  type: 'CHANGE_PLATEFINDING_ALGORITHM'
+  algorithm: 'INHERENT_AND_EXTRUSION'
+})
+\end{minted}
+\caption{A state change to the store, indicating which plate finding
+  algorithm is selected in the user interface.}
+\label{lst:action-dispatch}
+\end{listing}
+
+The intended state change of an action is propagated by a
+reducer. A reducer applies a data transformation on the state tree,
+see Listing~\ref{sec:action-reducer}.
+
+\begin{listing}[h]
+\begin{minted}[
+linenos
+]{coffeescript}
+initialState =
+  platefindingAlgorithm: DEFAULT_PLATEFINDING_ALGORITHM
+
+pipeline = (state = initialState, action) ->
+  switch action.type
+    when CHANGE_PLATEFINDING_ALGORITHM
+      return Object.assign({}, state, { platefindingAlgorithm: action.algorithm })
+    else return state
+\end{minted}
+\caption{A reducer applies state transformation of actions.}
+\label{lst:action-reducer}
+\end{listing}
+
+When the state is changed by an action, all React Components that use
+data from the changed portion of the state are updated. A re-render is
+triggered. Thus, we emphasize a purely data-driven update flow in our
+frontend application. This brings explicit dependencies and avoids
+race conditions \cite{redux}.
+
+\subsubsection{A Dispatcher Connects {\convertify} With the User
+  Interface}
+\label{dispatch-and-dispatcher}
 
 %     - needs-figure :: Client code connects all plugin
 %     features with a user interface
@@ -515,20 +620,39 @@ configuring the communication of plugins.
 %       framework (Bundle and Protocols come in handy, Client code
 %       implements a Dispatcher instance = the mediator)
 
-%     - We have a WebApp and a Server package, which are both Client
-%       code, because we have two types of applications
-%     - the WebApp is an online service deployed for use by Makers
+{\convertify} decouples any user interface specific code from the
+actual logic and rendering. Thus, we can observe the state of
+{\convertify}, but we have not yet discussed how the events of
+{\convertify} affect our web interface. As all user interface is setup
+in a Redux store, we have a purely data-driven approach to update the
+user interface. That means, changes from within {\convertify} have to
+be propagated to the Redux store. Changes to the store are applied
+through actions. Each state change of {\convertify} is mapped to a
+Redux action. This mirrors the change of state from {\convertify} to
+the frontend. For example, when the \name{PlatenerPipeline} plugin
+finishes the computation of laser cutter conversions, the
+\class{Dispatcher}'s \name{evaluationDidFinish} callback is invoked.
+Figure~\ref{fig:dispatcher-dispatch} shows how the \class{Dispatcher}
+and Redux are connected. The \class{Dispatcher} has access to the
+Redux store. This is possible, because the \class{Dispatcher} is
+implemented in the frontend package. Then, it uses the store's
+\name{dispatch} method and an action to propagate the solutions to
+Redux. Now, we still have a fully data-driven approach, connecting our
+framework with {\platener}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.1\columnwidth]{03-architecture-dispatcher-dispatch}
+  \caption{The \class{Dispatcher} connects {\convertify} and the Redux store.}
+  \label{fig:dispatcher-dispatch}
+\end{figure}
+
+\subsection{The Backend Package Provides a Command Line Interface for
+  Batch Processing}
+\label{sec:cli-tool}
+
 %     - the CLI tool is a service for batch processing or integration
 %       with other applications
-
-% **** The WebApp Package Builds a Cross-platform Web Page
-
-%      - Subsubsection overview
-%      - needs-ref :: Web Interfaces are built with HTML and CSS
-%      - needs-ref :: The React library | copy from AOP paper
-%      - needs-ref, needs-figure :: The Redux library (Dump Components and Smart Containers)
-%      - needs-figure :: Using Redux dispatch in the Dispatcher
-%      - Subsubsection summary
 
 % **** The Server Package Allows Headless Batch Processing of Models
 
@@ -538,6 +662,58 @@ configuring the communication of plugins.
 %      - Processing multiple objects in sequence
 %      - Integration with tools to be built in future
 %      - Subsubsection summary
+
+
+The backend package of {\platener} provides a command line interface
+(CLI). With the CLI of {\platener}, we can process multiple
+{\threedmodel}s in a queue. Results are read from and stored in
+a dictionary. We receive detailed summaries and logs for each
+conversion. A walkthrough of our CLI is given in
+Section~\ref{}\note{ref walkthrough}.
+
+A command line interface is an application solely consisting of
+textual input and output. A CLI is typically more flexible and
+powerful than a graphical user interface. Because a CLI has to be used
+0in a terminal window, it targets mostly advanced users. Another upside
+of CLIs is, that they can be integrated within other applications,
+e.g. when executing shell commands \cite{cli}.
+
+Performing a single conversion at a time, is sufficient for most
+users. Using a web interface for that task, makes it as easy as it can
+get. Though, when dealing with a collection of objects, the manual
+conversion of each model is cumbersome. Our CLI provides a batch
+processing method, reading data from the local file system. For each
+{\stlfile}, the CLI starts the \name{PlatenerPipeline} and writes the
+output to a {\zipfile} into a target directory. Similar to the
+frontend package, we implement a \class{Dispatcher} instance, which
+connects the CLI commands and actions to {\convertify}.
+
+When a conversion finishes, we log details of the progress. Therefore,
+we only store the conversion's meta data into a \class{Report} instance. Thus, the
+garbage collection of {\javascript} frees the occupied memory of the
+{\threedmodel}. All \class{Reports} are printed to the console after
+all conversion finish. On top of the individual report per object, we
+summarize all data and give a brief statistical overview.
+Figure~\ref{fig:reports} shows the variety of available reports.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.1\columnwidth]{03-architecture-reports}
+  \caption{The CLI logs reports for each conversion.}
+  \label{fig:reports}
+\end{figure}
+
+A CLI can be controlled via a shell. This makes it easy, to integrate a
+CLI into another application. Thus, {\platener} could be used by other
+3D-editors to generate laser cutter conversions in an interactive
+environment.
+
+
+
+
+
+
+
 
 
 % \subsection{Package Responsibilities}
@@ -735,3 +911,9 @@ configuring the communication of plugins.
 % \end{enumerate}
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:
