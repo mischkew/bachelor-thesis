@@ -2,7 +2,7 @@
 \begin{document}
 
 %************************************************
-\chapter{Joint Computation}\label{ch:joints}
+\chapter{Joint Computation / Klara}\label{ch:joints}
 \newcommand{\TODO}[1]{\textcolor{red}{\\ \textbf{TODO:} #1 \\}}
 %************************************************
 
@@ -15,26 +15,15 @@
 
 \section{Joint computation}
 \TODO{buy green and orange (or at least two different colors) of acrylic for demo objects and pictures in the paper}
-\paragraph{Overview Paragraph: what will be achieved, why is it necessary}
 When an object consisting of multiple parts is lasercutted it needs to have connectors. Those can be elements like screws, nails and glue. Or the plates already come along with connectors. Those can be for example fingerjoints which, when well calibrated, do not need any external material to hold together. \\
 Whenever possible we want to provide connections like that because a user needs less effort, when components work directly out of the lasercutter. This is why we provide three types of joints which are added to the determined plates.
 
-\subsection{Volume based clipping}
-Before joints can be added to the plates we have to prepare them. We cut the shapes back so that the joints do not overlap with the other plate.
-\paragraph{prerequisite: plategraph intersection lines}
-As seen before in the step [plateGraph] up to four intersectionlines will have been calculated.\\
-Two of them lie both on one side of the plate and the other two belong to the second side. The two lines on one side build a rectangle when their ends are connected. We use those two rectangles to cut out of the plate what will get fingerjoints.\\
-%\textbf{TODO: Insert image of the four lines, with the two rectangles marked.}\\
-\includegraphics[width=\columnwidth]{Images/10-joints-clippingPlate.jpg}\\
-There are cases when not all four lines are actually a plate intersection but only a plane intersection. \\
-%\textbf{TODO: Image of plates which result in not 4 intersections.}\\
-\includegraphics[width=\columnwidth]{Images/10-joints-casesOfLines.jpg}\\
-In this case the infinitifly long plane intersection line will be clipped to match the length of the existing plate intersections. This yields two rectangles as well, which can then be used for clipping the shapes of the plates.
-
-
+\TODO{I moved volume based clipping from here, make sure nothing in this chapter was relying on it to be in this chapter!!}
 
 \section{building joints}
+\TODO{Make this section easier to read!}
 The general procedure of creating joints is achieved in three steps: First we calculate how many female and male joints fit onto the intersection. Then the retrieved joints are placed at the intersectionline and finally the shapes are merged to result in the original plate with joints.
+\TODO{better item names!! and maybe subsections instead of item because content of item is so large}
 \begin{enumerate}
     \item buildAlignedJointTemplates\\
         \paragraph{jointCount}
@@ -85,13 +74,15 @@ The general procedure of creating joints is achieved in three steps: First we ca
 \end{enumerate}
 
 \section{Different Fingerjoint types}
+
 \TODO{Bilder noch so anpassen, dass nur females/males zu sehen und in echt, wie sie zusammen stecken}\\
 We support three types of joints. Each have benefits when used for specific material in a special use case. We allow the user to choose the type of material which then affects the choice of joints in the converted model.
+\TODO{maybe use minipages to show image on one side an the text on the other!}
 \subsubsection{Fingerjoint template}
-\includegraphics[width=0.5\columnwidth]{Images/fingerjoints.png}
-\paragraph{How these joints look like}
+\includegraphics[width=0.5\columnwidth]{Images/fingerjoints.png}\\
+%\paragraph{How these joints look like}
 Fingerjoints only consist of 90 degrees angles. Both, the female and male joints, are the same only offset by one joint. This means that the joints can slide directly into each other. But that only works when the sizes are measured correctly so that they create a tight fit. Otherwise plates connected by fingerjoints do not fit into each other at all or fall apart and have to be glued. 
-\paragraph{How these joints work, and for what material}
+%\paragraph{How these joints work, and for what material}
 When using fingerjoints one typically has 90 degree angles plates because it is the easiest to connect them in this angle. Other angles can be created but it is hard to know when the plates form the exact angle that is wanted unless the plates are part of a construction which gives them no other chance than to form the given angle.\\
 Regarding the material fingerjoints are useless when flexible materials are connected with it. The problem is that a tight fit cannot be created as well in most cases. Also very thin material is not working well since fingerjoints hold up due to the friction of one plate to the other. The fewer material the less friction.\\
 We usually use fingerjoints for acrylic and wood.
@@ -99,18 +90,22 @@ We usually use fingerjoints for acrylic and wood.
 \subsubsection{JimJoint template}
     \includegraphics[width=0.5\columnwidth]{Images/jimjoints.png}
     These joints are named after Jim McCann who thankfully showed us the design for these connections.
-    \paragraph{How these joints look like}
+    %\paragraph{How these joints look like}
     The male and female joints are the same but they grow wider with its height. This means these joints cannot slide into each other but they rather snap together. This means once they are connected they cannot be taken apart just by pulling on the plates. 
-    \paragraph{How these joints work, and for what material}
+    %\paragraph{How these joints work, and for what material}
     In order for the snapping to work the material used has to be flexible or very thin and therefore flexible. Jim McCann already used it for foam. We now use it especially for paper because this material would be much too thin for creating enough friction for fingerjoints to work.
 
 \subsubsection{Dovetail template}
     \includegraphics[width=0.5\columnwidth]{Images/schwalbe.png}
     \TODO{Image of wood dovetails where this joint is derived from.}\\
     Typically a dovetail joint is used in woodwork. It helps to ensure that when there was a pulling force on both wooden plates that the joints would all hold onto the other plate.\\
-    But in order to create the female joints the wood needs to be cut in an angle. This is not possible without inadequately high time and power consumption. See the upcoming section 'alternative solution' for information on how to lasercut the female part of a dovetail.
-    \paragraph{How these joints look like}
-    \paragraph{How these joints work, and for what material}
+    But in order to create the female joints the wood needs to be cut in an angle. This is not possible without inadequately high time and power consumption. See the upcoming section 'alternative solution' for information on how to lasercut the female part of a dovetail.\\
+    Instead, we developed a joint type very similar to the original dovetail. This can be easily cut with a lasercutter.
+    %\paragraph{How these joints look like}
+    The males and females are alot like typical fingerjoints. But the females have an additional part which will fixate the other plate from one direction.
+    \TODO{insert image}
+    %\paragraph{How these joints work, and for what material}
+    These joints now withstand a force pulling away the plate with the female joints. It works with any material with at least around one millimeter of thickness when the material is not very flexible.
 
 \subsection{adjusting fingerjoints length when plates are angled}
     \paragraph{adjustJointHeight}
@@ -134,19 +129,27 @@ We usually use fingerjoints for acrylic and wood.
     \begin{itemize}
         \item Snap fits we already tried. Hard to implement because enough space needs to be given when cutting the spring.
         \item how to lasercut the female part of a dovetail with alot of effort!\\
-        In order to achieve different depths of cutting you can set the lasercutter to use lower power. This is usually used for engraving which also does not cut through the material.\\  
-        \TODO{Name Lasercut like a boss here and include the image of the gradient which defines the power of the laser.}\\
+        In order to achieve different depths of cutting you can set the lasercutter to use lower power. This is usually used for engraving which also does not cut through the material.\\
+        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-schwalbeMitLaser.png}\\
+        \TODO{Name Lasercut like a boss here}\\
         By coloring a part in the svg-file in a gradient from white to black this part will be cut in an angle. The more white the less power.
         \item other joint type: pettis joint (fingerjoint with screws)
         \item slot joinery technique when overlapping plates had to be rejoined
         \item Wrong fingerjoint height adjustment:\\
         Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. \\
+        \item Dustins useless angle stuff:\\
+        He computed different angle types. They are quite crappy because he assumed that plates would only meet at edges. But plates can lie in another\\
+        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesDustin.jpg}\\
+        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesWrongAssumption.jpg}\\
+        Therefore we do not use those angle type but we clip both plates with their four intersection lines. \\
+        Then due to angle and trigonometry etc. we can calculate the correct length for the joints which connects the plates again.
     \end{itemize}
     
     
     
 \section{Future work}
     \begin{itemize}
+        \item Dustin also suggested T-joints
         \item joints should not stand out on the side. \\
         Either their width has to be adjusted to be not only the width of when the joint starts building away from the plate. but also include how far away it is growing to the sides in its full height. \\
     (Beware that the joints still have to be placed according to its inner with otherwise they are too lose (except for fingerjoints) )

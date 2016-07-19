@@ -2,13 +2,20 @@
 \begin{document}
 
 %************************************************
-\chapter{Classifiers}\label{ch:classifiers}
+\chapter{Classifiers / Klara}\label{ch:classifiers}
 \newcommand{\TODO}[1]{\textcolor{red}{\\ \textbf{TODO:} #1 \\}}
 %************************************************
 
 \section{Classifiying idea}
+In the previous chapters we covered the approach of solely finding plates within 3D-models. This approach needs the model to be very 'boxy'. Therefore sometimes the algorithm fails because of too many round edges or other noise. \\
+This is why we tried another approach which is also being used by CGAL. We look for all kinds of primitive shapes in addition to plates. This allows us to split the model into separate objects which can then be independently converted to lasercutable plates. Due to the tolerance of the algorithm to noise we can even detect surface when there is a lot of texture. \TODO{include image}
+Currently, our software system does not include the findings of the classifiers for a conversion. Instead we wanted to find out how well the algorithm works for our use case. \\
+In order to properly include the classifiers we built up a theoretical structure to make the most of the findings. 
+\includegraphics[width=0.5\columnwidth]{Images/10-classifiers-ClassificationStructureGraphBuilding.jpg}
+A Classifier finds a particular shape like a plane, plate, box, sphere, cylinder, prism, etc. Classifiers can use findings of others for example the box finder uses the previously found planes. As soon as all classifiers have finished their .... \TODO{What happens next... : gefundene sachen gruppieren, einzeln dann Bauweisen dafür bestimmen, die 'benoten' die mit der besten note nehmen} 
 \TODO{From what paper did we take this? and CGAl etc.}
 \paragraph{What is it usually used for? - pointclouds... which points do we intend to take for the algorithm?}
+Usually, RANSAC is used with pointclouds. This means we need a lot of points and the more noise there is within the points the better for the algorithm. In our case we work with meshes where a model of a box might only have 8 points. This is a problem because the diagonals of the box look just like another plane to the algorithm because the sides and the diagonals are all supported by 4 points. Therefore, the RANSAC approach can definitely not be used in every case with any 3D-model. Instead it should be used as an additional way to split the model.
 \section{RANSAC - Random Sample Consensus}
 The RANSAC-approach firstly chooses a defined number of random points. These points are a minimal set from the point data and its number is defined by the shape which is being classified.\\
 On the basis each of these minimal sets a candidate shape is generated and tested against all points in the data set. The candidate gets a score which tells how well the randomly chosen points represent the shape. This score can result from counting the points which lie within the candidate.\\

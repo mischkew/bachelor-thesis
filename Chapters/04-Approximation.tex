@@ -365,6 +365,21 @@ Hashing is usually done if only identical points are merged instead of vertices 
 \section{Hole Detection - in Plates Kapitel}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \chapter{Classifiers}
 \section{primitives}
 \subsection{Prism - Dimitri}
@@ -373,7 +388,12 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \myNotes{TODO: Herangehensweise erklären, etc.}
 
+A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives (usually faces or shapes).
+
+To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill \myNotes{hat Sven flood fill erklärt?}.
+
 \subsubsection{Bucket System}
+\label{sec:PrismBucketSystem}
 
 The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$ whose \myNotes{(whose ist falsch, was muss da hin?)} calculation is explained later in this text.
 
@@ -462,7 +482,7 @@ The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends 
 
 
 
-Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value of $\vec{a}_{I_{Ring}}$.
+Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value $z_{I_{Ring}}$.
 
 \begin{figure}
     \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
@@ -500,7 +520,7 @@ Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 \end{equation}
 
 
-Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
+Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation: 
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
@@ -516,26 +536,34 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
 \end{figure}
 
 
+$ \vec{a}_{I_{Ring}}' $ is the projection of $\vec{a}_{I_{Ring}} $:
 
 
 \begin{equation}
     \label{equ:VecAStrich}
-    \vec{a}' = (x_{a}, 0)
+    \vec{a}_{I_{Ring}}' = (x_{a}, 0)
 \end{equation}
 
+$ \vec{b}_{I_{Ring}} $ spans the threshold angle $\phi$ with $ \vec{a}_{I_{Ring}} $ and has the same $z$ value $z_{I_{Ring}}$:
+
 \begin{equation}
-    \vec{b} = (x_{b}, y_{b}, z_{I_{Ring}})
+    \vec{b}_{I_{Ring}} = (x_{b}, y_{b}, z_{I_{Ring}}) \qquad with | \vec{b}_{I_{Ring}}| = 1
     \label{equ:VecB}
 \end{equation}
 
+The corresponding projected vector $ \vec{b}_{I_{Ring}}' $:
+
 \begin{equation}
-    \vec{b}' = (x_{b}, y_{b})
+    \vec{b}_{I_{Ring}}' = (x_{b}, y_{b})
     \label{equ:VecBStrich}
 \end{equation}
 
+Due to the mentioned conditions the coordinates of $ \vec{b}_{I_{Ring}} $ are calculated as follows:
+
+
 \begin{equation}
     \label{equ:Projection1}
-    \cos{\phi} = \frac{\vec{a} * \vec{b}}{|\vec{a}| * |\vec{b}|} = \vec{a} * \vec{b} \stackrel{(\ref{equ:VecA}) + (\ref{equ:VecB})}{=} x_{a} * x_{b} + z_{I_{Ring}}^{2}
+    \cos{\phi} = \frac{\vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}}}{|\vec{a}| * |\vec{b}|} = \vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}} \stackrel{(\ref{equ:VecA}) + (\ref{equ:VecB})}{=} x_{a}_{I_{Ring}} * x_{b}_{I_{Ring}} + z_{I_{Ring}}^{2}
 \end{equation}
 
 \begin{equation}
@@ -546,15 +574,18 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
 \begin{equation}
 \begin{split}
     \label{equ:YpsilonB}
-    & 1 = |\vec{a}| = |\vec{b}| \\
+    & 1 = |\vec{a}_{I_{Ring}}| = |\vec{b}_{I_{Ring}}| \\
     & => \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } = \sqrt{ x_{b}^{2} + y_{b}^{2} + z_{I_{Ring}}^{2} } \\
     & => y_{b} = \sqrt{ x_{a}^{2} - x_{b}^{2} }
 \end{split}
 \end{equation}
 
+
+The angle ${\gamma}_{I_{Ring}}$ which is used to separate a ring into buckets is calculated with the projected vectors $ \vec{a}_{I_{Ring}}' $ and $ \vec{b}_{I_{Ring}}' $ :
+
 \begin{equation}
 \begin{split}
-    \cos{\gamma}& = \frac{\vec{a}' * \vec{b}'}{|\vec{a}'| * |\vec{b}'|}
+    \cos{{\gamma}_{I_{Ring}}}& = \frac{\vec{a}_{I_{Ring}}' * \vec{b}_{I_{Ring}}'}{|\vec{a}_{I_{Ring}}'| * |\vec{b}_{I_{Ring}}'|}
     = \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} +  y_{b}^{2} } } \\
     & \stackrel{(\ref{equ:YpsilonB})}{=} \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} - x_{b}^{2} +  x_{a}^{2} } }
     = \frac{ x_{a} * x_{b} }{ x_{a} * x_{a} }
@@ -564,9 +595,12 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
     & \stackrel{(\ref{equ:ZIRing})}{=} \frac{ \cos{\phi} - ( 1 - cos^{2}{{\alpha}_{I_{Ring}}} ) }{ \cos^{2}{{\alpha}_{I_{Ring}}} }
     = \frac{ \cos^{2}{{\alpha}_{I_{Ring}}} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } + \frac{ \cos{\phi} - 1 }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
     & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } \\
-    => \gamma & = \arccos{( 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } )}
+    => {\gamma}_{I_{Ring}} & = \arccos{( 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } )}
 \end{split}
 \end{equation}
+
+
+The corresponding angle $ \beta $ of a normal $ \vec{n} $ is calculated with use of the unit vector in x direction $ \vec{v_{x}'} $. This angle needs to be adapted in case $ y < 0 $ since the maximum angle between two vectors is 180° and we want to cover a complete circle:
 
 \begin{equation}
 \begin{split}
@@ -578,21 +612,88 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
 \end{split}
 \end{equation}
 
-da jetzt nur halbkreis, check auf y
+The angle $ \beta $ is represented as a multiple of the $ \gamma $ angle to get the bucket index $ I_{Bucket} $:
 
 \begin{equation}
-    I_{Bucket} = \floor{\frac{\beta}{\gamma}}
+    I_{Bucket} = \floor{\frac{\beta}{ {\gamma}_{I_{Ring}} }}
 \end{equation}
+
+Consequently the maximum bucket index is calculated with the maximum angle of 360°:
 
 \begin{equation}
-    I_{MaxBucket} = \floor{\frac{2 \pi}{\gamma}}
+    I_{MaxBucket} = \floor{\frac{2 \pi}{ {\gamma}_{I_{Ring}} }}
 \end{equation}
 
-\myNotes{TODO: Beta berechnen erklären}
 
 
+\subsubsection{Implementation}
 
-% (Plate) - Shape - EdgeLoop - Architektur und Funktionalität
-% (Clipping)
+The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. \myNotes{(sind dependencies vorher erklärt? sollte so sein)} It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism.
+
+\paragraph{PrismClassifier}
+
+\begin{listing}[!h]
+\centering
+\begin{minted}[
+linenos, breaklines
+]{coffeescript}
+run: ->
+    return new Promise( (resolve) =>
+        buckets = new PrismShapeNormalsBuckets(_bucketFactor * _angleThreshold)
+
+        @_putIntoBuckets @shapes, buckets
+        
+        prisms = @_detectPrisms @shapes, buckets
+        
+        log.debug("PrismClassifier found " + prisms.length + " prisms")
+        
+        resolve(prisms)
+    )
+\end{minted}
+\caption{run method of the PrismClassifier}
+\label{lst:PrismClassifierRun}
+\end{listing}
+
+Listing \ref{lst:PrismCalssifierRun} shows the implementation of the \emph{PrismClassifier} run method: 
+
+At first the normal buckets are initialised with a slightly greater threshold than the actual angle as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) and \emph{\_bucketFactor} $ = 1.1 $ so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel. 
+
+Since $ {\gamma}_{1} = 0.153886 $ with $\phi = 0.15$ the \emph{\_bucketFactor} should be at least $1.026$. We choose a value of $1.1$ to support later changes of the threshold as described in section \ref{sec:PrismFutureWork} Future Work without having to change the \emph{\_bucketFactor}. With this value all thresholds $ \leq 0.832 = 48\degree$ are covered.
+
+Then all shapes are put into the corresponding buckets. This is done by iterating over all shapes and passing them to the bucket system which handles the classification on its own.
+
+Next we iterate over all shapes again while requesting the potential parallel shapes from the bucket system. The shapes are checked with the given threshold and a \emph{prism} is created in case of parallelism.
+
+At the end a set of all prisms is returned which can be used for further primitive classification.
+
+
+\paragraph{PrismShapeNormalsBuckets}
+
+\emph{PrismShapeNormalsBuckets} is based on the specification in section \ref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
+
+The constructor saves the angle threshold, instantiates the rings as a \emph{javascript map} and calculates the maximum ring index $I_{MaxRing}$.
+
+It provides two functions used by the classifier: \emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
+
+\emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
+
+\emph{getShapesToCheckAndDeleteThisOne}
+
+
+Ring
+
+MaxRing
+
+\paragraph{Prism}
+
+\subsubsection{Future Work}
+\label{sec:PrismFutureWork}
+
+planes
+
+mantelfläche
+
+scoring : größerer Winkel?
+
 
 \end{document}
