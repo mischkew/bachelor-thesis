@@ -20,92 +20,138 @@
 
 
 % \paragraph{Why is this part necessary?}
-On the basis of the graph we can create connectors for plates in a later step ( \ref{ch:joints}). Depending on angles and neighborhood relationships an adequate connector type can be chosen.
+On the basis of the plategraph we can create connectors for plates in the later step \hyperref[ch:joints]{joint creation}. Depending on angles and neighborhood relationships an adequate connector type can be chosen.
 % for what? to figure out joint connections?
 
 % \paragraph{What is being achieved in this Chapter?}
-In this step we analyse the spatial arrangement of plate objects in 3D-space to create a graph structure which tracks the adjacency. The plates to be analysed are found in the previous step \ref{ch:plates}. Two or more plates are adjacent to another when at least one side touches or overlaps with another plate. In addition, the angles in between the plates are measured. 
+In this step we analyse the spatial arrangement of plate objects in 3D-space to create a graph structure which tracks the adjacency. The plates to be analysed are found in the previous step \hyperref[ch:plates]{Plates}. Two or more plates are adjacent to another when at least one side touches or overlaps with the other plate. In addition, the angles in between the plates are calculated. 
 
 
 % WHAT IS WITH THE 3D SNIPPETS??? DO THEY STILL EXIST?
 
-% \paragraph{Chosen Graph Class Structure}
-The graph always holds a list of all found plates and their neighbors. A plate is just one possible object to be listed. Other graph nodes can be left over 3D snippets which will have to be handled when all plates have been correctly connected.\\
-For iterating over the graph we traverse all edges of the graph which also hold the important neighborhood parameters such as angle and the line at which nodes intersect.\\\* \\
+% \paragraph{Chosen Graph Class Structure} 
+The graph holds a list of all found plates and their neighbors. \\
+For graph iteration we traverse all edges of the graph which also hold the neighborhood parameters such as angle and the line at which nodes intersect.\\\* \\
 \hspace*{-1.8cm}
-\includegraphics[width=1.3\columnwidth]{Images/GraphStructure.png}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=1\columnwidth]{Images/GraphStructure.png}
+\caption{Class diagram of the plategraph structure. Nodes and Connections can be added to the graph when a new intersection has been found. }
+\end{figure}
 
+\TODO{Plategraph beinhaltet nodes, edges ... und was machen der graph, was sind nodes und edges, dadurch kann auf diese weisen... das ... erreicht werden...}
 
 \section{Detecting spatial arrangement}
 % \subparagraph{requirements for running the algorithm}
 % unnecessary??
-As a prerequisite the step \ref{ch:plates} needs to find inherent or create extruded plates first. Afterwards the plane-plane intersections of all combinations of both sides of the plates are computed which results in up to four intersection lines. In preparation for the joint generation step \ref{ch:joints} we truncate the inner intersection lines which would otherwise overlap with adjacent plate intersections.
+As a prerequisite the step \hyperref[ch:plates]{Plates} needs to find inherent or create extruded plates first. Afterwards the plane-plane intersections of all combinations of both sides of the plates are computed which results in up to four intersection lines. In preparation for the joint generation step \ref{ch:joints} we truncate the inner intersection lines which would otherwise overlap with adjacent plate intersections.
 
 \subsection{Finding intersections}\label{findIntersections}
 % \subparagraph{concrete explanation, functions used/example code etc.}
-When two planes intersect there is an intersection line. Since we work with plates which equal 2 parallel planes we expect to find up to 4 intersection lines.\\
-Firstly, we retrieve the direction vector(\emph{dir}) of any intersection line between two plates by calculating the cross vector of both normals.
+When two planes intersect there is an intersection line. Since we work with plates which equal two parallel planes we expect to find up to four intersection lines.\\
+First, we retrieve the direction vector \emph{dir} of an intersection line between two plates by calculating the cross vector of both normals.
 \TODO{include citation}
-In order to retrieve all possible intersection lines of two plates we calculate four possible plane-plane intersections \cite{planePlaneIntersection} of 
+In order to retrieve all possible intersection lines of two plates we then calculate four possible plane-plane intersections \cite{planePlaneIntersection} of 
 \begin{itemize}
 \item the two main sides of the plates
 \item the two parallel sides of the plates
 \item one main and one parallel side 
-\item and the other way around
+\item one parallel side and one main side
 \end{itemize}
 \*\\
-First, a possible position vector has to be found which lies on both planes.
+First, a possible position vector \emph{p} has to be found which lies on both planes.
 \\\*\\
 \emph{Plane constants:} $d_1, d_2$\\
-\emph{Normals:} $n_1, n_2$
-$$ p = \frac{d_1 * n_{2}^{2} - d_2 * (n_1 * n_2)}{n_{1}^{2} * n_{2}^{2} - (n_1 * n_2)^{2}} * n_1 + \frac{d_2*n_1^2 - d_1*(n_1 * n_2)}{n_1^2 * n_2^2 - (n_1 * n_2)^2} * n_2 $$
+\emph{Normals:} $\vec{n_1}, \vec{n_2}$
+$$ p = \frac{d_1 * \vec{n_{2}}^{2} - d_2 * (\vec{n_1} * \vec{n_2})}{\vec{n_{1}}^{2} * \vec{n_{2}}^{2} - (\vec{n_1} * \vec{n_2})^{2}} * \vec{n_1} + \frac{d_2*\vec{n_1}^2 - d_1*(\vec{n_1} * \vec{n_2})}{\vec{n_1}^2 * \vec{n_2}^2 - (\vec{n_1} * \vec{n_2})^2} * \vec{n_2} $$
+\TODO{cite this}
 
-On the basis of a position vector and the direction an intersection line can be computed: $ line = p*x + dir$
+On the basis of a position vector \emph{p} and the direction $\vec{dir}$ an intersection line can be computed: $ line = p*x + \vec{dir}$
 \\
 Now that all lines are found we have to test if the lines actually go through both plates and that the plates touch. \\
+\TODO{Why should it not go through both plates?}
 In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates.\\
+\TODO{When and how?}
 In order to find the boundaries of the lines we calculate the intersections of the lines with all boundary edges of the plates.\\
+\begin{figure}[!ht]
+\centering
 \includegraphics[width=.5\columnwidth]{Images/HeadAllBoundaries.png}
-\\
+\caption{All intersections that were found. }
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
 \includegraphics[width=.5\columnwidth]{Images/06-1-graph-fourIntersectionLines.jpg}
+\caption{Single plate pair with all of its intersection lines. The marked part is the segment that we continue to work with.}
+\end{figure}
+
 
 \section{Preparing plates for connectors}
 \subsection{Volume based clipping}
 Before joints can be added to the plates we have to prepare them. We cut the shapes back so that the joints do not overlap with the other plate.\\
-As seen before, up to four intersectionlines, have been calculated per intersection.\\
-Two of them lie both on one side of the plate and the other two belong to the second side. The two lines on one side build a rectangle when their ends are connected. We use those two rectangles to cut out of the plate what will get fingerjoints.\\
-%\textbf{TODO: Insert image of the four lines, with the two rectangles marked.}\\
-\includegraphics[width=\columnwidth]{Images/10-joints-clippingPlate.jpg}\\
-There are cases when not all four lines are actually a plate intersection but only a plane intersection. \\
-%\textbf{TODO: Image of plates which result in not 4 intersections.}\\
-\includegraphics[width=\columnwidth]{Images/10-joints-casesOfLines.jpg}\\
-In this case the infinitifly long plane intersection line will be clipped to match the length of the existing plate intersections. This yields two rectangles as well, which can then be used for clipping the shapes of the plates.\\
-\includegraphics[width=.5\columnwidth, angle=90]{Images/06-1-graph-clippingRectangles.jpg}\\
+As seen before, up to four intersectionlines have been calculated per intersection. Two of them lie both on one side of the plate and the other two belong to the second side. The two lines on one side build a rectangle when their ends are connected. We use those two rectangles to remove the parts of the plates where we will place fingerjoints.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{Images/10-joints-clippingPlate.jpg}
+\caption{Side view of a single plate pair. The circles mark where there are intersection lines. The rectangles show what is clipped away from plate 1. }
+\end{figure}
+
+There are cases when not all four lines are actually a plate intersection but only a plane intersection. 
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{Images/10-joints-casesOfLines.jpg}
+\caption{There can also be less than 4 actual intersections. In this case we have to calculate the projected intersectionlines as well which are only a correct plane-plane-intersection but not actually where the plates overlap}
+\end{figure}
+
+In this case the infinitifly long plane intersection line will be clipped to match the length of the existing plate intersections. This yields two rectangles as well, which can then be used for clipping the shapes of the plates.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth, angle=90]{Images/06-1-graph-clippingRectangles.jpg}
+\caption{The shape of the plate is rotated so it lies on the xy-plane. The rectangles derived from the intersection line segments define what has to be clipped away from the shape.}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
 \includegraphics[width=.5\columnwidth, angle = 90]{Images/06-1-graph-clippingResult.jpg}
+\caption{When the shapes have been cut in 2D they are rotated back to form a 3-dimensional plate again. This figure depicts the volume which was cut off by the algorithm leaving the remaining plates p$_1$ and p$_2$}
+\end{figure}
+
 
 \section{Analyzing spatial arrangement}
 \subsection{Angle calculation}\label{angleCalculation}
-In order to generate nicely fitting joints in the upcoming step and for grouping plates to curves (see Chapter \ref{ch:curves}) the angles are necessary.\\
-Firstly, we determine the angle between the according planes.\\
-plane normals: u, v\\
+In order to generate fitting joints in the upcoming step and for grouping plates to curves (see Chapter \hyperref[ch:curves]{Curves}) the angles are necessary.\\
+First, we determine the angle between the according planes.\\
+plane normals: $\vec{u}, \vec{v}$\\
 angle between planes: $\theta$
-$$ cos(\theta) = \frac{u \cdot v}{|u| * |v|}$$
+$$ cos(\theta) = \frac{\vec{u} \cdot \vec{v}}{|\vec{u}| * |\vec{v}|}$$
 But we are not talking about infinitely large planes instead we want the angle which is enclosed by the finitely large plates. Therefore we need to adjust the angle in some cases.\\
+\TODO{rewrite previous 2 sentences!!}
 Thanks to the previous clipping step we can find out when the angle has to be adjusted.\\
-We observed that plates with an acute angle still touch when cut back and that plates with an obtuse angle do not touch after cutting them back.\\
-\includegraphics[width=.5\columnwidth]{Images/06-1-graph-TouchingOrNotAfterClipping.jpg}\\
+We observed that plates with an acute angle still touch when cut back and that plates with an obtuse angle do not touch after cutting them back.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth]{Images/06-1-graph-TouchingOrNotAfterClipping.jpg}
+\caption{After the clipping process the plate pair might be not touching anymore. This means that the angle between the plates has to be larger than 90$^\circ$.}
+\end{figure}
+
 Finally, we test if the plates still touch and adjust the angle accordingly.
 
 \subsection{Finding new main lines}\label{mainLine}
 In order to know where to add the joints to the plate we have to identify one line segment for each plate whithin a connection.\\
-For that we compare the distances of the new edges of the two plates. Where the distance is the smallest they are the two lines which determine where to place the joints.\\
-\includegraphics[width=.5\columnwidth, angle=90]{Images/06-1-graph-mainLinesAfterClipping.jpg}\\
+For that we compare the distances of the new edges of the two plates. Where the distance is the smallest they are the two lines which determine where to place the joints.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth, angle=90]{Images/06-1-graph-mainLinesAfterClipping.jpg}
+\caption{The distances between the new edges after the clipping process reveals which of them are the inner lines. Those lines will be used for adding joints in the next step.}
+\end{figure}
+
 The segments are called main line for that connection and plate.
 
 \subsection{Truncating intersection lines}
 Now that all main lines are known we need to shorten the lines so that no other lines overlap with it. If this step is missing then the following step for creating joints will run in to problems because the joints overlap each other.\\
 If we now have a look at only the inner intersections of plates in a model we can identify the overlaps.
-\begin{figure}[t]
+\begin{figure}[!ht]
+\centering
 \includegraphics[width=.5\columnwidth]{Images/HeadInnerBoundaries.png}
 \caption{The inner boundaries of the plates overlap. In the next step when joints will be created they are only supposed to be on the inner part of the line. Therefore the lines have to be truncated.}
 \end{figure}
@@ -147,60 +193,72 @@ If we now have a look at only the inner intersections of plates in a model we ca
 			}	      
         }
     }
-   	\caption{Truncate lines}
+   	\caption{Truncating lines}
 \end{algorithm}
 
-Finally, we found all plate adjacencies and necessary information on the connected parts. Also, we adjusted the plates. Therefore the next chapter \ref{ch:joints} can start adding joints.
+Finally, we found all plate adjacencies and necessary information on the connected parts. Also, we adjusted the plates. Therefore the next step explained in Chapter \hyperref[ch:joints]{Joint Creation} can start adding joints.
 
-\section{Alternative approaches for problems addressed in this chapter}
+\section{Alternative approaches}
 The solutions presented in this chapter may not be the only way to go. Therefore, we want to give an overview of other algorithms we tried or are aware of and why we replaced them.
 
-\subsection{Possible data structures for tracking the intersections}
+\subsection{Possible data structures for intersection tracking}
+\TODO{cite Beyer}
 Dustin Beyer used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Their indices corresponded to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.\\
 \*\\
-Instead of an adjacency matrix we used the previously explained plate graph class structure because it allows for traversal along the plates and, additionally, the found edges. \\
-Moreover, our structure is open for adding additional objects beside plates. For example 3D-printable snippets which were not converted to plates by our Software.
+Instead of an adjacency matrix we used the previously explained plategraph class structure because it allows for traversal along the plates and, additionally, the found edges. \\
+Moreover, our structure is open for adding additional objects beside plates. For example 3D-printable snippets which were not converted to plates by our software.
 
 \subsection{Approaches for finding intersections}
+\TODO{cite}
 In the master thesis on Platener a connection is calculated by finding all four possible connections between both sides of two plates. Then the edges of the plates are tested against the line. The part of the line overlapping with an edge was kept for further calculations.\\
 \*\\
-When looking for plate intersections we also calculate all possible intersections. But plates do not always touch each others edges. Therefore we replaced this algorithm by a different approach explained in \ref{findIntersections}
+When looking for plate intersections we also calculate all possible intersections. But plates do not always touch each others edges. Therefore we replaced this algorithm by a different approach explained in the previous section for \hyperref[findIntersections]{finding intersections}.
 
 % \subsection{Bruteforce finding lines}
 % The first approach was gathering all lines from all plate boundaries and looking for intersects of any other line. This is a very costly calculation but less prone to rounding errors. \\
 % Later we continued on to using plane intersections which meant we only needed to work with all combinations of plates instead of all of its edges.
 
-\subsection{Representation of the location for joints}
-As seen before in \ref{mainLine} we calculate one line per intersection and plate which determines where we will place the joints. We chose this approach because it is a straight forward way. The joints only have to be moved onto the line and can directly be added to the plates. \\
+\subsection{Representation of the joint location}
+As seen before in the section \hyperref[mainLine]{Main Lines} we calculate one line per intersection and plate which determines where we will place the joints. We chose this approach because it is a straight forward way. The joints only have to be moved onto the line and can directly be added to the plates. \\
 A different, more future oriented, approach is to work with the axis going through the middle of where the joints will be. This means it also defines the axis around which the plates could rotate when their angle changes. 
 \TODO{Include image that shoes hinge twice. One where the axis is marked and one where our two main lines are marked!}
-In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
+In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should be similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
 In our use case the single line approach for an edge of a plate is completely sufficient.
 
 \subsection{Finding main lines by checking if they lie on a corner of the shape}
 As already mentioned when plates intersect there can be up to four intersection lines. We need to define which of them is the most important one in order to know where to put joints. The line we wanted to choose had to touch both plates.
 \TODO{Image of the four lines and showing which one should always be the main line}
 This means all lines which intersected with any points of the shapes of the plates were ignored. The other line became main line.\\
-Our assumption, which we adopted from the Platener thesis \TODO{cite},  for finding the main line was the following:\\
-Two plates always touch one another edge-to-edge. Therefore, if an intersection line does not lie on an outer boundary of the shape then it is the main line.\\
-\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}\\
-But the problem is that plates can intersect each other in many different ways which do not all verify our first assumption. 
-\TODO{include image of two planes where this doesnt work}
-This is why we replaced this algorithm with the one from the previous section \ref{mainLine}
+Our assumption which we adopted from the Platener thesis \TODO{cite}  for finding the main line is the following:\\
+Two plates always touch one another edge-to-edge. Therefore, if an intersection line does not lie on an outer boundary of the shape it is the main line.
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}
+\caption{Our assumption was that we only need to define one main line per plate pair. If there was just one intersection at all it was obvious. And when there were more than one intersection we thought the inner intersection should be the main line. }
+\end{figure}
+
+But the problem is that plates can intersect in many different ways which do not all verify our first assumption. 
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}
+\caption{In this case the angle between the plates is obtuse. If we just took the inner intersection here without first clipping of the plates there would be no space for joints. }
+\end{figure}
+\TODO{replace this with image of two planes where this doesnt work}
+This is why we replaced this algorithm with the one from the previous section \hyperref[mainLine]{Main Lines}.
 
 \subsection{Adjusting angles based on which sides of the plates touch}
 Our previous version of finding a main line was supposed to yield one line. Based on this line the angle was calculated with the following procedure:\\ 
 After the angle of the planes had been calculated we adjusted the angle in some cases dependent on the direction in which the normals were pointing. \\
 We know which sides of the plates are enclosing the angle thanks to the previous main line calculation.
 % figure which shows when angle is right, but also one case when it is not right
-\begin{figure}[h]
-
+\begin{figure}[!ht]
+\centering
 \includegraphics[width= 1\columnwidth]{Images/anglesExamplesSmall.png}
 \caption{(a) The angle between the plates' normals correspond with the angle $\gamma$ between the plates. (b) The angle between the plates' normals is in this case an adjacent angle to the requested angle $\gamma$.}
 \end{figure}
 
 In order to find out in which cases the angle has to be adjusted we check for two properties.\\
-Firstly, there is the question which of the sides of the plates intersect. A plate is defined by a 2D-shape which is called main side. The other side which exists due to a specified thickness of the plate is called parallel side.\\
+First, there is the question which of the sides of the plates intersect. A plate is defined by a 2D-shape which is called main side. The other side which exists due to a specified thickness of the plate is called parallel side.\\
 Additionally, we look at the direction of the normals. The direction is positive when it is directed from the main to the parallel side and negative otherwise.\\
 For an angle to be in need to be adjusted the following conditions need to be satisfied.
 \begin{itemize}
@@ -210,18 +268,23 @@ For an angle to be in need to be adjusted the following conditions need to be sa
 \end{itemize}
 But as mentioned before all of these calculations are based on the assumption that the previous main line calculation only yielded one line.\\
 \TODO{Include image that shows when this is not the case, with captions explaining why our current algorithm fails here}
-In this case the previous algorithm fails which is why we developed a new approach for finding the correct angle as already explained in the section \ref{angleCalculation}.
+In this case the previous algorithm fails which is why we developed a new approach for finding the correct angle as already explained in the section \hyperref[angleCalculation]{Angle Calculation}.
 
 \section{Future work}
 
 \begin{itemize}
     \item To be not forgotten: A line can be split into pieces!:\\
-    Plates do not only touch another along one line. \\
+    Plates do not only touch another along one line. 
+    \begin{figure}[!ht]
+    \centering
     \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-moreThanOneLinePerEdge.jpg}
+    \caption{Plate 2 touches Plate 1 twice. This should result in two edges and intersections which should be handled seperately.}
+    \end{figure}
+    
     \item find out if model is assemblable in the end\\
     A very important information about the final converted model is if it can actually be build. A user may not only need assembly instructions on how to actually build the model when cut but also if it is possible to do so. There may be a conflict when plate a needs to be put up before plate b but plate b also needs to be in the model before plate a. This should not happen or at least be mentioned to the user.
     \item rejoining broken up plates (t-connection)\\
-    This is what dustin also suggested and already implemented.\\
+    This is what Dustin also suggested and already implemented.\\
     He suggested to group two plates together again when:\\
     \begin{enumerate}
         \item the main sides of P1 and P2 are coplanar
@@ -232,7 +295,7 @@ In this case the previous algorithm fails which is why we developed a new approa
     For this the following steps are necessary:
     \begin{enumerate}
         \item Iterate over all nodes and check if it has two or more neighbors. 
-        \item Test if the any of the neigbors are coplanar to each other. If so they are labeled as plates p1 and p2. Any other neighbor is labeled p3 or higher.
+        \item Test if any of the neighbors are coplanar to each other. If so they are labeled as plates p1 and p2. Any other neighbor is labeled p3 or higher.
         \item Check if p1 and p2 have the same thickness. If not start over with the next node
         \item If they have the same thickness the intersections needs to be checked for parallelness and overlaps between p1 and p3 and p2 and p3.
         \item When determined that p1 and p2 are actually one plate which is parted by p3 then they need to be unioned and marked for a t-junction to be handled in the next step.

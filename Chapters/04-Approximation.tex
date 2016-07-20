@@ -360,7 +360,73 @@ Hashing is usually done if only identical points are merged instead of vertices 
 
 \section{Point on Line Removal}
 
+\emph{PointOnLineRemover} is used by the \emph{ShapesFinder} to delete unnecessary vertices and therefore reducing their complexity. It checks every \emph{EdgeLoop} of a found shape for vertices that lie on implicit lines given by other vertices as shown in figure \myNotes{figure einzusetzen}: Point 2 lies on the line between point 1 and 3 and gets deleted.
+
+\myNotes{TODO: figure}
+
+\emph{Shapes} may represent only a line or a point instead of an 2D-shape if they do not contain enough vertices. An \emph{EdgeLoop} gets deleted if it contains less than three vertices after point on line removal because it does not span an area any more. In case the contour of a \emph{shape} gets deleted the complete \emph{shape} is obsolete and gets deleted as well.
+
+A threshold for the distance of a point to a line is given by the global config since minor deviations from the line are not relevant.
+
+A simplified pseudo code version of the actual removal algorithm is shown in listing \ref{lst:pointOnLineRemovalAlgo}: \emph{getPreviousIndices()} returns the two previous indices that are not removed and \emph{isPreviousOnLine(index, prev, prevprev)} returns true if $ vertex_{prev}$ lies on the line between $vertex_{index}$ and $vertex_{prevprev}$. So we iterate over all vertices while deleting all its previous vertices until the previous is not on the line. 
+
+\begin{listing}[!h]
+\centering
+\begin{minted}[
+linenos, breaklines
+]{coffeescript}
+for index in [0...vertices.length] when index not in removedIndices
+    while true
+        {prev, prevprev} = @getPreviousIndices(index)
+        if @isPreviousOnLine(index, prev, prevprev)
+            removedIndices.push(prev)
+        else
+            break
+\end{minted}
+\caption{Simplified point on line removal algorithm}
+\label{lst:pointOnLineRemovalAlgo}
+\end{listing}
+
+
+When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \myNotes{figure einzusetzen}: Point 1 gets deleted in case point 2 lies within threshold distance to the line between point 0 and 1. But the actual point that should be deleted is obviously point 2 since it lies directly on the line between point 1 and 3. 
+
+Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In figure \myNotes{figure einzusetzen} point 1 lies outside of the line between point 0 and 2. With this additional check the resulting triangle consist of the points 0, 1 and 3 as obviously desired.
+
+\myNotes{TODO: figure}
+
+
+
+
+
+
+
+
+
 \section{Remove Contained Plates - in Lukas Kapitel}
+
+\emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software. 
+
+There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs with extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
+
+We iterate over all plates and compare them to all other plates. The comparison is based on their normals while further checks are only necessary in a minimal fraction. Therefore the comparison is fast enough and the amount of comparisons must not be reduced with a different iteration algorithm.
+
+\subsection{Plate completely inside another}
+
+As described in the master thesis the algorithm may produce small plates that lie completely inside the actual modeled plate. These plates are orthogonal.
+
+So if two plates have orthogonal normals we check if one of them lies completely in the other and remove it.
+
+\subsection{Overlapping parallel plates}
+
+A 3D block can not be represented by one single plate if it is thicker than a plate. The software creates two plates instead. The resulting plates will overlap in case this block is thinner than those two plates together.
+
+So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections.
+
+
+
+
+
+
 
 \section{Hole Detection - in Plates Kapitel}
 
@@ -628,6 +694,8 @@ Consequently the maximum bucket index is calculated with the maximum angle of 36
 
 \subsubsection{Implementation}
 
+\myNotes{TODO: Klassendiagramm}
+
 The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. \myNotes{(sind dependencies vorher erklärt? sollte so sein)} It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism.
 
 \paragraph{PrismClassifier}
@@ -673,7 +741,8 @@ At the end a set of all prisms is returned which can be used for further primiti
 
 The constructor saves the angle threshold, instantiates the rings as a \emph{javascript map} and calculates the maximum ring index $I_{MaxRing}$.
 
-It provides two functions used by the classifier: \emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
+It provides two functions used by the classifier: \\
+\emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
 
 \emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
 
@@ -686,20 +755,27 @@ First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the rin
 Second: The ring with index 0 "is adjacent to itself" because the unit ball got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).  
 
 
-Ring
+\paragraph{Ring}
 
-MaxRing
+A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}
+
+The method \emph{push} sorts a given shape into the corresponding bucket. \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring. 
+
+
+\paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.
 
 \paragraph{Prism}
+
+A \emph{Prism} contains two parallel shapes that span a prism. In future work this should be extended by the lateral surface which is not handlet yet.
 
 \subsubsection{Future Work}
 \label{sec:PrismFutureWork}
 
-planes
+\paragraph{Planes} \emph{Planes} from the \emph{PlaneClassifier} should be taken into account in addition to the shapes. Ideally the \emph{PlaneClassifier} detects noisy planes that are not represented as shapes. Therefore a better approximation of the original model could be achieved.
 
-mantelfläche
+\paragraph{Lateral Surface} The lateral surface of the prism has yet to be identified and added to the prism structure. This is needed for further operations and more specific classifications of the prism. For example for classifying a cube the surrounding sides have to be known.
 
-scoring : größerer Winkel?
+\paragraph{Scoring} Prism scoring is not implemented yet. To rate a prism the actual angle between the two nearly parallel shapes have to be considered. If scoring is implemented the angle threshold for parallelism can be adjusted to a much higher value while big variations to 0° will be reflected in the score.
 
 
 \end{document}
