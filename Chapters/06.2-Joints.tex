@@ -18,87 +18,112 @@
 When an object consisting of multiple parts is lasercutted it needs to have connectors. Those can be elements like screws, nails and glue. Or the plates already come along with connectors. Those can be for example fingerjoints which, when well calibrated, do not need any external material to hold together. \\
 Whenever possible we want to provide connections like that because a user needs less effort, when components work directly out of the lasercutter. This is why we provide three types of joints which are added to the determined plates.
 
-\TODO{I moved volume based clipping from here, make sure nothing in this chapter was relying on it to be in this chapter!!}
-
 \section{building joints}
 \TODO{Make this section easier to read!}
-The general procedure of creating joints is achieved in three steps: First we calculate how many female and male joints fit onto the intersection. Then the retrieved joints are placed at the intersectionline and finally the shapes are merged to result in the original plate with joints.
-\TODO{better item names!! and maybe subsections instead of item because content of item is so large}
-\begin{enumerate}
-    \item buildAlignedJointTemplates\\
-        \paragraph{jointCount}
-        We need to know how many joints we have to place onto the intersection. We call this 'jointCount' which describes the number of all joints to fit on the line including the male and female joints. Since all joint types have equal widths for female and male joints we divide the length of the line by the width of a joint.
-        \paragraph{adjustJointWidth}
-        But this calculation has to be rounded which means the number of joints just found might not fill the complete length of the line after all. Therefore we adjust the width so that the joints will be evenly spread without leaving space on either end of the line.
-        Now that we know how the joints will look like and how many we need it is time to find out how to distribute them.\\
-        We defined that when there is an even number of joints, the middle joint will be male and twice as thick as normally.\\
-        %\textbf{TODO: provide image of the two cases: even and odd number}
-        \includegraphics[width=\columnwidth]{Images/10-joints-evenOddJointCount.jpg}
-        \paragraph{computeMaleJointsPerSide} %number only
-        On both sides of the middle joint will be an equal number of male joints. How many depends on the jointCount. An even jointCount means 2 joints less and odd means one joint less on the sides because the middle joint will be created seperately. Since the jointCount specifies the number of all joints, male and female we have to divide by two to get the number of male joints only and then divide by two once more to achieve the seperation into the two sides.\\
-        maleJointsPerSide = 
-        \begin{cases} 
-        (jointCount - 2) / 4, & jointCount $ \% 2 == 0 $ \\ 
-        (jointCount - 1) / 4, & jointCount $ \% 2 == 1 $
-        \end{cases}
-            \paragraph{buildJointsForEven / Odd count}
-            Finally, we can start placing the middle joint and distributing as many joints as just calculated on either side of it evenly with leaving enough space inbetween the joints for a female one to fit in.\\
-            % \textbf{TODO: image of final spreaded joints, show that distance between them is the width.}
-            \includegraphics[width=\columnwidth]{Images/10-joints-spreadedJoints.jpg}
-        \paragraph{computeFemaleJointsPerSide} %number only
-        The computation for the number of female joints on one side of the middle joint is very similar to the previous computation for male joints. Only that the middle joints do not have to be subtracted.\\
-        femaleJointsPerSide = 
-        \begin{cases} 
-        (jointCount) / 4, & jointCount $ \% 2 == 0 $ \\ 
-        (jointCount + 1) / 4, & jointCount $ \% 2 == 1 $
-        \end{cases}
-            \paragraph{create Females for fingerjoint type}
-            When creating fingerjoints the female joints are the exact negative of the male joints. Therefore we do not create these joints one by one. Instead we retrieve the boundingbox of the male joints along the length of the intersection line and calculate the difference of this rectangle and the male joints. The result are the female joints.
-            \paragraph{create Females for jimjoints/dovetail joints}
-            In the case of dovetail- and jim-joints we have to create the female joints by placing each single joint along the intersection line.\\
-            This is achieved by distributing them in the same way as the male joints are evenly spread. Except that for the females we leave the space for the middle joint empty.\\
-        Finally, we have created female and male joints which are aligned along a line with the length of the intersection.
+The general procedure of creating joints consists of three steps: First we calculate how many female and male joints fit onto the intersection. Then the retrieved joints are placed at the intersection line and finally, the shapes are merged to result in the original plate with joints.
+\subsubsection{Building the joints for a specific intersection line}
+% \paragraph{jointCount}
+We need to know how many joints we have to place onto the intersection. We call this 'jointCount' which describes the number of all joints which fit on the line including the male and female joints. Since all joint types have equal widths for female and male joints we divide the length of the line by the width of a joint.\\
+\*\\
+% \paragraph{adjustJointWidth}
+But this calculation has to be rounded because the number of joints just found might not work out evenly with the length of the line. Therefore we adjust the width so that the joints will be evenly spread without leaving space with no joint on either end of the line.
+Now that we know how the joints will look like and how many we need it is time to find out how to distribute them.\\
+We defined that when there is an even number of joints, the middle joint will be male and twice as thick as normally.\\
+%\textbf{TODO: provide image of the two cases: even and odd number}
+\includegraphics[width=\columnwidth]{Images/10-joints-evenOddJointCount.jpg}\\
+\*\\
+% \paragraph{computeMaleJointsPerSide} %number only
+On both sides of the middle joint will be an equal number of male joints. How many depends on the jointCount. An even jointCount means 2 joints less and odd means one joint less on the sides because the middle joint will be created seperately. Since the jointCount specifies the number of all joints, male and female we have to divide by two to get the number of male joints only and then divide by two once more to achieve the seperation into the two sides.\\
+maleJointsPerSide = 
+\begin{cases} 
+(jointCount - 2) / 4, & jointCount $ \% 2 == 0 $ \\ 
+(jointCount - 1) / 4, & jointCount $ \% 2 == 1 $
+\end{cases}\\
+\*\\
+% \paragraph{buildJointsForEven / Odd count}
+Finally, we can start placing the middle joint and distributing as many joints as just calculated on either side of it evenly with leaving enough space inbetween the joints for a female one to fit in.\\
+% \textbf{TODO: image of final spreaded joints, show that distance between them is the width.}
+\includegraphics[width=\columnwidth]{Images/10-joints-spreadedJoints.jpg}\\
+\*\\
+% \paragraph{computeFemaleJointsPerSide} %number only
+The computation for the number of female joints on one side of the middle joint is very similar to the previous computation for male joints. Only that the middle joints do not have to be subtracted.\\
+femaleJointsPerSide = 
+\begin{cases} 
+(jointCount) / 4, & jointCount $ \% 2 == 0 $ \\ 
+(jointCount + 1) / 4, & jointCount $ \% 2 == 1 $
+\end{cases}\\
+\*\\
+% \paragraph{create Females for fingerjoint type}
+When creating \emph{fingerjoints} the female joints are the exact negative of the male joints. Therefore we do not create these joints one by one. Instead we retrieve the boundingbox of the male joints along the length of the intersection line and calculate the difference of this rectangle and the male joints. The result are the female joints.\\
+\*\\
+% \paragraph{create Females for jimjoints/dovetail joints}
+In the case of \emph{dovetail}- and \emph{jim-joints} we have to create the female joints by placing each single joint along the intersection line.\\
+This is achieved by distributing them in the same way as the male joints are evenly spread. Except that for the females we leave the space for the middle joint empty.\\
+Finally, we have created female and male joints which are aligned along a line with the length of the intersection.
     
-    \item placeJointsAtIntersectionLineOfNode\\
-        This step moves the joints to the correct position in space. 
-            \paragraph{line and shape into XY}
-            In order to be able to do shape union functions we need to move the problem to the xy-plane. Therefore the intersectionline and the shapes of the plates are transformed.
-            \paragraph{bounding box of joints, center of bounding box}
-            The joints which already lie in the xy-plane are rotated and translated onto the intersectionline in XY.
-            \paragraph{make sure joints are placed at line but outside of shape}
-            To make sure that the joints will be appended to the plates we test if the transformed joints lie inside the plate. If so they are moved towards the outside of the plate.
+\subsubsection{Placing the joints at the correct edge of the plate}
+This step moves the joints to the correct position in space. 
+% \paragraph{line and shape into XY}\\
+\*\\
+In order to be able to do shape union functions we need to move the shape of the plate and the intersectionline into the xy-plane.
+\*\\
+% \paragraph{bounding box of joints, center of bounding box}
+The joints which already lie in the xy-plane are rotated and translated onto the intersectionline.\\
+\*\\
+% \paragraph{make sure joints are placed at line but outside of shape}
+To make sure that the joints will be \emph{appended} to the plates we test if the transformed joints lie inside the plate. If so they are moved towards the outside of the plate.
+            
+\subsubsection{Merging the joints with the plate}
+The last step unions the now aligned shapes of the joints and plates and rotates them to the correct position in space where the plate belongs to within the model.
 
-    \item mergeJointsAndShape and rotate back\\
-        The last step merges the now aligned shapes of joints and plates and rotates them to the correct position in space where the plate belongs to inside the model.
-    
-\end{enumerate}
 
 \section{Different Fingerjoint types}
 
 \TODO{Bilder noch so anpassen, dass nur females/males zu sehen und in echt, wie sie zusammen stecken}\\
 We support three types of joints. Each have benefits when used for specific material in a special use case. We allow the user to choose the type of material which then affects the choice of joints in the converted model.
-\TODO{maybe use minipages to show image on one side an the text on the other!}
+
 \subsubsection{Fingerjoint template}
-\includegraphics[width=0.5\columnwidth]{Images/fingerjoints.png}\\
+\begin{minipage}{0.4\textwidth}
+\includegraphics[width=1\columnwidth]{Images/fingerjoints.png}
+% \caption{Path which a lasercutter has to follow to cut our plates with fingerjoints.}
+\end{minipage}
+\begin{minipage}{0.6\textwidth}
 %\paragraph{How these joints look like}
-Fingerjoints only consist of 90 degrees angles. Both, the female and male joints, are the same only offset by one joint. This means that the joints can slide directly into each other. But that only works when the sizes are measured correctly so that they create a tight fit. Otherwise plates connected by fingerjoints do not fit into each other at all or fall apart and have to be glued. 
+Fingerjoints only consist of 90 degrees angles. Both, the female and male joints, are the same only offset by one joint. This means that the joints can slide directly into each other. 
+\end{minipage}
+But that only works when the sizes are measured correctly so that they create a tight fit. Otherwise plates connected by fingerjoints do not fit into each other at all or fall apart and have to be glued. 
 %\paragraph{How these joints work, and for what material}
-When using fingerjoints one typically has 90 degree angles plates because it is the easiest to connect them in this angle. Other angles can be created but it is hard to know when the plates form the exact angle that is wanted unless the plates are part of a construction which gives them no other chance than to form the given angle.\\
+When using fingerjoints one typically has 90 degree angled plates because it is the easiest way to connect them. Other angles can be created but it is hard to know when the plates form the exact angle that is wanted unless the plates are part of a construction which gives them no other choice than to form the given angle.
+\TODO{Maybe show this in a picture? Boat vs only two plates, where the angle cannot be determined without the other plates}
 Regarding the material fingerjoints are useless when flexible materials are connected with it. The problem is that a tight fit cannot be created as well in most cases. Also very thin material is not working well since fingerjoints hold up due to the friction of one plate to the other. The fewer material the less friction.\\
 We usually use fingerjoints for acrylic and wood.
 
+
 \subsubsection{JimJoint template}
-    \includegraphics[width=0.5\columnwidth]{Images/jimjoints.png}
+    \begin{minipage}{0.6\textwidth}
+    
     These joints are named after Jim McCann who thankfully showed us the design for these connections.
     %\paragraph{How these joints look like}
-    The male and female joints are the same but they grow wider with its height. This means these joints cannot slide into each other but they rather snap together. This means once they are connected they cannot be taken apart just by pulling on the plates. 
+    The male and female joints are the same but they grow wider with its height.
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+    \includegraphics[width=1\columnwidth]{Images/jimjoints.png}
+    % \caption{Path which a lasercutter has to follow to cut our plates with JimJoints.}
+    \end{minipage}
+    This means these joints cannot slide into each other but they rather snap together. This means once they are connected they cannot be taken apart just by pulling on the plates. 
+    
     %\paragraph{How these joints work, and for what material}
     In order for the snapping to work the material used has to be flexible or very thin and therefore flexible. Jim McCann already used it for foam. We now use it especially for paper because this material would be much too thin for creating enough friction for fingerjoints to work.
 
 \subsubsection{Dovetail template}
-    \includegraphics[width=0.5\columnwidth]{Images/schwalbe.png}
-    \TODO{Image of wood dovetails where this joint is derived from.}\\
+\TODO{Image of wood dovetails where this joint is derived from.}\\
+    \begin{minipage}{0.4\textwidth}
+    \includegraphics[width=1\columnwidth]{Images/schwalbe.png}
+    % \caption{Path which a lasercutter has to follow to cut our plates with JimJoints.}
+    \end{minipage}
+    \begin{minipage}{0.6\textwidth}
     Typically a dovetail joint is used in woodwork. It helps to ensure that when there was a pulling force on both wooden plates that the joints would all hold onto the other plate.\\
+    \end{minipage}
     But in order to create the female joints the wood needs to be cut in an angle. This is not possible without inadequately high time and power consumption. See the upcoming section 'alternative solution' for information on how to lasercut the female part of a dovetail.\\
     Instead, we developed a joint type very similar to the original dovetail. This can be easily cut with a lasercutter.
     %\paragraph{How these joints look like}
@@ -126,24 +151,31 @@ We usually use fingerjoints for acrylic and wood.
     
 
 \section{Alternative solutions / related work}
-    \begin{itemize}
-        \item Snap fits we already tried. Hard to implement because enough space needs to be given when cutting the spring.
-        \item how to lasercut the female part of a dovetail with alot of effort!\\
-        In order to achieve different depths of cutting you can set the lasercutter to use lower power. This is usually used for engraving which also does not cut through the material.\\
-        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-schwalbeMitLaser.png}\\
-        \TODO{Name Lasercut like a boss here}\\
-        By coloring a part in the svg-file in a gradient from white to black this part will be cut in an angle. The more white the less power.
-        \item other joint type: pettis joint (fingerjoint with screws)
-        \item slot joinery technique when overlapping plates had to be rejoined
-        \item Wrong fingerjoint height adjustment:\\
-        Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. \\
-        \item Dustins useless angle stuff:\\
-        He computed different angle types. They are quite crappy because he assumed that plates would only meet at edges. But plates can lie in another\\
-        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesDustin.jpg}\\
-        \includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesWrongAssumption.jpg}\\
-        Therefore we do not use those angle type but we clip both plates with their four intersection lines. \\
-        Then due to angle and trigonometry etc. we can calculate the correct length for the joints which connects the plates again.
-    \end{itemize}
+\subsection{more joint type}
+\subsubsection{snap fits}
+Snap fits we already tried. Hard to implement because enough space needs to be given when cutting the spring.
+\TODO{show image of our cube with snap fits!}
+\subsubsection{pettis joints}
+other joint type: pettis joint (fingerjoint with screws)
+\subsubsection{t-joint}
+slot joinery technique when overlapping plates had to be rejoined
+\subsubsection{real dovetails with the lasecutter}
+how to lasercut the female part of a dovetail with alot of effort!\\
+In order to achieve different depths of cutting you can set the lasercutter to use lower power. This is usually used for engraving which also does not cut through the material.\\
+\includegraphics[width=0.5\columnwidth]{Images/06-2-joints-schwalbeMitLaser.png}\\
+\TODO{Name Lasercut like a boss here}\\
+By coloring a part in the svg-file in a gradient from white to black this part will be cut in an angle. The more white the less power.
+
+\subsection{Wrong fingerjoint height adjustment}
+Firstly, the angle can be projected onto values between 0 and 90. Then the cosine function returns a number between 0 and 1 for the angle. The thickness of the plate is divided by this number to achieve a height that fits the angle and the thickness of the plates. 
+
+\subsection{Dustins useless angle stuff}
+He computed different angle types. They are quite crappy because he assumed that plates would only meet at edges. But plates can lie in another\\
+\includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesDustin.jpg}\\
+\includegraphics[width=0.5\columnwidth]{Images/06-2-joints-angleTypesWrongAssumption.jpg}\\
+Therefore we do not use those angle type but we clip both plates with their four intersection lines. \\
+Then due to angle and trigonometry etc. we can calculate the correct length for the joints which connects the plates again.
+
     
     
     

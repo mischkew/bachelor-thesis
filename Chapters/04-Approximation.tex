@@ -418,7 +418,7 @@ _normalInHemisphere: (normal) ->
     else
         return normal
 \end{minted}
-\caption{Normals are transformed into hemsiphere}
+\caption{Normals are transformed into hemisphere}
 \label{lst:_normalInHemisphere}
 \end{listing}
 
@@ -677,7 +677,13 @@ It provides two functions used by the classifier: \emph{push} and \emph{getShape
 
 \emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
 
-\emph{getShapesToCheckAndDeleteThisOne}
+\emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath. 
+
+While determining the surrounding rings following special cases need to be considered:
+
+First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
+
+Second: The ring with index 0 "is adjacent to itself" because the unit ball got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).  
 
 
 Ring

@@ -11,25 +11,31 @@ There are multiple approaches for finding plates contained in a 3D-mesh. The fir
 
 \begin{figure}
     \includegraphics[width=1.0\columnwidth]{Images/plates_inherentplates.png}
-    \caption{Finding inherent plates}
+    \caption{Finding inherent plates.}
     \label{fig:inhplates}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=1.0\columnwidth]{Images/plates_extrudedplates.png}
-    \caption{Finding extruded plates}
+    \caption{Finding extruded plates.}
     \label{fig:extplates}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=1.0\columnwidth]{Images/plates_stackedplates.png}
-    \caption{Finding stacked plates}
+    \caption{Finding stacked plates.}
     \label{fig:staplates}
 \end{figure}
 
 \section{Prerequisites for finding plates}
 
-Before finding plates, the model's faces have to be grouped into planar surfaces. This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
+Before finding plates, the model's faces have to be grouped into planar surfaces (Figure \ref{fig:coplanar}). This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
+
+\begin{figure}
+    \includegraphics[width=1.0\columnwidth]{Images/plates_coplanar.png}
+    \caption{Finding inherent surfaces.}
+    \label{fig:coplanar}
+\end{figure}
 
 \subsection{Coplanar Faces}
 
@@ -255,7 +261,7 @@ PASTE HERE
 \section{Stacking plates}
 
 As an alternative approach, plates can be stacked. This method does not directly use the models surfaces. However, they can be used for optimization.
-The main function for stacking is shown in Listing \ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. After clipping the models faces with these planes, the resulting edges are merged into edge loops, which are used for creating shapes and, as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotaion in order to align them with the model. 
+The main function for stacking is shown in Listing \ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. After clipping the models faces with these planes, the resulting edges are merged into edge loops, which are used for creating shapes and, as wall as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotation in order to align them with the model. 
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -333,7 +339,7 @@ getClippingPlanes: ->
 
 \subsection{Clipping the model's faces}
 
-Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing \ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing \ref{lst: findplane}. 
+Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing \ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing \ref{lst:findplane}. Starting at the median plane (\mintinline{coffeescript}{@planes.length // 2}), we search the planes until one plane clipping the face is found or it's certain that no plane clips the face.
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -362,8 +368,10 @@ findClippingPlane: (face) ->
       face, 
       @planes[currentIndex]
     )
+    # found clipping plane
     if direction is 0
       index = currentIndex
+    # continue search
     else
       oldIndex = currentIndex
       currentIndex += Math.round stepWidth * direction
@@ -373,6 +381,19 @@ findClippingPlane: (face) ->
 \caption{Finding a plane which clips the face.}
 \label{lst:findplane}
 \end{listing}
+
+The search direction is calculated by clipping the face against the plane (Listing \ref{lst:clipfaceplane}). After clipping each edge with the face, the number of intersection decides the result.
+
+\begin{itemize}
+  \item No intersections: The face does not clip the plane.
+  \item One Intersection: Invalid. It's not possible to get only one intersection when clipping a valid face.
+  \item Two intersections: If both intersection points are the same, one vertex of the face clips the plane. Otherwise two edges clip the plane.
+  \item Three intersections: If any two of the intersection points are the same, a vertex and the opposite edge clip the plane. Otherwise the whole face lies in the plane.
+\end{itemize}
+
+If the face doesn't clip the plane or only intersect with one vertex, we check if it's below or above the plane and return either -1 or 1 as direction (calculation shown in Listing \ref{lst:facedirection}). In all other cases, 0 is returned, because the face clips the plane and we don't have to search further. 
+
+Additionally, if either two edges, an edge and a vertex or the whole face clips the plane, these intersections are stored in the plane.
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -387,8 +408,9 @@ clipFaceAgainstPlane: (face, plane) ->
     intersection = plane.plane.intersectLine line
     if intersection? then intersections.push intersection
   )
-  # handle intersection
+  # handle intersections
   # [...]
+  return direction
 \end{minted}
 \caption{Clipping a face against a plane.}
 \label{lst:clipfaceplane}
@@ -409,6 +431,8 @@ getDirectionFromPlaneToFace: (face, plane) ->
 \caption{Calculating the direction from a plane to a face.}
 \label{lst:facedirection}
 \end{listing}
+
+After one clipping plane has been found, the adjacent ones have to be checked as well, since a face can span over multiple planes. This is done by iterating over the planes, starting from the next one and moving away. If the returned direction isn't 0, we can stop because the plane and all following ones do not clip the face. Both directions, upwards and downwards, are checked seperately (see Listing \ref{lst:checkadjacent}).
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -435,7 +459,37 @@ checkAdjacentPlanes: (face, index) ->
 \label{lst:checkadjacent}
 \end{listing}
 
+\subsection{Creating shapes}
+
+Using the intersections stored in each plane, shapes can be created. These shapes represent the cross-sections of the model. Since this requires merging the intersection edges, the shapes finder can be re-used for this step. Additionally, the \jsclipper library is used to create 2D polygons, which are used in the next step.
+
 \subsection{Adding shafts}
+
+In order to assemble the stacked plates, we connect them with shafts (Figure \ref{fig:shafts}). The idea is simple: if two shapes which are located in adjacent planes intersect, they have to be connected by at least one shaft. The shaft finding algorithm has three steps: First, we iterate over all shapes and connect as many as possible. Next, we fix shapes which are not yet connected. Afterwards, we clean up shafts which are only connected to one shape.
+
+\begin{figure}
+    \includegraphics[width=1.0\columnwidth]{Images/plates_shafts.png}
+    \caption{Connecting plates with shafts.}
+    \label{fig:shafts}
+\end{figure}
+
+\subsubsection{The shaft object}
+
+A shaft has these properties:
+\begin{itemize}
+    \item polygons - a list of the polygons which the shaft connects
+    \item intersection - the intersection of all the polygon which the shaft connects
+    \item finished - true if the shaft is complete and won't be extended to connect more polygons
+    \item lastlevel - the layer of the last added polygon
+    \item shaftData - contains the shaft's cross section's x and y dimensions
+\end{itemize}
+It contains functions which allow adding new polygons to the shaft, and building the shaft's cross section and contour.
+
+\subsubsection{First pass}
+
+Instead of the actual shapes, the corresponding polygons are used, which enable working with the \jsclipper. These are organized in layers, matching the clipping planes. Each layer contains a list of polygons, since there can be multiple shapes in one layer. We have to iterate over both lists, the inner and the outer, as shown in Listing \ref{lst:findshafts}.
+
+When processing a new polygon, we first mark that it hasn't been added to any shaft yet. Now, we iterate over all shaft candidates. If the current level (the layer) is bigger than the shaft's last added polygon's level plus one, there was no polygon from the last layer added to the shaft. Since we do not want shafts to create "bridges" spanning between unconnected layers, the shaft is marked as completed. If that's not he case, we try to add the polygon to the shaft.
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -483,6 +537,39 @@ findShafts: ->
 \label{lst:findshafts}
 \end{listing}
 
+Figure \ref{lst:addpolytoshaft} shows the calculations run when adding a polygon to a shaft. First, the shaft's intersection and the new polygon are intersected. The resulting intersection is checked if it's big enough to fit the shaft. If that's the case, the shaft's intersection is updated and the polygon is added to the shaft.
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos,breaklines
+]{coffeescript}
+tryAddingPolygonToShaftCandidate: (
+    polygon, shaftCandidate, direction
+  ) ->
+    clip = polygon.polygon.intersect shaftCandidate.intersection
+    if clip.length > 0 and
+        Shaft.isIntersectionBigEnoughForShaft clip[0], @shaftData
+      newIntersection =
+        new jsclipper.Polygon clip[0].getShape(), clip[0].getHoles()
+      shaftCandidate.intersection = newIntersection
+      if direction is "DOWN" then shaftCandidate.polygons.unshift polygon
+      else shaftCandidate.polygons.push polygon
+      polygon.shafts.push shaftCandidate
+      return true
+    return false # no intersection
+\end{minted}
+\caption{Adding a polygon to a shaft.}
+\label{lst:addpolytoshaft}
+\end{listing}
+
+Back to Figure \ref{lst:findshafts}: If the polygon was not added to any of the shafts, we create a new one - if the polygon is big enough. Additionally, the shaft is overlapped "backwards", up to three layers. This improves stability in the assembled model.
+
+\subsubsection{Fixing unconnected plates}
+
+In some cases, not all polygons - and thus not all plates - are connected to the others yet. Addditionally, shafts should be expanded in both directions as far as possible. A fix is shown in Listing \ref{lst:fixunconnected}.
+
+Each polygon is checked how well it is connected to other polygons. If it is connected to both a polygon below and above (\mintinline{coffeescript}{connection.isConnected} is true), everything is fine. Otherwise, the shafts connecting it from above and below are checked. We try to expand these to connect more polygons in the given direction. If this succeeds, handling for this polygon is completed. Otherwise, we create a new shaft at this polygon and try to expanmd it in both directions.
+
 \begin{listing}[ht]
 \begin{minted}[
 linenos,breaklines
@@ -525,8 +612,12 @@ fixUnconnectedPlates: (shaftCandidates) ->
   )
 \end{minted}
 \caption{Fixing unconnected plates.}
-\label{lst:findshafts}
+\label{lst:fixunconnected}
 \end{listing}
+
+\subsubsection{Cleaning up shafts}
+
+As a result of this method, polygons which are not adjacent to any other polygon get assigned an own shaft. Since this does not improve the models stability, these are removed again, as shown in Listing \ref{lst:cleanupshafts}.
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -543,8 +634,12 @@ cleanUpShafts: (shafts) ->
         )
         shafts.splice i, 1
 \end{minted}
-\caption{Fixing unconnected plates.}
-\label{lst:findshafts}
+\caption{Cleaning up shafts.}
+\label{lst:cleanupshafts}
 \end{listing}
+
+\subsection{Creating plates}
+
+After the shafts are found, their cross section is cut from the connected polygons. Next, these polygons are parsed into shapes and plates. Additionally, the shafts' contours are calculated, with additional plates being created from them. Together, all plates are returned.
 
 \end{document}

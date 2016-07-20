@@ -153,8 +153,29 @@ If we now have a look at only the inner intersections of plates in a model we ca
 Finally, we found all plate adjacencies and necessary information on the connected parts. Also, we adjusted the plates. Therefore the next chapter \ref{ch:joints} can start adding joints.
 
 \section{Alternative approaches for problems addressed in this chapter}
-The solutions presented in this chapter may not be the only way to go. Therefore, we want to give an overview of other algorithms we tried and why we replaced them.
-\TODO{nice introduction for this section and headlines}
+The solutions presented in this chapter may not be the only way to go. Therefore, we want to give an overview of other algorithms we tried or are aware of and why we replaced them.
+
+\subsection{Possible data structures for tracking the intersections}
+Dustin Beyer used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Their indices corresponded to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.\\
+\*\\
+Instead of an adjacency matrix we used the previously explained plate graph class structure because it allows for traversal along the plates and, additionally, the found edges. \\
+Moreover, our structure is open for adding additional objects beside plates. For example 3D-printable snippets which were not converted to plates by our Software.
+
+\subsection{Approaches for finding intersections}
+In the master thesis on Platener a connection is calculated by finding all four possible connections between both sides of two plates. Then the edges of the plates are tested against the line. The part of the line overlapping with an edge was kept for further calculations.\\
+\*\\
+When looking for plate intersections we also calculate all possible intersections. But plates do not always touch each others edges. Therefore we replaced this algorithm by a different approach explained in \ref{findIntersections}
+
+% \subsection{Bruteforce finding lines}
+% The first approach was gathering all lines from all plate boundaries and looking for intersects of any other line. This is a very costly calculation but less prone to rounding errors. \\
+% Later we continued on to using plane intersections which meant we only needed to work with all combinations of plates instead of all of its edges.
+
+\subsection{Representation of the location for joints}
+As seen before in \ref{mainLine} we calculate one line per intersection and plate which determines where we will place the joints. We chose this approach because it is a straight forward way. The joints only have to be moved onto the line and can directly be added to the plates. \\
+A different, more future oriented, approach is to work with the axis going through the middle of where the joints will be. This means it also defines the axis around which the plates could rotate when their angle changes. 
+\TODO{Include image that shoes hinge twice. One where the axis is marked and one where our two main lines are marked!}
+In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
+In our use case the single line approach for an edge of a plate is completely sufficient.
 
 \subsection{Finding main lines by checking if they lie on a corner of the shape}
 As already mentioned when plates intersect there can be up to four intersection lines. We need to define which of them is the most important one in order to know where to put joints. The line we wanted to choose had to touch both plates.
@@ -167,18 +188,10 @@ But the problem is that plates can intersect each other in many different ways w
 \TODO{include image of two planes where this doesnt work}
 This is why we replaced this algorithm with the one from the previous section \ref{mainLine}
 
-\subsection{How we found angles before:}
-Our previous version of finding a main line was supposed to yield one line. Based on this line the angle was calculated with the following procedure: 
-\TODO{Include image that shows when this is not the case, with captions explaining why our current algorithm fails here}
-Therefore, it happens that the current algorithm finds more than one main line. \\
-A new approach we developed for that is clipping the plates at all four intersection lines. Based on the result the angle can be determined because the previous angle calculation cannot be used anymore because the main line is not given anymore. \\
-\*\\
-In order to generate nicely fitting joints in the following step and for grouping plates the angles are necessary.\\
-Firstly, we determine the angle between the according planes.\\
-plane normals: u, v\\
-angle between planes: $\theta$
-$$ cos(\theta) = \frac{u \cdot v}{|u| * |v|}$$
-But we are not talking about infinitely large planes instead we want the angle which is enclosed by the finitely large plates. Therefore we need to adjust the angle in some cases dependent on the direction in which the normals are pointing. We know which sides of the plates are enclosing the angle thanks to the previous main line calculation.
+\subsection{Adjusting angles based on which sides of the plates touch}
+Our previous version of finding a main line was supposed to yield one line. Based on this line the angle was calculated with the following procedure:\\ 
+After the angle of the planes had been calculated we adjusted the angle in some cases dependent on the direction in which the normals were pointing. \\
+We know which sides of the plates are enclosing the angle thanks to the previous main line calculation.
 % figure which shows when angle is right, but also one case when it is not right
 \begin{figure}[h]
 
@@ -195,29 +208,12 @@ For an angle to be in need to be adjusted the following conditions need to be sa
     \item[] AND
     \item Their directions are both positive OR both negative
 \end{itemize}
-
-
-\subsection{Dustin: how he did it}
-\TODO{Maybe include this somewhere else....}
-Dustin used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Their indices corresponded to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.\\
-Furthermore, in the master thesis on Platener a connection is calculated by finding all four possible connections between both sides of two plates. Then the edges of the plates are tested against the line. Those edges, which lied on the line were then tested for overlaps.\\
-\*\\
-Instead of an adjacency matrix we used the previously explained plate graph class structure because it allows for traversal along the plates and, additionally, the found edges. \\
-Moreover, our structure is open for adding additional objects beside plates. For example 3D-printable snippets which cannot be converted to plates by our Software.\\
-When looking for plate intersections we also calculate all possible intersections. But plates do not always touch each others edges. Therefore we replaced this algorithm by a different approach explained in \ref{findIntersections}
-
-% \subsection{Bruteforce finding lines}
-% The first approach was gathering all lines from all plate boundaries and looking for intersects of any other line. This is a very costly calculation but less prone to rounding errors. \\
-% Later we continued on to using plane intersections which meant we only needed to work with all combinations of plates instead of all of its edges.
-
-\subsection{why not use middle axis going through joints? Good-bad-evaluation}
-As seen before in \ref{mainLine} we calculate one line per intersection and plate which determines where we will place the joints. We chose this approach because it is a straight forward way. The joints only have to be moved onto the line and can directly be added to the plates. \\
-A different, more future oriented, approach is to work with the axis going through the middle of where the joints will be. This means it also defines the axis around which the plates could rotate when their angle changes. \\
-In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
-In our use case the single line approach for an edge of a plate is completely sufficient.
-
+But as mentioned before all of these calculations are based on the assumption that the previous main line calculation only yielded one line.\\
+\TODO{Include image that shows when this is not the case, with captions explaining why our current algorithm fails here}
+In this case the previous algorithm fails which is why we developed a new approach for finding the correct angle as already explained in the section \ref{angleCalculation}.
 
 \section{Future work}
+
 \begin{itemize}
     \item To be not forgotten: A line can be split into pieces!:\\
     Plates do not only touch another along one line. \\

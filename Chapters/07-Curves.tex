@@ -74,8 +74,92 @@ While traversing along the bend connections the transformations matrices for the
 
 For the first plate the matrix is already known. It is the rotation matrix of its shape.
 
-For the other plates it is important make sure that they keep in touch with the connected plate while laying them into the xy-plane. Therefore the bend angle must be calculated which is 180\textdegree  minus the angle between the connected plates (this angle is already known from the plate graph creation). Additionally the bend axis is determined building the cross product of the two normals of the connected plates. This way the axis does not only lay at the right place but also points in the right direction (which it would not it only the connection line between the two plates is used). The angle and the axis are used together to create the rotation matrix to lay the plate in the same plane like the previous plate. To get the final transformation matrix this must be multiplied by the transformation matrix of the previous plate.
+For the other plates it is important make sure that they keep in touch with the connected plate while laying them into the xy-plane. Therefore the bend angle must be calculated which is 180\textdegree  minus the angle between the connected plates (this angle is already known from the plate graph creation).
+
+Additionally the bend axis is determined building the cross product of the two normals of the connected plates. This way the axis does not only lay at the right place but also points in the right direction (which it would not it only the connection line between the two plates is used).
+
+This axis has to be transformed to lay in the xy-plane at the edge of the previous plate. To do so our implementation uses the start point of the intersection line and end point created by adding the axis vector to the start point. These two points are transformed by the be transformation matrix of the previous plate. From the transformed points the final axis is determined by subtracting the end point form the start point.
+
+The angle and the axis are used together to create the rotation matrix to lay the plate in the same plane like the previous plate.
+
+Because the rotation matrix only rotates around the point of origin, two translation matrices are created. First, one for translating the plate to the origin to perform the rotation there. Second, one to translate the plate back to the connection edge.
+
+To get the final transformation matrix the transformation matrix of the previous plate is multiplied by the first translation matrix, the rotation matrix and finally the second translation matrix.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-no_overlaps}
+    \caption{\note{info}}
+    \label{fig:bend-matrix:1}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{07-no_overlaps_2d}
+    \caption{\note{info}}
+    \label{fig:bend-matrix:2}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-overlaps}
+    \caption{\note{info}}
+    \label{fig:bend-matrix:3}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{07-overlaps_2d}
+    \caption{\note{info}}
+    \label{fig:bend-matrix:4}
+  \end{subfigure}
+  \caption{\note{how the bend matrix is created}}
+  \label{fig:bend-matrix}
+\end{figure}
+
+\begin{listing}[ht]
+\begin{minted}[
+linenos,breaklines
+]{coffeescript}
+angle = (180 - connection.parameters.angle) * Math.PI / 180
+intersectionLine = connection.parameters.intersectionLine
+start = intersectionLine.start.clone()
+
+lineDir = plate.shape.normal.clone().cross connection.node.shape.normal
+end = start.clone().add lineDir
+
+start = start.applyMatrix4 rotMat
+end = end.applyMatrix4 rotMat
+
+axis = start.clone().sub end
+axis.normalize()
+
+moveMat1 = new THREE.Matrix4().makeTranslation(
+  -start.x,
+  -start.y,
+  -start.z
+)
+moveMat2 = new THREE.Matrix4().makeTranslation start.x, start.y, start.z
+bendMat = new THREE.Matrix4().makeRotationAxis axis, angle
+
+newRotMat = moveMat2.clone().multiply bendMat
+newRotMat = newRotMat.multiply moveMat1
+newRotMat = newRotMat.multiply rotMat.clone()
+\end{minted}
+\caption{Creating the transformation matrix for a plate as part of a bent plate.}
+\label{lst:bend-matrix}
+\end{listing}
 
 \section{Alternative solutions}
+
+\subsection{Check for best solution}
+
+The current implementation do not always find the best solution. While traversing the graph it is possible that there multiple different paths which result in unequally well sets of bent plates. One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first. Because the currently only one attempt to traverse the graph is made the second possibility would not be found.
+To avoid this a possible solution is if one plate that should be added to a bent plate but overlaps with one other plate of the bent plate to also check if removing the older plate (and the only via this plate connected plates) and add the new plate results in a better solution.
+This will increase the run time and will only result in better solutions for models where the bendable parts of the \threedmodel form a highly connected graph.
+
+\subsection{Curved joints}
+
+In the current implementation the finger joints are generated just based on the plates but not on the bent plates. 
+
 
 \end{document}
