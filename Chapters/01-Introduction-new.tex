@@ -18,8 +18,8 @@
 People always had ingenious ideas. Though, back in time it was
 difficult bringing these ideas to life. For example in the field of
 engineering, when one has an idea how airplanes fly better
-(Figure~\ref{fig:intro-ideas:plane}). There are ideas concerning an
-creative process, like a fashion line for shoes which offer correct
+(Figure~\ref{fig:intro-ideas:plane}). There are ideas concerning
+creative processes, like designing a fashion line for shoes which offer correct
 fit to the the feet of its wearer (Figure~\ref{fig:intro-ideas:shoe}).
 Even in health care broad ideas evolve. In 2013 Jake Evill presented
 \name{Cortex}, a customizable plaster that is \enquote{fully
@@ -55,7 +55,7 @@ Figure~\ref{fig:intro-ideas:plaster}. \note{give sources of images.
 Before it was hard to shape these ideas into a physical reality. But
 the way ideas are turned into reality is changing. Today machines
 exist that, connected to a computer, will take over the fabrication of
-objects. Thus, users of fabrication machines can focus on ideas
+objects. Users of fabrication machines can focus on ideas
 instead of requiring and acquiring additional skills to actually
 fabricate.
 
@@ -119,7 +119,7 @@ With a laser cutter low-fidelity functional objects are
 fabricated. Low-fidelity means producing functional objects
 that fulfill their purpose, but lack the amount of detail a
 full-fledged product would have. If there is a minor
-relevance to structural details of the designed object the
+relevance to structural details of the designed object, the
 laser cutter is the perfect choice. Using a laser cutter for
 low-fidelity objects will increase the overall efficiency of
 the fabrication process. A user can iterate on objects
@@ -146,9 +146,9 @@ users face two challenges: They need a vast amount of
 spatial orientation and craft men's knowledge about the used
 materials. The final object has to be assembled from the
 cut-out plates. The user has to know where the plates will
-resemble on the objects in 3D space. Then, the user has to
+resemble on the object in 3D space. Then, the user has to
 attach the plates to each other. In the case of wooden
-plates, this would require knowledge about carpentry. In
+plates this would require knowledge about carpentry. In
 Figure~\ref{}\note{figure} we combined the plates of a bird
 house with finger joints. When creating cutting plans
 manually for larger objects detailed work is
@@ -172,14 +172,14 @@ we begin the fabrication process with a 3D~model.
 Our software system {\platener} converts the 3D~model to a
 2D cutting plan. {\platener} analyzes the geometries and
 approximates the model with plates. Users are not required
-to map the 2D~cutting plan into 3D~space manually.
-The system is aware common materials used with a laser cutter. The software generates all connections between plates automatically.
-
-All connections are calibrated, meaning the plates hold
-together without using any glue or other means of
-attachment. With our software users fabricate 3D~models
-easily while benefiting from the working speed of a laser
-cutter and free choice of materials.
+to map the 2D~cutting plan into 3D~space manually. The
+system is aware of common materials used with a laser
+cutter. The software generates all connections between
+plates automatically. All connections are calibrated,
+meaning the plates hold together without using any glue or
+other means of attachment. With our software users fabricate
+3D~models easily while benefiting from the working speed of
+a laser cutter and free choice of materials.
 
 % in this thesis we talk about:
 
@@ -206,15 +206,17 @@ for this thesis. Their work introduced the concept of converting
 technique. Our work improves the introduced methods, while we focused
 on building a user-centered conversion service.
 
-\paragraph{{\brickify}} \citeauthor{bachelor-thesis} present a
-low-fidelity fabrication approach using 3D~printers and
-LEGO\textsuperscript{TM} bricks. Similar to {\platener} they use a
-3D~editor to convert input models to a hybrid model consisting of
-printed material and bricks. They improve fabrication time noticeably.
-{\brickify} is grounded on previous work by \citeauthor{fabrickation}.
-They built a user-oriented web service using WebGL. The implementation
+\note{how to keep previous and now platener apart?}
+\paragraph{{\brickify}} \citeauthor{bachelor-thesis} present
+a low-fidelity fabrication approach using 3D~printers and
+LEGO\textsuperscript{TM} bricks. Similar to {\platener} they
+use a 3D~editor to convert input models. The conversions
+result in hybrid models consisting of printed material and
+bricks. They improve fabrication time noticeably. They built
+a user-oriented web service using WebGL. The implementation
 presented in this thesis is based on the implementation of
-{\brickify}.
+{\brickify}. {\brickify} is grounded on previous work by
+\citeauthor{fabrickation}.
 
 \note{add bib for fabrickation}
 
