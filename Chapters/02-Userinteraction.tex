@@ -17,11 +17,117 @@
 \subsection{Pipeline Visualizations}
 \subsection{Algorithm/ Method Selection}
 \subsection{Testables (Operating Mode)}
-\subsection{Console Debug Ouput}
+\subsection{Console Debug Output}
 
-\section{CLI}
+\section{{\platener} as a Command Line Interface for Advanced Users}
+\label{sec:walkthrough-cli}
 
-\subsection{Usage and Results}
-\subsection{Reports}
+We have seen in the preceding sections, how {\platener} is used in a
+web browser. We intent to maximize scalability and user-friendliness
+by providing a web application. Though, converting a {\threedmodel}
+can be realized in a mere drag-and-drop action using a web browser, we
+are limited to a single conversion at a time. Also, the web solution
+focuses on the results of the conversion. So far, we have no tool,
+that reports about the conversion status and internal successful or
+failed processes. Our software {\platener} provides a command line
+interface (CLI), which is used in a terminal window. The CLI exposes
+commands for converting {\threedmodel}s, processing multiple models in
+sequence and logging progress reports. We explain the usage of the CLI
+in Section~\ref{sec:walkthrough-cli-usage} and we demonstrate the
+logging capabilities in Section~\ref{sec:walkthrough-cli-reports}.
+
+\subsection{Usage Instructions of {\platener}'s CLI}
+\label{sec:walkthrough-cli-usage}
+
+A CLI is self-documenting. Listing~\ref{lst:cli-help} shows the
+available commands.
+
+\begin{listing}[!h]
+\begin{minted}[
+linenos
+]{text}
+node platener-cli.js -h
+
+Specify an output directory.
+
+  Usage: platener-cli [options] <output-dir>
+
+  Options:
+
+    -h, --help                output usage information
+    -V, --version             output the version number
+    -p --convertPath <input>  Convert multiple stl-Models to plates.
+                              Give path to an folder with stl-Files.
+    -f --convertFile <input>  Convert an stl-Model to plates.
+                              Give path to an stl-File.
+    -v --verbose              Enable Verbose Logging
+    -s --subReports           Log Reports for each Fabrication Method
+    --maxFilesize <input>     Limit filesize (MB),
+                              so large files are skipped.
+
+Full Help:
+
+-f --convertFile    Generate all conversions for each
+                    fabrication mode for the given stl-Model.
+                    Each solution is stored in a seperate zip-File.
+                    The zip-Files are written to the output directory.
+\end{minted}
+\caption{The help of {\platener}'s CLI.}
+\label{lst:cli-help}
+\end{listing}
+
+
+The command line interface mirrors all the computational behavior of
+{\platener} as a web application. With the CLI, we can convert a
+single {\threedmodel} by loading data from the file system. The
+conversion result is again a {\zipfile}. It is written to a given
+target directory. Also, we can recursively read input directories to
+convert each {\stlfile} for the laser cutter. Both commands are given
+in Listing~\ref{lst:cli-convert}.
+
+
+\begin{listing}[!h]
+\begin{minted}[
+linenos
+]{shell}
+# convert a single file
+node platener-cli.js -f ./stl/cubeFilled5cm.stl ./conversions
+
+# convert an input directory
+node platener-cli.js -f ./stl ./conversions
+\end{minted}
+\caption{Converting an {\stlfile} with {\platener}'s CLI.}
+\label{lst:cli-convert}
+\end{listing}
+
+Additionally, we can use the \emph{--maxFilesize} filter, to limit the
+input files by their size in \ensuremath{MegaBytes}.
+
+\subsection{Tracking Down Errors with Conversion Reports}
+\label{sec:walkthrough-cli-reports}
+
+Using the web application, we either receive a successfully converted
+{\svgfile} or the conversion fails. As the web interface is a
+user-centered design, we do not show extensive error messages or logs
+of similar kind. For a developer, it is crucial where and under what
+circumstances the software failed. With reports, we document the
+conversions process. A report provides a short summary of the
+conversion and gathers all error messages along the way, so a
+developer can track down the issue. Figure~\ref{} shows a summary
+report. Figure~\ref{} shows a report itemizing the results of our
+three conversion approaches. In Figure~\ref{} an error message is
+depicted. When multiple conversions were enqueued by {\platener}, we
+receive each conversion report when the process finishes, see
+Figure~\ref{}.
+
+
+
+
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:

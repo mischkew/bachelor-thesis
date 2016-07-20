@@ -1,15 +1,244 @@
 \documentclass[../ClassicThesis.tex]{subfiles}
 \begin{document}
 
-%************************************************
-\chapter{Introduction}\label{ch:introduction}
-%************************************************
+% ************************************************
+\chapter{Introduction}
+\label{ch:introduction}
+% ************************************************
 
-\section{Solution Platener}
+\section{Introduction}
 
-\section{Problem we try to solve}
+% people are awesome -> ideas
+% bringing ideas to live -> back in time -> difficult
+% transition, changes now
+% machines -> plug into your computer -> take over fabrication for you
 
-\section{A very brief: What have we achieved.}
+
+People always had ingenious ideas. Though, back in time it was
+difficult bringing these ideas to live. For example in the field of
+engineering, when one has an idea how airplanes fly better
+(Figure~\ref{fig:intro-ideas:plane}). Or ideas concerning an creative
+process, like a fashion line for shoes which offer correct fit to the
+shape of the feet of its wearer (Figure~\ref{fig:intro-ideas:shoe}).
+Even in health care broad ideas evolve. In 2013 Jake Evill presented
+\name{Cortex}, a customizable plaster that is \enquote{fully
+  ventilated, super light, shower friendly, hygienic, recyclable and
+  stylish}\footnote{\url{http://www.evilldesign.com/cortex}}, see
+Figure~\ref{fig:intro-ideas:plaster}.
+
+The way ideas are turned into reality is changing. Today, machines
+exist that we can plug into our computer that will take over the
+fabrication of objects. Thus, we can fully concentrate on the ideas
+instead of requiring and acquiring additional skills to actually
+fabricate.
+
+% one of theses machines => 3d printer
+% market -> growing, machines more and more affordable
+% layerwise plastik materials, free forms, easy to use -> button click -> object out.
+% but: limitations -> slow, material (lose structure/ beauty)
+
+Such a fabrication machine is a 3D printer. 3D printing is an emerging
+technology spreading across the consumer market. According to
+\name{Wohlers Associates}, in the year 2015 the 3D printing market was
+worth 6.5 billion USD. Their prognosis estimates a roughly 300\%
+growth in the next five years\cite{wohlers-market}. With 3D printers
+literally any user can produce any free-form object with a button
+press. A common technique in 3D printing is fused deposition modeling
+(FDM)\cite{}\note{source that FDM is common}. With the FDM technique,
+thermoplastic material is heated and then pressed through a nozzle,
+mounted on a print head. Thus, layer by layer material is extruded to
+create three dimensional objects\cite{}\note{source thats how FDM
+  works}. Though 3D printing brings a substantial progress in the
+field of fabrication, it shows two flaws: 3D printing is slow and 3D
+printing is limited in its materials. Even small models need a couple
+of hours to be printed. The miniature bird house in
+Figure~\ref{}\note{figure} printed for three hours. In its original
+dimensions it needs about two days of printing time. The FDM technique
+requires material to be pushed through a nozzle. Thus, the material is
+melted and loses its original structure and characteristics.
+
+% other machine, our target machine -> laser cutter
+% cutting materials from a cut plan (typically svg file)
+% 2d shapes/ plates
+% assembled to objects
+% materials like wood, acryllic, textiles, metal or stone
+% laser cutter -> low-fi fabrications
+% faster than printer
+% market laser cutters is coming
+
+Another fabrication machine is the laser cutter, shown in
+Figure~\ref{}\note{figure}. A laser traces the outlines of a planar
+cutting plan, so actual plates are cut from the materials
+(Figure~\ref{}\note{figure}). Such materials are wood or acrylic.
+High-performance devices can cut textiles, metals or stone. The laser
+cutter is fast and preserves the original structure of the used
+materials. Figure~\ref{} and Figure~\ref{} show how the cut-out plates
+are assembled to a three dimensional object in several minutes. With a
+laser cutter, we perform low fidelity fabrications. Low-fi means, we
+produce functional objects that fulfill their purpose, but lack the
+amount of detail a full-fledged product would have. Nonetheless, we
+can iterate several times a day on our object to produce better
+results. In comparison to 3D printing, we can use the time more
+efficiently. Such a functional object is a quadcopter produced from
+wood, shown in Figure~\ref{}\note{figure}. With a laser cutter, we can
+also produce decorative objects (Figure~\ref{}\note{figure}). Here, we
+benefit from the original characteristics of the materials.
+
+When creating three dimensional objects with a laser cutter, users
+face two challenges: They need a vast amount of spatial orientation
+and they need craft men's knowledge about the used materials.
+
+
+Naturally, it has other flaws.
+
+
+% you
+% can build 3d things from the laser cutter as well. though not
+% freeform, but it is possible iterating on functional objects -> drone
+% original materials can be used -> designer glasses but 2 challenges:
+
+% need to assemble. spatial orientation. need to know where plates from the cutting plan will resemble on final model.
+% need knowledge about materials. knowledge a carpenter or craftsman has. fingerjoints for example
+% manual drafting of cutting plans for large objects -> difficult
+% each connection must be placed exactly, on millimeter, others plates stuck or fall apart
+
+% we aim to make 3d model fabrication with laser cutter easy. using its pros in time, material. improving the creation of cut plans
+% we present software system platener
+% similar intuitive approach as with 3d printing. start from 3d model. user knows how results will look lik.
+% our software converts 3d model to a suitable cutting plan.
+% analyzes geometries -> approximating a model with plates (different techniques we elaborate on in this thesis)
+% putting plates together (software knows which materials -> allowing to place finger joints calibrated for the laser cutting, allowing bends).
+
+% in this thesis we talk about:
+
+% architecure
+% data structures
+% approximation of high-res models
+% plate finding
+% plate joining
+% advanced analysis and conversion technique (future work)
+
+% \section{Related Work}
+
+
+% The work presented in this paper builds on personal fabrication,
+% low-fidelity fabrication, and shape approximation.
+
+% Personal Fabrication and Laser Cutting
+
+% Laser-cutters are used for a wide variety of objects in personal
+% fabrication as they allow users to quickly fabricate
+% objects that fulfill a technical function: Coros et al. [2]
+% show how to fabricate animated mechanical toys using
+% laser cutters, SketchChair [19] shows how to build functional
+% furniture, and Pteromys [21] shows how to laser cut
+% functional model airplanes.
+
+% Low-fidelity fabrication
+
+% Platener shares the same goal as previous low-fidelity fabrication
+% system, which aim at reducing fabrication time by
+% replacing the original 3D representation with an alternative
+% one: faBrickator replaces sub-volumes of a 3D model with
+% Lego bricks [17]. LaserOrigami [16] approximates 3D
+% shape by bending laser-cut 2D using a defocused laser.
+% WirePrint replaces the surface of a 3D model with a
+% wireframe structure [15].
+
+% Converting 3D models into stackable 2D plates
+
+% The most common approach to represent a 3D model using
+% laser-cuttable parts is to convert it to a stack of 2D plates.
+% This stack is generated by rasterizing/slicing the model
+% along its vertical axis at a fixed interval. This functionality
+% is included in many commercial products, such as the 3D
+% editor 123D Make [1]. Hildebrand et al. [7] take this ap-
+% proach one step further by slicing parts of the model in
+% different orientations to better approximate the overall
+% shape. While stackable plates ensure that the volume of a
+% 3D object is well approximated, they are a less accurate
+% surface representation.
+
+% Converting 3D models into intersecting 2D pieces
+
+% A different representation of a 3D model can be achieved
+% using intersecting planar pieces. The resulting objects require
+% less material and consist of fewer parts and thus are
+% easier to assemble. SketchChair [19], for instance, provides
+% a user interface for creating chairs based on intersecting
+% pieces. McCrae et al. [6] and Schwartzburg et al. [20] provide
+% algorithms that guarantee the constructability of designs
+% based on intersecting pieces. Slices [12], finally,
+% minimizes the number of pieces based on a study of human
+% perception of shape. For some classes of objects, such as
+% many types of furniture, a representation based on intersecting
+% pieces equals the original shape (e.g., Furniture
+% Factory [18] and Lau et al. [9]). Instead of converting an
+% existing 3D model to intersecting pieces, FlatFitFab [13]
+% allows users to create 3D models directly from lasercuttable
+% parts.
+
+% Converting 3D models to foldable 2D sheets
+
+% To better represent the shape of a 3D model, several systems
+% have been developed to convert 3D models into planar
+% sheets that can be folded into the desired 3D shape. Mitani
+% et al. [14] propose an algorithm that unfolds a 3D model
+% into a set of strips that can be cut out of paper. Besides
+% using hard creases to fold material into 3D shapes, Curved
+% Folding [8] proposes to integrate smooth curves in the
+% bending pattern. Soft folding [22] combines both approaches
+% and allows users to include creases and soft folds into a
+% flat sheet. While foldable sheets result in an accurate surface
+% representation, they have no infill and are thus not
+% sturdy enough to perform mechanical functions.
+% Combining different fabrication techniques
+% In the context of architecture, Martens et al. [11] manually
+% segment a 3D model into both laser-cut and 3D printing
+% parts to make use of the benefits of both tools. Platener
+% facilitates combining different fabrication techniques by
+% automating the substitution
+
+% \subsection{Low-Fi Fabrication}
+
+
+% \paragraph{Low-Fi Fabrication}
+
+% Low-fidelity fabrication
+
+% Platener shares the same goal as previous low-fidelity fabrication
+% system, which aim at reducing fabrication time by
+% replacing the original 3D representation with an alternative
+% one: faBrickator replaces sub-volumes of a 3D model with
+% Lego bricks [17]. LaserOrigami [16] approximates 3D
+% shape by bending laser-cut 2D using a defocused laser.
+% WirePrint replaces the surface of a 3D model with a
+% wireframe structure [15].
+
+% \paragraph{Platener}
+
+% \paragraph{faBrickation}
+
+% \paragraph{brickify}
+
+% \paragraph{WirePrint}
+
+
+% \subsection{Laser Cutters and {\threedmodel}s}
+
+% \paragraph{LaserOrigami}
+
+% \paragraph{SketchChair}
+
+% \paragraph{123Make and Plate Stacking}
+
+% \paragraph{FlatFitFab}
 
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../ClassicThesis"
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:

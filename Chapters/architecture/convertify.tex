@@ -480,9 +480,9 @@ applications, that use {\convertify}. E.g {\platener} accesses the
 {\convertify}'s WebGL scene. The \class{Bundle} is a controller for
 {\convertify}. It loads models into the system and exposes controls
 for the scene. With this, we can animate the scene programmatically or
-sync the scenes of multiple {\convertify} instances. We need a bundle
-for both, frontend and backend package, because data access is done
-differently in browser environments and {\nodejs}.
+sync the scenes of multiple {\convertify} instances. We need a
+\class{Bundle} for both, frontend and backend package, because data
+access is done differently in browser environments and {\nodejs}.
 
 In the preceding section, we introduced a \class{Dispatcher}, which
 organizes the communication between plugins and {\convertify}. As
@@ -491,7 +491,7 @@ with it. Now, every application wants to organize its plugins and
 event handlers differently. That is why, each application implements
 its own \class{Dispatcher} instance. The \class{Bundle} can be
 configured with such a \class{Dispatcher}.
-Figure~\ref{fig:bundle-dispatcher} shows how the \class{Bundle} in the
+Figure~\ref{fig:bundle-dispatcher} shows the \class{Bundle} in the
 context of an application.
 
 \begin{figure}
@@ -517,14 +517,53 @@ context of an application.
 \subsection{{\convertify} is a cross-platform isomorphic framework}
 \label{sec:convertify-is-isomorphic}
 
-\note{explain crossplatform}
-\note{same fro cross as for isomoprhic...}
+{\convertify} is a cross-platform framework. Cross-platform
+{\javascript} code runs seamlessly in multiple browsers, being aware
+of their different implementations and APIs. This allows {\convertify}
+to run on almost any device. Thus, we can reach a vast amount of
+users.
 
 
-\note{explain isomorphic = headless}
-\note{explain what convertify can do when isomorphic}
-\note{explain how convertify is isomorphic}
-\note{explain why convertify is isomorphic (pros)}
+To enable cross-platform {\javascript} support, we use polyfills and
+libraries, that are cross-platform as well.
+
+A polyfill is \enquote{a
+  piece of code or plugin that provides technology that [we] expect
+  the browser to support
+  natively}\footnote{\url{https://remysharp.com/2010/10/08/what-is-a-polyfill}}.
+For example legacy {\javascript} engines do not support data
+structures, like \class{Map}, \class{Set} or \class{Promise}. With the
+\name{es6-shim}\footnote{\url{https://github.com/paulmillr/es6-shim}}
+polyfill, we provide these features.
+
+Using libraries that have cross-platform support themselves, helps us
+maintaining {\convertify} as a cross-platform framework. Such
+libraries are for example
+\name{lodash}\footnote{\url{http://lodash.com}} or {\threejs}.
+\name{lodash} provides functional utilities, which greatly improve the
+way we work with out data structures. {\threejs} is the 3D library
+which we use for WebGL rendering. The WebGL API is not consistent for every browser
+\footnote{\url{https://docs.unity3d.com/Manual/webgl-browsercompatibility.html}}.
+
+
+{\convertify} is an isomorphic framework. We speak of isomorphic
+{\javascript} code, when the code can be seamlessly executed in
+browser environments and non-browser
+environments\footnote{\url{http://nerds.airbnb.com/isomorphic-javascript-future-web-apps/}}.
+The most common non-browser {\javascript} environment is
+{\nodejs}\footnote{\url{https://nodejs.org}}. {\convertify} can use
+its full feature set in {\nodejs}, but the actual rendering to a
+visible scene. This enables us to write applications, that can be
+integrated into other environments or workflows. In the case of our
+application {\platener}, we can batch process 3D-models from a command
+line interface, see Section~\ref{sec:cli-tool}.
+
+% \note{explain isomorphic = headless}
+% \note{explain what
+%   convertify can do when isomorphic}
+% \note{explain how convertify is
+%   isomorphic}
+% \note{explain why convertify is isomorphic (pros)}
 
 
 \subsection{{\convertify} is built on {\brickify}}
