@@ -9,43 +9,49 @@
 \section{Fabrication Machines Enable Anyone to Bring Their Ideas to Life}
 \label{sec:introduction}
 
-\note{maybe subdivide this package?}
+% \note{maybe subdivide this package?}
 % people are awesome -> ideas
 % bringing ideas to live -> back in time -> difficult
 % transition, changes now
 % machines -> plug into your computer -> take over fabrication for you
 
-People always had ingenious ideas. Though, back in time it was
-difficult bringing these ideas to life. For example in the field of
-engineering, when one has an idea how airplanes fly better
-(Figure~\ref{fig:intro-ideas:plane}). There are ideas concerning
-creative processes, like designing a fashion line for shoes which offer correct
-fit to the the feet of its wearer (Figure~\ref{fig:intro-ideas:shoe}).
-Even in health care broad ideas evolve. In 2013 Jake Evill presented
-\name{Cortex}, a customizable plaster that is \enquote{fully
-  ventilated, super light, shower friendly, hygienic, recyclable and
-  stylish}\footnote{\url{http://www.evilldesign.com/cortex}}, see
-Figure~\ref{fig:intro-ideas:plaster}. \note{give sources of images.
-  how to give sources? as footnote??}
+% \note{people in general. no specific field or skillset.
+% ideas always.}
 
-\begin{figure}[h]
+People always had lots of creative ideas, regardless their
+background or skill set. Though back in time it was
+difficult realizing these due to the lack of specific
+knowledge or tools. For example in the field of engineering,
+when one has an idea how airplanes fly better
+(Figure~\ref{fig:intro-ideas:plane}). There are ideas
+concerning creative processes, like designing a fashion line
+for shoes which offer correct fit to the the feet of its
+wearer (Figure~\ref{fig:intro-ideas:shoe}). Even in health
+care broad ideas evolve. In 2013 Jake Evill presented
+\name{Cortex}, a customizable plaster that is \enquote{fully
+  ventilated, super light, shower friendly, hygienic,
+  recyclable and
+  stylish}\footnote{\url{http://www.evilldesign.com/cortex}},
+see Figure~\ref{fig:intro-ideas:plaster}.
+
+\begin{figure}[ht]
   \centering
-  \begin{subfigure}[b]{0.321\textwidth}
-    \centering
+  \begin{subfigure}[b]{\textwidth}
     \includegraphics[width=\textwidth]{01-intro-plane}
     \caption{A self-fabricated model airplane.}
+    \source{\url{http://thingiverse-production-new.s3.amazonaws.com/renders/05/d7/e9/e9/88/Take_Off_03_preview_featured.jpg} \visited}
     \label{fig:intro-ideas:plane}
   \end{subfigure}
-  \begin{subfigure}[b]{0.321\textwidth}
-    \centering
+  \begin{subfigure}[b]{\textwidth}
     \includegraphics[width=\textwidth]{01-intro-shoe}
     \caption{A shoe with correct fit to its wearer.}
+    \source{\copyright Olivier van Herpt, \url{http://oliviervanherpt.com/img/3d-printed-shoes-foot.jpg} \visited}
     \label{fig:intro-ideas:shoe}
   \end{subfigure}
-  \begin{subfigure}[c]{0.321\textwidth}
-    \centering
+  \begin{subfigure}[c]{\textwidth}
     \includegraphics[width=\textwidth]{01-intro-plaster}
     \caption{\name{Cortex}, a fully ventilated plaster.}
+    \source{\copyright Jake Evill, \url{http://www.evilldesign.com/image/41499/2000x0-5/p18qh3vpntsq91sg21a261dr114dc6.jpg} \visited}
     \label{fig:intro-ideas:plaster}
   \end{subfigure}
   \caption{With fabrication machines, broad ideas come to life.}
@@ -77,18 +83,32 @@ mounted on a print head. Material is extruded layer by layer  to
 create 3D~objects\cite{}\note{source thats how FDM
   works}.
 
-Though 3D printing brings a substantial progress to the field of
-fabrication, it shows two flaws: 3D printing is slow, and 3D printing
-is limited in its materials. Even small models need a couple of hours
-to be printed. The miniature bird house in Figure~\ref{}\note{figure}
-printed for three hours\footnote{Printed with the \name{Ultimaker~2+},
-  \url{https://ultimaker.com/en/products/ultimaker-2-plus}}. In its
-original dimensions it requires about two days of printing
-time\footnote{Estimated with the \name{Cura~2} 3D~printer software,
-  \url{https://ultimaker.com/en/products/cura-software}}. The FDM
-technique requires material to be extruded through a nozzle. Thus the
-material is melted and loses its original structure and
-characteristics.
+\note{measure bird house dimensions}
+
+Though 3D printing brings a substantial progress to the
+field of fabrication, it shows two flaws: 3D printing is
+slow, and it is limited in its materials. Even small models
+need a couple of hours to be printed. The miniature bird
+house (4x4x5cm) in Figure~\ref{fig:intro-bird-house} printed
+for three hours\footnote{Printed with the
+  \name{Ultimaker~2+},
+  \url{https://ultimaker.com/en/products/ultimaker-2-plus}}.
+In its original dimensions (30x30x45cm) it requires about
+two days of printing time\footnote{Estimated with the
+  \name{Cura~2} 3D~printer software,
+  \url{https://ultimaker.com/en/products/cura-software}}.
+The FDM technique requires material to be extruded through a
+nozzle. Thus the material is melted and loses its original
+structure and characteristics. These characteristics are
+aesthetics or haptics, for example the feeling when touching
+the material surface.
+
+\begin{figure}[ht]
+  \includegraphics[width=0.6\textwidth]{01-intro-bird-house}
+  \caption{A 3D~printed bird house.}
+  \label{fig:intro-bird-house}
+\end{figure}
+
 
 % other machine, our target machine -> laser cutter
 % cutting materials from a cut plan (typically svg file)
@@ -105,15 +125,46 @@ characteristics.
 % original materials can be used -> designer glasses but 2 challenges:
 
 Another fabrication machine is the laser cutter, shown in
-Figure~\ref{}\note{figure}. A laser traces the outlines of a
-planar cutting plan, producing plates which are cut out from
-flat materials (Figure~\ref{}\note{figure}). Such materials
-are wood or acrylic. High-performance devices can cut
-textiles, metals, and stone. The cutting process requires
-very short time, compared to the printing time of a
-3D~printer. Figure~\ref{} and Figure~\ref{} show how the
-cut-out plates are assembled to a 3D~object. The entire
-fabrication is completed in several minutes.
+Figure~\ref{fig:intro-laser:machine}. A laser traces the
+outlines of a planar cutting plan, producing plates which
+are cut out from flat materials
+(Figure~\ref{fig:intro-laser:cut}). Such materials are wood
+or acrylic. High-performance devices can cut textiles,
+metals, and stone. The cutting process requires very short
+time, compared to the printing time of a 3D~printer.
+Figure~\ref{fig:intro-laser:assembly1} and
+Figure~\ref{fig:intro-laser:assembly2} show how the cut-out
+plates are assembled to a 3D~object. The entire fabrication
+is completed in several minutes.
+
+
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[a]{0.49\textwidth}
+    \includegraphics[width=\textwidth]{01-intro-laser-machine}
+    \caption{A laser cutter.}
+    \label{fig:intro-laser:machine}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \includegraphics[width=\textwidth]{01-intro-laser-cut}
+    \caption{The laser cuts plates from wood.}
+    \label{fig:intro-laser:cut}
+  \end{subfigure}
+  \begin{subfigure}[c]{0.49\textwidth}
+    \includegraphics[width=\textwidth]{01-intro-laser-assembly1}
+    \caption{Plates are assembled into a 3D~object. }
+    \label{fig:intro-laser:assembly1}
+  \end{subfigure}
+  \begin{subfigure}[d]{0.49\textwidth}
+    \includegraphics[width=\textwidth]{01-intro-laser-assembly2}
+    \caption{The wooden bird house is connected with finger
+      joints.}
+    \label{fig:intro-laser:assembly2}
+  \end{subfigure}
+  \caption{Fabrication steps for building a bird house with
+    a laser cutter.}
+  \label{fig:intro-laser}
+\end{figure}
 
 With a laser cutter low-fidelity functional objects are
 fabricated. Low-fidelity means producing functional objects
@@ -126,15 +177,29 @@ the fabrication process. A user can iterate on objects
 several times a day to achieve better results.
 % In comparison to 3D printing, we can use the time more
 % efficiently.
-Such a
-functional object could be a quadcopter produced from wood, as shown
-in Figure~\ref{}\note{figure}.
+Such a functional object could be a quadcopter produced from
+wood, as shown in Figure~\ref{fig:intro-quadcopter}.
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{01-intro-quadcopter}
+  \caption{A laser cutted quadcopter.}
+  \source{\url{http://wedreamabout.com/wp-content/uploads/2016/01/drone-plywood-mixedbg-2.jpg
+    } \visited}
+  \label{fig:intro-quadcopter}
+\end{figure}
 
 With a laser cutter users can design objects with decorative
-aspects (Figure~\ref{}\note{figure}). The laser cutter
+aspects (Figure~\ref{fig:intro-glasses}). The laser cutter
 preserves the original structure of the used materials. The
 fabricated object benefits from the unique characteristics
 of the material.
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{01-intro-glasses}
+  \caption{Wooden designer glasses built with a laser cutter.}
+  \source{\url{https://i.ytimg.com/vi/q0dDhesoC08/maxresdefault.jpg} \visited}
+  \label{fig:intro-glasses}
+\end{figure}
 
 % need to assemble. spatial orientation. need to know where plates from the cutting plan will resemble on final model.
 % need knowledge about materials. knowledge a carpenter or craftsman has. fingerjoints for example
@@ -149,9 +214,9 @@ cut-out plates. The user has to know where the plates will
 resemble on the object in 3D space. Then, the user has to
 attach the plates to each other. In the case of wooden
 plates this would require knowledge about carpentry. In
-Figure~\ref{}\note{figure} we combined the plates of a bird
-house with finger joints. When creating cutting plans
-manually for larger objects detailed work is
+Figure~\ref{fig:intro-laser:assembly2} we combined the
+plates of a bird house with finger joints. When creating
+cutting plans manually for larger objects detailed work is
 required. All connections have to be positioned perfectly,
 otherwise the plates stuck or fall apart during assembly.
 
@@ -164,7 +229,8 @@ otherwise the plates stuck or fall apart during assembly.
 
 In this thesis, we present a solution which enables users to
 produce three dimensional objects with a laser cutter. We
-improve the creation process of cutting plans, so that users
+produce cutting plans from {\threedmodel}s automatically.
+We improve the creation process of cutting plans, so that users
 do not require any additional skills. Similar to 3D~printing
 we begin the fabrication process with a 3D~model.
 % Every user can imagine from the model, how the final
@@ -174,12 +240,12 @@ Our software system {\platener} converts the 3D~model to a
 approximates the model with plates. Users are not required
 to map the 2D~cutting plan into 3D~space manually. The
 system is aware of common materials used with a laser
-cutter. The software generates all connections between
-plates automatically. All connections are calibrated,
-meaning the plates hold together without using any glue or
-other means of attachment. With our software users fabricate
-3D~models easily while benefiting from the working speed of
-a laser cutter and free choice of materials.
+cutter. The software generates connections between the
+plates. All connections are calibrated, meaning the plates
+hold together without using any glue or other means of
+attachment. With our software users fabricate 3D~models
+easily while benefiting from the working speed of a laser
+cutter and free choice of materials.
 
 % in this thesis we talk about:
 
@@ -209,7 +275,7 @@ on building a user-centered conversion service.
 \note{how to keep previous and now platener apart?}
 \paragraph{{\brickify}} \citeauthor{bachelor-thesis} present
 a low-fidelity fabrication approach using 3D~printers and
-LEGO\textsuperscript{TM} bricks. Similar to {\platener} they
+{\lego} bricks. Similar to {\platener} they
 use a 3D~editor to convert input models. The conversions
 result in hybrid models consisting of printed material and
 bricks. They improve fabrication time noticeably. They built

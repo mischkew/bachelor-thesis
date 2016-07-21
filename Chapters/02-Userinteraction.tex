@@ -101,7 +101,7 @@ node platener-cli.js -f ./stl ./conversions
 \end{listing}
 
 Additionally, we can use the \emph{--maxFilesize} filter, to limit the
-input files by their size in \ensuremath{MegaBytes}.
+input files by their size in megabytes.
 
 \subsection{Tracking Down Errors with Conversion Reports}
 \label{sec:walkthrough-cli-reports}
@@ -113,14 +113,44 @@ of similar kind. For a developer, it is crucial where and under what
 circumstances the software failed. With reports, we document the
 conversions process. A report provides a short summary of the
 conversion and gathers all error messages along the way, so a
-developer can track down the issue. Figure~\ref{} shows a summary
-report. Figure~\ref{} shows a report itemizing the results of our
-three conversion approaches. In Figure~\ref{} an error message is
-depicted. When multiple conversions were enqueued by {\platener}, we
-receive each conversion report when the process finishes, see
-Figure~\ref{}.
+developer can track down the issue. Figure~\ref{fig:report-simple}
+shows a summary report. A report itemizing the results of our three
+conversion approaches can be seen in Figure~\ref{fig:report-methods}.
+In Figure~\ref{fig:report-error} an error message is depicted. When
+multiple conversions were enqueued by {\platener}, we receive each
+conversion report when the process finishes, as shown in
+Figure~\ref{fig:report-multiple}.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=1\columnwidth]{02-user-interaction-report-simple}
+  \caption{A \class{Report}, showing a summary of the conversion.}
+  \label{fig:report-simple}
+\end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=1\columnwidth]{02-user-interaction-report-methods}
+  \caption{A \class{Report}, showing a separate summary for each
+    fabrication method of the conversion.}
+  \label{fig:report-methods}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\columnwidth]{02-user-interaction-report-error}
+  \caption{When a conversion fails the \class{Report} shows the error
+    message.}
+  \label{fig:report-error}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\columnwidth]{02-user-interaction-report-multiple}
+  \caption{A sequence of conversions is summarized when all
+    computation completed.}
+  \label{fig:report-multiple}
+\end{figure}
 
 
 

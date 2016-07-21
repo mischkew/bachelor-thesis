@@ -7,14 +7,25 @@
 % ************************************************
 
 In this chapter we outline the architecture and composition of the
-application {\platener}. Therefore, we look at concepts of graphics
-programming in web-environments in Section~\ref{sec:cg-web}. Then, we
-explore the structure of our software from two points of view. At
-first, we present {\convertify} in
-Section~\ref{sec:framework-convertify}. {\convertify} is the
-web-framework in which {\platener} is implemented. Secondly, we
-explain the details of {\platener} in
+application {\platener}. Our software is implemented in our web
+framework {\convertify}. The framework allows building interactive
+WebGL applications in a modular manner. Features are decoupled into
+plugins. Each application implements its {\userinterface}
+independently from {\convertify}.
+
+We introduce the concepts of graphics programming in web
+environments in Section~\ref{sec:cg-web}. The design of {\convertify}
+is explained in Section~\ref{sec:framework-convertify}. Finally, we
+give details of the structure of {\platener} in
 Section~\ref{sec:application-platener}.
+
+% Then, we
+% explore the structure of our software from two points of view. At
+% first, we present {\convertify} in
+% Section~\ref{sec:framework-convertify}. {\convertify} is the
+% web-framework in which {\platener} is implemented. Secondly, we
+% explain the details of {\platener} in
+% Section~\ref{sec:application-platener}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
