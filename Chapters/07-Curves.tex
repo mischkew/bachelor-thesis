@@ -279,22 +279,26 @@ newRotMat = newRotMat.multiply rotMat.clone()
 
 \subsection{Search for best surface development}
 
-The current implementation does not always find the best solution. While traversing the graph it is possible that there multiple different paths through the graph. This results in unequally good sets of bent plates. One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first. Because the currently only one attempt to traverse the graph is made the second possibility would not be found.
-To avoid this a possible solution is the following: If one plate that should be added to a bent plate but overlaps with one other plate of the bent plate to also check if removing the older plate (and the only via this plate connected plates) and add the new plate results in a better solution.
-This will increase the run time and will only result in better solutions for models where the bendable parts of the \threedmodel{} form a highly connected graph.
+The current implementation does not always find the best solution. While traversing the graph it is possible that there multiple different paths through the graph. This results in unequally good sets of bent plates. For example one way of traversing could create more but smaller bent plates then another.
+%One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first.
+Because currently only one attempt to traverse the graph is made, the second and probably better option would not be found.
+
+We propose following solution to avoid this problem: If a plate which should be added to a bent plate intersects a already added plate, we try removing the present plate and check if adding the new one yields better results.
+
+This will increase the run time and results in better solutions for models where the bendable parts of the \threedmodel{} form a highly connected graph.
 
 \note{TO DO: figure}
 
-\subsection{Curved joints}
+\subsection{Joints at curved edges}
 
-In the current implementation the finger joints are generated just based on the plates but not on the bent plates. This means if multiple small plates which each have to small edges to place finger joints on them, the bent plate generated from them would not get Finger joints too.
+Currently the finger joints are generated just based on the plates but not on the bent plates. If multiple small plates which each have to small edges to place finger joints on them are merged into a bent plate, the result would not have finger joints added to it as well.
 
-To avoid this, a new method must be found to generate finger joints at curved edges, because the edge of the plate that connects to the bent plate  will be curved. Additionally the finger joints has to be regenerated for every attempt to add a new plate to a bent plate to check for overlaps because adding plates will change the generated joints.
+To avoid this, a new method must be found to generate finger joints at curved edges. Since the edge of the plate that connects to the bent plate  will be curved, the current finger joint algorithm can not be used here. Because adding a plate to the bent plate changes the finger joints, we have to check for overlaps constantly. Thus, the finger joints have to be generate for every attempt to add a new plate.
 
 \subsection{More bend line types}
 \label{sec:more_bend_line_types}
 
-The current implementation generates independent of the used material a dashed line as bend line. But This is good for paper to fold it there. For acrylic it would be possible to generate a not dashed line that will be engraved to just give a bending hint without weaken the material to much. For wood, on the other side, living hinges should be generated to make the wood bendable at all.
+ Independently of the used material, a dashed line is added as the bend line. This is good for folding paper. While acrylic can not be bend as easily, we propose engraving a continuous line, which tells the user where to bend the material without weaken the material to much. For wood, on the other side, living hinges should be generated to make the wood bendable at all.
 
 \subsection{Material dependant bend angle}
 \label{sec:material_dependant_bend_angle}

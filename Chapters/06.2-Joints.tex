@@ -84,8 +84,6 @@ The last step unions the now aligned shapes of the joints and plates and rotates
 
 
 \section{Different Fingerjoint types}
-
-\TODO{Bilder noch so anpassen, dass nur females/males zu sehen und in echt, wie sie zusammen stecken}\\
 We support three types of joints. Each have benefits when used for specific material. For example acylic is not flexible which means it is very sturdy, but bendable when heated. \\
 We allow the user to choose the type of material which then affects the choice of joints in the converted model.
 
@@ -130,7 +128,12 @@ This means these joints cannot slide into each other but they rather snap togeth
 In order for the snapping to work the material has to be flexible or very thin. Jim McCann already used it for foam. We now use it especially for paper because this material would be too thin for creating enough friction for fingerjoints to work.
 
 \subsubsection{Dovetail template}
-\TODO{Image of wood dovetails where this joint is derived from.}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=.5\columnwidth]{Images/dovetails-wood.jpg}
+\caption{Original dovetails created with a mill in wooden plates.}
+\label{fig:realDovetailJoints}
+\end{figure}
 
 \begin{figure}[!ht]
 \centering
@@ -139,12 +142,11 @@ In order for the snapping to work the material has to be flexible or very thin. 
 \label{fig:dovetailJoints}
 \end{figure}
     
-    Typically a dovetail joint is used in woodwork. It helps to ensure that when there is a pulling force on both wooden plates that the joints all hold onto the other plate.\\
+    Typically a dovetail joint is used in woodwork, see fig. \ref{fig:realDovetailJoints}. It helps to ensure that when there is a pulling force on both wooden plates that the joints all hold onto the other plate.\\
     But in order to create the female joints the wood needs to be cut in an angle. This is not possible without inadequately high time and power consumption. See the upcoming section \hyperref[futureWork]{Future Work} for information on how to lasercut the female part of a dovetail.\\
     Instead, we developed a joint type, see fig. \ref{fig:dovetailJoints}, very similar to the original dovetail. This can be easily cut with a lasercutter.
     %\paragraph{How these joints look like}
-    The males and females are alot like typical fingerjoints. But the females have an additional part which will fixate the other plate from one direction.
-    \TODO{insert image}
+    The males and females are alot like typical fingerjoints. But the females have an additional part which will fixate the other plate from one direction.\\
     %\paragraph{How these joints work, and for what material}
     These joints now withstand a force pulling away the plate with the female joints. It works with any material with at least around one millimeter of thickness when the material is not very flexible.
 
