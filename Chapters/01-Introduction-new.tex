@@ -86,11 +86,11 @@ Though 3D printing brings a substantial progress to the
 field of fabrication, it shows two flaws: 3D printing is
 slow, and it is limited in its materials. Even small models
 need a couple of hours to be printed. The miniature bird
-house (3.5x3.5x5.5cm) in Figure~\ref{fig:intro-bird-house}
+house (3.5~x~3.5~x~5.5cm) in Figure~\ref{fig:intro-bird-house}
 printed for three hours\footnote{Printed with the
   \name{Ultimaker~2+},
   \url{https://ultimaker.com/en/products/ultimaker-2-plus}}.
-In its original dimensions (20x20x30cm) it requires about
+In its original dimensions (20~x~20~x~30cm) it requires about
 two days of printing time\footnote{Estimated with the
   \name{Cura~2} 3D~printer software,
   \url{https://ultimaker.com/en/products/cura-software}}.
@@ -264,27 +264,24 @@ plans.
 \section{Related Work}
 \label{sec:related-work}
 
-\paragraph{{\platener}} \citeauthor{master-thesis} did the groundwork
+\paragraph{{\platener}} \citet{master-thesis} did the groundwork
 for this thesis. Their work introduced the concept of converting
 3D~models to laser cuttable {\svgfile}s as a low-fidelity fabrication
 technique. Our work improves the introduced methods, while we focused
 on building a user-centered conversion service.
 
-\note{how to keep previous and now platener apart?}
-\paragraph{{\brickify}} \citeauthor{bachelor-thesis} present
+\paragraph{{\brickify}} \citet{bachelor-thesis} present
 a low-fidelity fabrication approach using 3D~printers and
-{\lego} bricks. Similar to {\platener} they
+{\lego}\footnote{\url{http://www.lego.com}} bricks. Similar to {\platener} they
 use a 3D~editor to convert input models. The conversions
 result in hybrid models consisting of printed material and
 bricks. They improve fabrication time noticeably. They built
 a user-oriented web service using WebGL. The implementation
 presented in this thesis is based on the implementation of
 {\brickify}. {\brickify} is grounded on previous work by
-\citeauthor{fabrickation}.
+\citet{fabrickation}.
 
-\note{add bib for fabrickation}
-
-\paragraph{LaserOrigami} \citeauthor{laserorigami} present a
+\paragraph{LaserOrigami} \citet{laserorigami} present a
 low-fidelity prototyping system for creating 3D~models with laser
 cutters. Though they have the same goal as {\platener}, they use a
 different approach. LaserOrigami cuts and folds the resulting
@@ -294,27 +291,22 @@ incorporates the additional laser cutter instructions for folding. The
 objects produced by {\platener} need a manual assembly step. In return
 {\platener} allows fabricating objects from a 3D~template.
 
-\note{add bib for laser origami}
-
 \paragraph{SketchChair} With the software SketchChair novice users can
 design and fabricate their own chair using a laser cutter. Similar to
-{\platener} \citeauthor{sketchchair} provide a system to produce
+{\platener} \citet{sketchchair} provide a system to produce
 cutting plans for functional objects from 3D~models. These 3D~models
 are generated from two dimensional sketches which are drafted in an
 editor. In contrast to SketchChair, {\platener} attempts to convert
 any given 3D~model into a laser cuttable template.
 
-\note{add bib for sketchchair}
-
 \paragraph{123Make} Autodesk\footnote{\url{http://www.autodesk.de/}}
-ships a 3D~editor which converts 3D~models into slices. These slices
+ships a 3D~editor which converts 3D~models into slices\footnote{\url{http://www.123dapp.com/make}}. These slices
 can be cut with a laser cutter and stacked onto each other to
 approximate the original model. This method solely provides an
 approximation of the external shape of the object. Though {\platener}
 provides this technique as well, we focus on maintaining the
 functional aspect of the input model.
 
-\note{some source for 123make}
 
 \end{document}
 

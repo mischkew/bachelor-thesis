@@ -66,7 +66,7 @@ Now that all lines are found we have to test if the lines actually go through bo
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=1\columnwidth]{Images/06-1-graph-fourIntersectionLines.png}
-\caption{Single plate pair with all of its intersection lines. The infinite line has been clipped to the length of the other lines.}
+\caption{Single plate pair with all of its intersection lines. The infinite line will be clipped to the length of the other lines.}
 \label{fig:infiniteIntersections}
 \end{figure}
 In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates. In order to find these boundaries we calculate the intersections of the lines with all boundary edges of the plates. The result is shown in figure \ref{fig:allBoundaries}.\\
@@ -178,15 +178,15 @@ The segments are called main line for that connection and plate.
 
 \subsection{Truncating intersection lines}
 Now that all main lines are known we need to shorten the lines so that no other lines overlap with it. If this step is missing then the following step for creating joints will run in to problems because the joints overlap each other.\\
-If we now have a look at only the inner intersections of plates in a model, seen in fig. \ref{fig:innerBoundaries}, we can identify the overlaps.
+If we now have a look at only the intersections of plates in a model, seen in fig. \ref{fig:allBoundaries}, we can identify the overlaps.
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{Images/TruncatedIntersectionsHMD.png}
-\caption{The inner boundaries of the plates overlap. In the next step when joints will be created they are only supposed to be on the inner part of the line. Therefore the lines have to be truncated.}
+\caption{All found intersections have been overlaping. After the truncation they only cover exactly the line which is needed for adding joints later.}
 \label{fig:innerBoundaries}
 \end{figure}
-For truncating the lines we use the following algorithm \ref{truncateLines}.
-\TODO{explain the alogrithm}\\
+For truncating the lines we use the following algorithm \ref{truncateLines} to achieve the result shown in figure \ref{innerBoundaries}.
+First, we take two of all the found lines and check if they intersect. They only intersect when their intersection point is on both of their line segments. Then, the two parts of both lines can be created since we calculated the intersection point which splits the lines. We assume that the part of the line we want to keep will always be the larger part. Therefore, we discard the shorter lines and return the others.\\
 \begin{algorithm}[H]
 	\DontPrintSemicolon
 	\KwData{lines}
@@ -315,8 +315,8 @@ A few more things have to be accomplished to allow for a smooth conversion.
 Currently, we only calculate one line per edge but as can be seen in figure \ref{fig:twoLineSegments} this is not enough. To solve this the line segments should be found and for each segment a new edge should be created to be handles seperately. 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=\columnwidth]{Images/Blocks_two_contact(1).png}
-\caption{Plate 2 touches Plate 1 twice. This should result in two edges and intersections which should be handled seperately.}
+\includegraphics[width=\columnwidth]{Images/Blocks_two_contact.png}
+\caption{The vertical plate touches the horizontal plate twice. This should result in two edges and intersections which should be handled seperately.}
 \label{fig:twoLineSegments}
 \end{figure}
 

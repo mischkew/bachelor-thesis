@@ -255,8 +255,8 @@ In addition all sorts of surface modification like engravings and small attachme
 
 
 \begin{figure}
-\includegraphics[width=1.0\columnwidth]{Images/04-approx-welding-beveled.png}
-\caption{Beveled cube with 1, 2, 10 subdivisions and their resulting cube without beveled edges}
+\includegraphics[width=1.0\columnwidth]{Images/04-approx-welding-beveled-2.png}
+\caption{Beveled cube a) with 1 subdivision, b) with 2 subdivisions, c) with 10 subdivisions and their resulting cube d) without beveled edges}
 \label{fig:beveled}
 \end{figure}
 
@@ -270,14 +270,14 @@ In addition all sorts of surface modification like engravings and small attachme
 \begin{figure}
 \includegraphics[width=0.5\columnwidth]{Images/04-approx-welding-pushedIn.png}
 \includegraphics[width=0.5\columnwidth]{Images/04-approx-welding-pushedIn-result.png}
-\caption{Pushed in details}
+\caption{Pushed in details get removed}
 \label{fig:pushed_in_details}
 \end{figure}
 
 
 \subsubsection{Process}
 
-The pipeline step clones the model due to our immutable state approach so the original model can be accessed at any point in time. The immutable state approach is described in chapter \ref{ch:Architecture} Architecture.
+The pipeline step clones the model due to our immutable state approach so the original model can be accessed at any point in time. The immutable state approach is described in chapter \ref{ch:architecture} Architecture.
 
 
 \paragraph{Welding Distance}
@@ -360,7 +360,7 @@ However, the runtime improvement is marginal compared to an octree and is more c
 
 \myNotes{TODO: figure}
 
-\emph{Shapes} may represent only a line or a point instead of an 2D-shape if they do not contain enough vertices. An \emph{EdgeLoop} gets deleted if it contains less than three vertices after point on line removal because it does not span an area any more. In case the contour of a \emph{shape} gets deleted the complete \emph{shape} is obsolete and gets deleted as well.
+\emph{Shapes} may represent only a line or a point instead of a 2D-shape if they do not contain enough vertices. An \emph{EdgeLoop} gets deleted if it contains less than three vertices after point on line removal because it does not span an area any more. In case the contour of a \emph{shape} gets deleted the complete \emph{shape} is obsolete and gets deleted as well.
 
 A threshold for the distance of a point to a line is given by the global config since minor deviations from the line are not relevant.
 
@@ -450,24 +450,21 @@ The pipeline step \emph{HoleDetection} is run after \emph{ShapesFinder} and cate
 \subsection{Prism - Dimitri}
 % \secauthor{DS}
 
-\myNotes{Diese subsection wird im Classifier-Kapitel eingefügt}
-
-
-A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives (usually faces or shapes).
+A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives which are usually faces or shapes.
 
 To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill.
 
 \subsubsection{Bucket System}
 \label{sec:PrismBucketSystem}
 
-The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their whose calculation is explained below.
+The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
 
 \begin{equation*}
     \vec{n} = \colvec{3}{x}{y}{z}
 \end{equation*}
 
 
-All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
+All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal like planes with normals $(1,0,0)$ and $(-1,0,0)$ are parallel, all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
 
 
 \begin{listing}[!h]
@@ -486,20 +483,20 @@ _normalInHemisphere: (normal) ->
 \end{listing}
 
 \begin{figure}
-    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-Rings.png}
-    \caption{rings_FromSide}
+    \includegraphics[width=0.9\columnwidth]{Images/PrismCl-Rings.png}
+    \caption{rings visualised from side}
     \label{fig:rings_FromSide}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-RingsFromTop.png}
-    \caption{rings_FromTop}
+    \includegraphics[width=0.9\columnwidth]{Images/PrismCl-RingsFromTop.png}
+    \caption{rings visualised from top}
     \label{fig:rings_FromTop}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=0.4\columnwidth]{Images/PrismCl-RingAngle.png}
-    \caption{ringAngle}
+    \caption{angle of a normal which is used for sorting it into a ring}
     \label{fig:ringAngle}
 \end{figure}
 
@@ -525,7 +522,7 @@ The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to
                 }
 \end{equation*}
 
-The maximum angle is 90° (normal $ = (0,0,1)$). Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
+The maximum angle is 90°. Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
 
 \begin{equation*}
     I_{MaxRing} = \floor*{
@@ -549,7 +546,7 @@ Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 
 \begin{figure}
     \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
-    \caption{middleZ}
+    \caption{geometric visualization of the z value in the middle of a ring}
     \label{fig:middleZ}
 \end{figure}
 
@@ -587,14 +584,14 @@ Each ring is seperated into buckets which cover the threshold angle $\phi$ as sh
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
-    \caption{buckets}
+    \caption{buckets in a ring span the projected angle $\protect\gamma$ of the angle $\protect\phi$}
     \label{fig:PrismCl-buckets}
 \end{figure}
 
 
 \begin{figure}
     \includegraphics[width=1.0\columnwidth]{Images/PrismCl-Projection.png}
-    \caption{projection}
+    \caption{projection of the angle $\protect\phi$}
     \label{fig:projection}
 \end{figure}
 
@@ -730,11 +727,11 @@ Next we iterate over all shapes again while requesting the potential parallel sh
 At the end a set of all prisms is returned which can be used for further primitive classification.
 
 
-\paragraph{PrismShapeNormalsBuckets}
+\paragraph{Prism Shape Normals Buckets}
 
 \emph{PrismShapeNormalsBuckets} is based on the specification in section \ref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
 
-The constructor saves the angle threshold, instantiates the rings as a \emph{javascript map} and calculates the maximum ring index $I_{MaxRing}$.
+The constructor saves the angle threshold, instantiates the rings as a javascript map and calculates the maximum ring index $I_{MaxRing}$.
 
 It provides two functions used by the classifier: \\
 \emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
@@ -747,14 +744,14 @@ While determining the surrounding rings following special cases need to be consi
 
 First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
 
-Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).
+Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket 180° away.
 
 
 \paragraph{Ring}
 
-A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}
+A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
 
-The method \emph{push} sorts a given shape into the corresponding bucket. \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
+The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
 
 
 \paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.
