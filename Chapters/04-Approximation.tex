@@ -203,7 +203,7 @@ $ \vec{v}_{weighted} = \vec{v}_{weighted} + \frac{\vec{v}_{new} - \vec{v}_{weigh
 
 The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}, meaning \emph{VertexWelding} just provides the new vertices and does not replace the old ones. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
 
-A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore. 
+A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each of the three points gets replaced and a face gets deleted if its points are not distinct anymore. 
 
 
 
@@ -212,7 +212,7 @@ A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangular
 
 After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} \emph{Simplification} provides a simplified version for all subsequent processing steps. It is directly followed by \emph{MeshSetup} and \emph{CoplanarFaces} which analyses the given mesh to combine multiple faces. 
 
-This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
+This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in the  \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
 
 \subsubsection{Details with stacked plates}
 
