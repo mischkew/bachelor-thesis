@@ -56,7 +56,7 @@ Furthermore we eliminate beveled edges that are not functional but created by 3D
 The algorithm can be reused in further processing to ensure unambiguous vertices that may occur due to rounding differences during transformations.
 
 
-The used technique is known as 'vertex welding' in computer graphics: We merge two or more vertices that lie in a specified distance to each other. Then the mesh contains fewer vertices. As a consequence of the smaller vertex set, thin faces no longer consist of three distinct vertices: Two nearby vertices are just represented by one vertex and the face gets deleted.
+The used technique is known as vertex welding in computer graphics: We merge two or more vertices that lie in a specified distance to each other. Then the mesh contains fewer vertices. As a consequence of the smaller vertex set, thin faces no longer consist of three distinct vertices: Two nearby vertices are just represented by one vertex and the face gets deleted.
 
 To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{fig:origBunny} is simplified with an unusually high welding distance of 10mm in Figure \ref{fig:10mmBunny}. The images display each face with a different color to visualize the resulting face set. The loaded model consists of 8662 faces while the simplified bunny is reduced to 616 faces. Note, how smaller details like eyes and ears get lost with higher welding distance while the overall shape still remains. For effect illustration the welding distance is higher than the actual distance for processing.
 
@@ -68,7 +68,7 @@ To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{
 
 \begin{figure}
 \includegraphics[width=0.8\columnwidth]{Images/04-approx-welding-rabbit-10mm.png}
-\caption{Simplified Stanford Bunny with 616 faces (welding distance: 10mm)}
+\caption{Simplified Stanford Bunny with 616 faces. Applied welding distance: 10mm}
 \label{fig:10mmBunny}
 \end{figure}
 
@@ -98,7 +98,7 @@ A set of triangles is given. We choose a welding distance so points that lie fur
 
 For each cluster of vertices that gets merged, a new vertex is created which is typically in the middle of all corresponding points. The original vertices are replaced by this new one in each triangle.
 
-In case a triangle $ABC$ has two points in the same merge cluster $A$ and $B$, both get replaced by the new vertex $V$. As a result the triangle consists of the points $VVC$ while it does not contain three distinct vertices anymore - it is a line. If all three of its points lie in a cluster the outcome triangle $VVV$ is a single point. In these cases the triangle gets deleted. The initial area of these deleted triangles is now covered by its adjacent triangles.
+In case a triangle $ABC$ has two points $A$ and $b$ in the same merge cluster, both get replaced by the new vertex $V$. As a result the triangle consists of the points $VVC$ while it does not contain three distinct vertices anymore - it is a line. If all three of its points lie in a cluster the outcome triangle $VVV$ is a single point. In these cases the triangle gets deleted. The initial area of these deleted triangles is now covered by its adjacent triangles.
 
 The result is an approximation of the input with fewer vertices and faces while the maximum variance equals the specified welding distance. As illustrated in Figure \ref{fig:vertex_welding}, the resulting shape can also completely equal the original one without any differences: Only vertices inside the rectangle got merged which does not affect the outline of the object.
 
@@ -110,9 +110,9 @@ The result is an approximation of the input with fewer vertices and faces while 
 \label{fig:vertex_welding}
 \end{figure}
 
-\subsubsection{How the vertex algorithm is esed in our software}
+\subsubsection{How the vertex algorithm is used in our software}
 
-For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed (for instance while using very small welding distances).
+For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed, e.g. while using very small welding distances.
 
 \emph{VertexWelding} provides five functions:
 
@@ -130,7 +130,7 @@ preprocesses the given vertex which may be any object containing \emph{x}, \emph
 
 \subsubsection*{getCorrespondingVertex}
 
-returns a new vertex based on the given one. This function is called for replacing each point of your object.
+returns a new vertex based on the given one. This function is called for replacing each point of an object.
 
 \subsubsection*{replaceVerticesAndDeleteNonTriangularFaces}
 
@@ -156,7 +156,7 @@ In this figure point 1 is a \emph{weightedVertex} with $weight = 2 $. Point 2 is
 
 After preprocessing all points of a given set have to be replaced while \emph{getCorrespondingVertex} returns the respective vertex for each requested point.
 
-In case a point is requested without preprocessing \emph{VertexWelding} builds its list without putting the new vertex in between the merged points but picks the first one as representative for all following.
+In case a point is requested without preprocessing \emph{VertexWelding} builds its list without putting the new vertex in between the merged points, but picks the first one as representative for all following.
 
 
 
@@ -202,7 +202,7 @@ $ \vec{v}_{weighted} = \vec{v}_{weighted} + \frac{\vec{v}_{new} - \vec{v}_{weigh
 
 The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}, meaning \emph{VertexWelding} just provides the new vertices and does not replace the old ones. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
 
-A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore.
+A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each of the three points gets replaced and a face gets deleted if its points are not distinct anymore.
 
 
 
@@ -211,7 +211,7 @@ A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangular
 
 After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} \emph{Simplification} provides a simplified version for all subsequent processing steps. It is directly followed by \emph{MeshSetup} and \emph{CoplanarFaces} which analyses the given mesh to combine multiple faces.
 
-This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
+This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in the  \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
 
 \subsubsection{Details with stacked plates}
 
