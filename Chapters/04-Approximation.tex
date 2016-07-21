@@ -20,7 +20,7 @@
 \begin{document}
 
 %************************************************
-\chapter{Approximation / Dimitri}\label{ch:appropximation}
+\chapter{Approximation / Dimitri}\label{ch:approximation}
 
 % \secauthor{DS}
 %************************************************
@@ -28,7 +28,7 @@
 \newcommand\myNotes[1]{\textcolor{red}{#1}}
 
 
-In this chapter we describe our methods to reduce the complexity of our data. 
+In this chapter we describe our methods to reduce the complexity of our data.
 
 The pipeline step \emph{Simplification} provides a simplified version of the {\threedmodel} for all subsequent processing steps. The operation is called mesh simplification. This processing step serves two purposes: Removal of unwanted details and runtime improvement.
 
@@ -40,17 +40,17 @@ Furthermore we eliminate obsolete vertices during shape generation with point on
 \section{Mesh Simplification}
 
 
-Mesh simplification reduces the complexity of a {\threedmodel} by decreasing the amount of vertices and faces. In this process the original object gets approximated with less information. While doing so the differences between the processing results of an original and an approximated object are kept as low as possible. 
+Mesh simplification reduces the complexity of a {\threedmodel} by decreasing the amount of vertices and faces. In this process the original object gets approximated with less information. While doing so the differences between the processing results of an original and an approximated object are kept as low as possible.
 
 Our mesh simplification tackles three issues:
 
 \paragraph*{Processing Time}
 
-After the model is loaded and stored we decrease its complexity to speed up following processing tasks. Every pipeline step benefits from this mesh simplification because of the reduced data they are working on which implicates a much faster pipeline runtime. 
+After the model is loaded and stored we decrease its complexity to speed up following processing tasks. Every pipeline step benefits from this mesh simplification because of the reduced data they are working on which implicates a much faster pipeline runtime.
 
 \paragraph*{Abstraction}
 
-Furthermore we eliminate beveled edges that are not functional but created by 3D-modeling software because of aesthetic reasons. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce. 
+Furthermore we eliminate beveled edges that are not functional but created by 3D-modeling software because of aesthetic reasons. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce.
 
 \paragraph*{Elimination of redundant information created by our processing pipeline}
 
@@ -93,9 +93,9 @@ To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{
 
 
 
-Vertex Welding merges vertices and works as shown in Figure \ref{fig:vertex_welding}: 
+Vertex Welding merges vertices and works as shown in Figure \ref{fig:vertex_welding}:
 
-A set of triangles is given. We choose a welding distance so points that lie further away of each other will not get merged. This is also the maximum distance a vertex can be moved from its original position. Therefore it describes the variance of input and resulting vertex set. 
+A set of triangles is given. We choose a welding distance so points that lie further away of each other will not get merged. This is also the maximum distance a vertex can be moved from its original position. Therefore it describes the variance of input and resulting vertex set.
 
 For each cluster of vertices that get merged a new vertex is created (which is typically in the middle of all corresponding points). The original vertices are replaced by this new one in each triangle.
 
@@ -113,7 +113,7 @@ The result is an approximation of the input with fewer vertices and faces while 
 
 \subsubsection{Usage}
 
-For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed (for instance while using very small welding distances). 
+For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed (for instance while using very small welding distances).
 
 \emph{VertexWelding} provides five functions:
 
@@ -166,7 +166,7 @@ So if you want to weld a set of vertices, you can call \emph{preprocessVertices}
 
 During list setup each new vertex is either merged with an existing \emph{weightedVertex} or added to the list. Therefore all original vertices are represented by a \emph{weightedVertex}. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure \ref{fig:weightedVertex}.
 
-In this figure point 1 is a \emph{weightedVertex} with $weight = 2 $. Point 2 is the next vertex to be preprocessed and is within welding distance to point 1. Therefore point 2 is merged with point 1. The resulting point 3 lies between point 1 and 2. Since point 1 has $ weight = 2 $ the distance between point 3 and 1 is half the distance between point 3 and 2. 
+In this figure point 1 is a \emph{weightedVertex} with $weight = 2 $. Point 2 is the next vertex to be preprocessed and is within welding distance to point 1. Therefore point 2 is merged with point 1. The resulting point 3 lies between point 1 and 2. Since point 1 has $ weight = 2 $ the distance between point 3 and 1 is half the distance between point 3 and 2.
 
 \begin{figure}
 \includegraphics[width=0.4\columnwidth]{Images/04-approx-WeightedVertex.png}
@@ -174,7 +174,7 @@ In this figure point 1 is a \emph{weightedVertex} with $weight = 2 $. Point 2 is
 \label{fig:weightedVertex}
 \end{figure}
 
-After preprocessing all points of a given set have to be replaced while \emph{getCorrespondingVertex} returns the respective vertex for each requested point. 
+After preprocessing all points of a given set have to be replaced while \emph{getCorrespondingVertex} returns the respective vertex for each requested point.
 
 In case a point is requested without preprocessing \emph{VertexWelding} builds its list without putting the new vertex in between the merged points but picks the first one as representative for all following.
 
@@ -222,14 +222,14 @@ $ \vec{v}_{weighted} = \vec{v}_{weighted} + \frac{\vec{v}_{new} - \vec{v}_{weigh
 
 The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
 
-A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore. 
+A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore.
 
 
 
 
 \subsection{Simplification Pipelinestep}
 
-After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} \emph{Simplification} provides a simplified version for all subsequent processing steps. It is directly followed by \emph{MeshSetup} and \emph{CoplanarFaces} which analyses the given mesh to combine multiple faces. 
+After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} \emph{Simplification} provides a simplified version for all subsequent processing steps. It is directly followed by \emph{MeshSetup} and \emph{CoplanarFaces} which analyses the given mesh to combine multiple faces.
 
 This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
 
@@ -336,10 +336,10 @@ After the actual vertex welding the {\threedmodel} is checked for an empty face 
 The mesh preparation itself is extracted into another pipeline step: \emph{MeshSetup}. It takes the simplified {\threedmodel} and makes it ready for all further processing: face vertex mesh building, normal calculation and mesh indexing.
 
 
-    
+
 \subsection{Reusage for redundant information elimination}
 
-The algorithm can be reused in later processing steps. This is done for two reasons: 
+The algorithm can be reused in later processing steps. This is done for two reasons:
 
 First a cluster of multiple points lying close together might not bring any additional usable information. So one single representative point of that cluster leads to the same result produced by our system. Therefore the data set can be simplified to improve its processing.
 
@@ -353,7 +353,7 @@ For instance, this may occur during curve creation as described in chapter \ref{
 
 \subsection{Alternative Methods for Vertex Welding}
 
-There are different ways of implementing vertex welding. The three other appropiate approaches are sorting vertices with an octree, via hashing or via binary space partitioning. 
+There are different ways of implementing vertex welding. The three other appropiate approaches are sorting vertices with an octree, via hashing or via binary space partitioning.
 
 We chose our approach because it serves the simplification step with welding the complete {\threedmodel} as well as reusing it in later processing steps whenever we want to weld a data set. Therefore we do not have to implement different welding methods for various usages. Other implementations may not be applicable, may not serve all usages or will not bring any significant time improvement.
 
@@ -365,11 +365,11 @@ The space is discretised into blocks which dimensions equal the welding distance
 
 This would perform slightly faster for complete mesh simplification and slightly slower for fragmental welding of small vertex sets. Due to the vertex arrangement of most objects the number of comparisons would be lower and consequential the runtime too. On the opposite it performs slower for welding steps that take only a small amount of vertices: Most of them have to be compared so the space discretisation does not bring any advantages.
 
-The implementation of a octree based welding is a bit more complex than the current implementation. We did not chose the octree variant since the current implementation runs in adequate runtime, was faster to code and easier to test. 
+The implementation of a octree based welding is a bit more complex than the current implementation. We did not chose the octree variant since the current implementation runs in adequate runtime, was faster to code and easier to test.
 
 \paragraph{Hashing}
 
-Hashing is similar to the Octree approach and sorts vertices into a hash list. The sorting is based on a hash value computed by a hash function. This method is usually used if only identical points are merged instead of vertices that lie close to each other. 
+Hashing is similar to the Octree approach and sorts vertices into a hash list. The sorting is based on a hash value computed by a hash function. This method is usually used if only identical points are merged instead of vertices that lie close to each other.
 
 Due to the nature of hash functions it is easy to identify identical points since they have the same hash vale. Contrary, different points will not end up with the same hash value even if they should be welded in case we use a higher welding distance. Therefore hashing is not applicable to our system.
 
@@ -393,7 +393,7 @@ However, the runtime improvement is marginal compared to an octree and is more c
 
 A threshold for the distance of a point to a line is given by the global config since minor deviations from the line are not relevant.
 
-A simplified pseudo code version of the actual removal algorithm is shown in listing \ref{lst:pointOnLineRemovalAlgo}: \emph{getPreviousIndices()} returns the two previous indices that are not removed and \emph{isPreviousOnLine(index, prev, prevprev)} returns true if $ vertex_{prev}$ lies on the line between $vertex_{index}$ and $vertex_{prevprev}$. So we iterate over all vertices while deleting all its previous vertices until the previous is not on the line. 
+A simplified pseudo code version of the actual removal algorithm is shown in listing \ref{lst:pointOnLineRemovalAlgo}: \emph{getPreviousIndices()} returns the two previous indices that are not removed and \emph{isPreviousOnLine(index, prev, prevprev)} returns true if $ vertex_{prev}$ lies on the line between $vertex_{index}$ and $vertex_{prevprev}$. So we iterate over all vertices while deleting all its previous vertices until the previous is not on the line.
 
 \begin{listing}[!h]
 \centering
@@ -413,7 +413,7 @@ for index in [0...vertices.length] when index not in removedIndices
 \end{listing}
 
 
-When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \myNotes{figure einzusetzen}: Point 1 gets deleted in case point 2 lies within threshold distance to the line between point 0 and 1. But the actual point that should be deleted is obviously point 2 since it lies directly on the line between point 1 and 3. 
+When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \myNotes{figure einzusetzen}: Point 1 gets deleted in case point 2 lies within threshold distance to the line between point 0 and 1. But the actual point that should be deleted is obviously point 2 since it lies directly on the line between point 1 and 3.
 
 Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In figure \myNotes{figure einzusetzen} point 1 lies outside of the line between point 0 and 2. With this additional check the resulting triangle consist of the points 0, 1 and 3 as obviously desired.
 
@@ -430,7 +430,7 @@ Therefore it is needed to check if a point lies in between the points spanning t
 \section{Remove Contained Plates - in Lukas Kapitel}
 % \secauthor{DS}
 
-\emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software. 
+\emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software.
 
 There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
 
@@ -500,7 +500,7 @@ The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of co
 \myNotes{TODO: buckets sind minimal größer als threshold...}
 
 
-All normals lie on the surface of the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative. 
+All normals lie on the surface of the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
 
 
 \begin{listing}[!h]
@@ -550,11 +550,11 @@ This hemisphere is separated into rings. Each ring covers the threshold angle $\
 The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to get the actual ring index $I_{Ring}$:
 
 \begin{equation*}
-    I_{Ring} = \floor*{ 
-                    \arcsin{ 
-                        \frac{z}{ \sqrt{ x^{2} + y^{2} } } 
-                    } 
-                    / \phi 
+    I_{Ring} = \floor*{
+                    \arcsin{
+                        \frac{z}{ \sqrt{ x^{2} + y^{2} } }
+                    }
+                    / \phi
                 }
 \end{equation*}
 
@@ -610,13 +610,13 @@ Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 \label{equ:ZIRing}
 \begin{split}
     1 & = \vert \vec{a}_{I_{Ring}} \vert \stackrel{(\ref{equ:VecA})}{=} \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } \\
-    => z_{I_{Ring}} & = \sqrt{1 - x_{a}^{2}} 
+    => z_{I_{Ring}} & = \sqrt{1 - x_{a}^{2}}
     \stackrel{(\ref{equ:XA})}{=} \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
 \end{split}
 \end{equation}
 
 
-Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation: 
+Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
@@ -740,11 +740,11 @@ run: ->
         buckets = new PrismShapeNormalsBuckets(_bucketFactor * _angleThreshold)
 
         @_putIntoBuckets @shapes, buckets
-        
+
         prisms = @_detectPrisms @shapes, buckets
-        
+
         log.debug("PrismClassifier found " + prisms.length + " prisms")
-        
+
         resolve(prisms)
     )
 \end{minted}
@@ -752,9 +752,9 @@ run: ->
 \label{lst:PrismClassifierRun}
 \end{listing}
 
-Listing \ref{lst:PrismCalssifierRun} shows the implementation of the \emph{PrismClassifier} run method: 
+Listing \ref{lst:PrismCalssifierRun} shows the implementation of the \emph{PrismClassifier} run method:
 
-At first the normal buckets are initialised with a slightly greater threshold than the actual angle as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) and \emph{\_bucketFactor} $ = 1.1 $ so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel. 
+At first the normal buckets are initialised with a slightly greater threshold than the actual angle as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) and \emph{\_bucketFactor} $ = 1.1 $ so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
 
 Since $ {\gamma}_{1} = 0.153886 $ with $\phi = 0.15$ the \emph{\_bucketFactor} should be at least $1.026$. We choose a value of $1.1$ to support later changes of the threshold as described in section \ref{sec:PrismFutureWork} Future Work without having to change the \emph{\_bucketFactor}. With this value all thresholds $ \leq 0.832 = 48\degree$ are covered.
 
@@ -776,20 +776,20 @@ It provides two functions used by the classifier: \\
 
 \emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
 
-\emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath. 
+\emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath.
 
 While determining the surrounding rings following special cases need to be considered:
 
 First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
 
-Second: The ring with index 0 "is adjacent to itself" because the unit ball got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).  
+Second: The ring with index 0 "is adjacent to itself" because the unit ball got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).
 
 
 \paragraph{Ring}
 
 A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}
 
-The method \emph{push} sorts a given shape into the corresponding bucket. \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring. 
+The method \emph{push} sorts a given shape into the corresponding bucket. \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
 
 
 \paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.

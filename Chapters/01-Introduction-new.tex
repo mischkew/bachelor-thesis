@@ -25,14 +25,14 @@ knowledge or tools. For example in the field of engineering,
 when one has an idea how airplanes fly better
 (Figure~\ref{fig:intro-ideas:plane}). There are ideas
 concerning creative processes, like designing a fashion line
-for shoes which offer correct fit to the the feet of its
-wearer (Figure~\ref{fig:intro-ideas:shoe}). Even in health
-care broad ideas evolve. In 2013 Jake Evill presented
+for shoes which offer correct fit to the feet of its wearer
+(Figure~\ref{fig:intro-ideas:shoe}). Even in health care
+broad ideas evolve. In 2013 Jake Evill presented
 \name{Cortex}, a customizable plaster that is \enquote{fully
   ventilated, super light, shower friendly, hygienic,
   recyclable and
-  stylish}\footnote{\url{http://www.evilldesign.com/cortex}},
-see Figure~\ref{fig:intro-ideas:plaster}.
+  stylish}\footnote{\url{http://www.evilldesign.com/cortex}}.
+Cortex is shown in Figure~\ref{fig:intro-ideas:plaster}.
 
 \begin{figure}[ht]
   \centering
@@ -58,7 +58,7 @@ see Figure~\ref{fig:intro-ideas:plaster}.
   \label{fig:intro-ideas}
 \end{figure}
 
-Before it was hard to shape these ideas into a physical reality. But
+Before, it was hard to shape these ideas into a physical reality. But
 the way ideas are turned into reality is changing. Today machines
 exist that, connected to a computer, will take over the fabrication of
 objects. Users of fabrication machines can focus on ideas
@@ -74,34 +74,29 @@ Such a fabrication machine is a 3D printer. 3D printing is an emerging
 technology spreading across the consumer market. According to
 \name{Wohlers Associates}, in the year 2015 the 3D printing market was
 worth 6.5 billion USD. Their prognosis estimates a roughly 300\%
-growth in the next five years\cite{wohlers-market}. With 3D printers
+growth in the next five years \cite{wohlers-market}. With 3D printers
 literally any user can produce any free-form object with a button
 press. A common technique in 3D printing is fused deposition modeling
-(FDM)\cite{}\note{source that FDM is common}. With the FDM technique
+(FDM). With the FDM technique
 thermoplastic material is heated and then pressed through a nozzle,
 mounted on a print head. Material is extruded layer by layer  to
-create 3D~objects\cite{}\note{source thats how FDM
-  works}.
-
-\note{measure bird house dimensions}
+create 3D~objects \cite{fdm}.
 
 Though 3D printing brings a substantial progress to the
 field of fabrication, it shows two flaws: 3D printing is
 slow, and it is limited in its materials. Even small models
 need a couple of hours to be printed. The miniature bird
-house (4x4x5cm) in Figure~\ref{fig:intro-bird-house} printed
-for three hours\footnote{Printed with the
+house (3.5x3.5x5.5cm) in Figure~\ref{fig:intro-bird-house}
+printed for three hours\footnote{Printed with the
   \name{Ultimaker~2+},
   \url{https://ultimaker.com/en/products/ultimaker-2-plus}}.
-In its original dimensions (30x30x45cm) it requires about
+In its original dimensions (20x20x30cm) it requires about
 two days of printing time\footnote{Estimated with the
   \name{Cura~2} 3D~printer software,
   \url{https://ultimaker.com/en/products/cura-software}}.
 The FDM technique requires material to be extruded through a
 nozzle. Thus the material is melted and loses its original
-structure and characteristics. These characteristics are
-aesthetics or haptics, for example the feeling when touching
-the material surface.
+structure and characteristics, like aesthetics or haptics.
 
 \begin{figure}[ht]
   \includegraphics[width=0.6\textwidth]{01-intro-bird-house}
@@ -129,8 +124,8 @@ Figure~\ref{fig:intro-laser:machine}. A laser traces the
 outlines of a planar cutting plan, producing plates which
 are cut out from flat materials
 (Figure~\ref{fig:intro-laser:cut}). Such materials are wood
-or acrylic. High-performance devices can cut textiles,
-metals, and stone. The cutting process requires very short
+or acrylic. High-performance devices can cut textile,
+metal, and stone. The cutting process requires very short
 time, compared to the printing time of a 3D~printer.
 Figure~\ref{fig:intro-laser:assembly1} and
 Figure~\ref{fig:intro-laser:assembly2} show how the cut-out
@@ -189,10 +184,11 @@ wood, as shown in Figure~\ref{fig:intro-quadcopter}.
 \end{figure}
 
 With a laser cutter users can design objects with decorative
-aspects (Figure~\ref{fig:intro-glasses}). The laser cutter
-preserves the original structure of the used materials. The
-fabricated object benefits from the unique characteristics
-of the material.
+aspects as well (Figure~\ref{fig:intro-glasses}).
+% The laser cutter preserves the original structure of the
+% used materials.
+The fabricated object benefits from the original
+characteristics of the material.
 
 \begin{figure}
   \includegraphics[width=\textwidth]{01-intro-glasses}
@@ -206,19 +202,19 @@ of the material.
 % manual drafting of cutting plans for large objects -> difficult
 % each connection must be placed exactly, on millimeter, others plates stuck or fall apart
 
-When creating three dimensional objects with a laser cutter,
-users face two challenges: They need a vast amount of
-spatial orientation and craft men's knowledge about the used
-materials. The final object has to be assembled from the
-cut-out plates. The user has to know where the plates will
-resemble on the object in 3D space. Then, the user has to
-attach the plates to each other. In the case of wooden
-plates this would require knowledge about carpentry. In
+When creating 3D~objects with a laser cutter, users face two
+challenges: They need a vast amount of spatial orientation
+and craft men's knowledge about the used materials. The
+final object has to be assembled from the cut-out plates.
+The user has to know where the plates will resemble on the
+object in 3D space. Then, the user has to attach the plates
+to each other. In the case of wooden plates this would
+require knowledge about carpentry. In
 Figure~\ref{fig:intro-laser:assembly2} we combined the
 plates of a bird house with finger joints. When creating
-cutting plans manually for larger objects detailed work is
-required. All connections have to be positioned perfectly,
-otherwise the plates stuck or fall apart during assembly.
+cutting plans manually for larger objects, detailed work is
+required. All connections have to be positioned perfectly.
+Otherwise the plates stuck or fall apart during assembly.
 
 % we aim to make 3d model fabrication with laser cutter easy. using its pros in time, material. improving the creation of cut plans
 % we present software system platener
@@ -227,12 +223,13 @@ otherwise the plates stuck or fall apart during assembly.
 % analyzes geometries -> approximating a model with plates (different techniques we elaborate on in this thesis)
 % putting plates together (software knows which materials -> allowing to place finger joints calibrated for the laser cutting, allowing bends).
 
-In this thesis, we present a solution which enables users to
-produce three dimensional objects with a laser cutter. We
-produce cutting plans from {\threedmodel}s automatically.
-We improve the creation process of cutting plans, so that users
-do not require any additional skills. Similar to 3D~printing
-we begin the fabrication process with a 3D~model.
+In this thesis, we present a solution which enables every
+user to produce three dimensional objects with a laser
+cutter. We produce cutting plans from {\threedmodel}s
+automatically. We improve the creation process of cutting
+plans, so that users do not require any additional skills.
+Similar to 3D~printing we begin the fabrication process with
+a 3D~model.
 % Every user can imagine from the model, how the final
 % object will look like.
 Our software system {\platener} converts the 3D~model to a
@@ -256,12 +253,13 @@ cutter and free choice of materials.
 % plate joining
 % advanced analysis and conversion technique (future work)
 
-\note{cross refs}
-
-We present our system architecture in Chapter~\ref{} and give an
-overview of the most important data structures in Chapter~\ref{}. From
-Chapter~\ref{} to Chapter~\ref{} we explain the conversion process of
-3D~models to 2D~cutting plans.
+We present our system architecture in
+Chapter~\ref{ch:architecture} and give an overview of the
+most important data structures in
+Chapter~\ref{ch:processingPipeline}. From
+Chapter~\ref{ch:approximation} to Chapter~\ref{ch:curves} we
+explain the conversion process of 3D~models to 2D~cutting
+plans.
 
 \section{Related Work}
 \label{sec:related-work}
