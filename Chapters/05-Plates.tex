@@ -7,21 +7,30 @@
 
 \section{Overview of approaches for finding plates}
 
-There are multiple approaches for finding plates contained in a 3D-mesh. The first, called inherent plates, requires the plates to be modeled in the mesh with both a top and a bottom side (see Figure \ref{fig:inhplates}). The second approach, extruded plates, uses the mesh surface to extrude plates into the object (Figure \ref{fig:extplates}). While this method works on more meshes then the inherent approach, it can produce doubled plates if they are modeled in the mesh. The third approach is to stack plates, creating a filled approximation of the mesh (Figure \ref{fig:staplates}).
+There are multiple approaches for finding plates contained in a 3D~mesh. Two of these concepts, inherent plates \cite[p.~32]{master-thesis} and extrusion \cite[p.~28]{master-thesis}, are based on existing algorithms. The third approach, stacking plates, was built from the ground up.
+
+Inherent plates are modeled in the mesh, with both a top and a bottom side (see Figure \ref{fig:inhplates}). Between these, a plate is constructed. This is the most obvious approach, since it finds plates which a human would identify as well. It is discussed in Section \ref{sec:inherentplates}. The second approach, extruding plates, uses the mesh surface to extrude plates into the object (Figure \ref{fig:extplates}). It is inspired by the extrusion manufacturing process, where a malleable material is pressed through a die. Here, a flat part of the model's surface is translated along its normal, resulting in the opposite side of the plate. This is described further in Section \ref{sec:extrudedplates}. Our algorithm uses a combination of these two concepts. First, the model is searched for inherent plates. Afterwards, all surfaces of the model which were not used for creating a plate yet are forwarded to the extruding algorithm. While the first step finds plates which were actually modeled in the  Thus, we can handle complex meshes which feature both types of plates. 
+
+The concept of stacking plates is described in Section \ref{}
+
+The second approach, extruded plates, uses the mesh surface to extrude plates into the object (Figure \ref{fig:extplates}). While this method works on more meshes then the inherent approach, it can produce doubled plates if they are modeled in the mesh. The third approach is to stack plates, creating a filled approximation of the mesh (Figure \ref{fig:staplates}).
 
 \begin{figure}
+    \centering
     \includegraphics[width=1.0\columnwidth]{Images/plates_inherentplates.png}
     \caption{Finding inherent plates.}
     \label{fig:inhplates}
 \end{figure}
 
 \begin{figure}
+    \centering
     \includegraphics[width=1.0\columnwidth]{Images/plates_extrudedplates.png}
     \caption{Finding extruded plates.}
     \label{fig:extplates}
 \end{figure}
 
 \begin{figure}
+    \centering
     \includegraphics[width=1.0\columnwidth]{Images/plates_stackedplates.png}
     \caption{Finding stacked plates.}
     \label{fig:staplates}
@@ -32,6 +41,7 @@ There are multiple approaches for finding plates contained in a 3D-mesh. The fir
 Before finding plates, the model's faces have to be grouped into planar surfaces (Figure \ref{fig:coplanar}). This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
 
 \begin{figure}
+    \centering
     \includegraphics[width=1.0\columnwidth]{Images/plates_coplanar.png}
     \caption{Finding inherent surfaces.}
     \label{fig:coplanar}
@@ -43,7 +53,7 @@ The algorithm for finding coplanar faces requires the models to be stored as a f
 
 Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass (see Listing \ref{lst:lookuptables}). 
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -70,7 +80,7 @@ setupFaceEdgeEdgeFaceLookup: ->
 
 Afterwards, the faces are grouped. This in done by iterating over all faces. When a face is found which has not been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index (Listing \ref{lst:iteratefaces}).
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -96,7 +106,7 @@ There are multiple important variables being set here: First, we have the new \m
 
 After the edges have been pushed in the queue, we start processing it (see Listing \ref{lst:traverseadjacent}).  
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -129,7 +139,7 @@ This is implemented as a \emph{tail recursion}, the helper function \mintinline{
 
 Listing \ref{lst:coplanarcheck} shows what happens when testing for coplanarity. \mintinline{coffeescript}{isAngleZero} calculates the angle between the normals and compares it to zero. This is done even if the new face was already visited. If the faces are not coplanar, the edge is added to the group's outer edges. In case of coplanarity, we now check if the face was visited. If it was not, it is added to the face group. Additionally, an entry is added to the \mintinline{coffeescript}{faceToFaceGroup} lookup table and the face is marked as visited. After fetching the face's edges, they are pushed into the queue.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -153,17 +163,19 @@ After all faces have been processed and assigned a group, the \mintinline{coffee
 
 \subsection{Shape Finder / Deus}
 
-DO STUFF HERE
+\note{TODO}
+
+The shape finder creates shapes from the outer edge loops of the found coplanar faces. The outer edge loop is a set of edges in the format [vertex_index_1, vertex_index_2]. This is converted into a set of continuous edge loops of the form [vertex_index_1, vertex_index_2, ..., vertex_index_n, vertex_index_1]
 
 \subsection{Hole Detection / Dimitri}
 
 PASTE HERE
 
-\section{Finding inherent plates}
+\section{Finding inherent plates}\label{sec:inherentplates}
 
 In order to find inherent plates in a mesh, the first step is to find all coplanar shapes which are parallel and check if the distance between them fits one of the given plate thicknesses (Listing \ref{lst:platecand}).
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -188,7 +200,7 @@ While the testing for normal parallelism is done with built-in vector functions,
 
 The calculation of the optimal plate thickness is shown in Listing \ref{lst:checkplatethickness}. First, the actual distance between the shapes is calculated. Next, all possible plate thicknesses are tested if they can approximate the actual thickness well enough. Lastly, the thickness with the lowest absolute deviation is chosen as the best thickness.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -216,7 +228,7 @@ checkPlateThickness: (shape1, shape2) ->
 
 After finding these plate candidates, the shape which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate, as shown in Listing \ref{lst:faceintersect}. Now, the intersection of both shapes is calculated. This is done by using the already calculated mapping of vertices into the x-y-plane. The resulting intersection is transformed back into 3D-space using the rotation matrix of the base shape. With the resulting shapes, plates are created.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -234,11 +246,11 @@ return plates
 
 The intersection between the shapes is done using the \jsclipper library. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
-\section{Extruding plates}
+\section{Extruding plates}\label{sec:extrudedplates}
 
 The extrusion of plates is a simpler approach, which is shown in Listing \ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded against the face's normal direction. The plane constant of the plates base plane is the same as the z-value of the shapes x-y-representation. After checking the shape's area, the new plate is created.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -258,12 +270,12 @@ createPlateFromShape: (shape) ->
 
 PASTE HERE
 
-\section{Stacking plates}
+\section{Stacking plates}\label{sec:stackedplates}
 
 As an alternative approach, plates can be stacked. This method does not directly use the models surfaces. However, they can be used for optimization.
 The main function for stacking is shown in Listing \ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. After clipping the models faces with these planes, the resulting edges are merged into edge loops, which are used for creating shapes and, as wall as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotation in order to align them with the model. 
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -294,7 +306,7 @@ findStackedPlates: (model, shapes) ->
 
 In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing \ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -317,7 +329,7 @@ findRotation: (shapes) ->
 
 Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a \threejs plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates-to-be, which is an approximation which works for most applications. The plane creation is shown in Listing \ref{lst:clippingplanes}.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -341,7 +353,7 @@ getClippingPlanes: ->
 
 Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing \ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing \ref{lst:findplane}. Starting at the median plane (\mintinline{coffeescript}{@planes.length // 2}), we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -354,7 +366,7 @@ clipFaceAgainstPlanes: (face) ->
 \label{lst:clipfaceplanes}
 \end{listing}
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -395,7 +407,7 @@ If the face doesn't clip the plane or only intersect with one vertex, we check i
 
 Additionally, if either two edges, an edge and a vertex or the whole face clips the plane, these intersections are stored in the plane.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -416,7 +428,7 @@ clipFaceAgainstPlane: (face, plane) ->
 \label{lst:clipfaceplane}
 \end{listing}
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}
@@ -434,7 +446,7 @@ getDirectionFromPlaneToFace: (face, plane) ->
 
 After one clipping plane has been found, the adjacent ones have to be checked as well, since a face can span over multiple planes. This is done by iterating over the planes, starting from the next one and moving away. If the returned direction is not 0, we can stop because the plane and all following ones do not clip the face. Both directions, upwards and downwards, are checked seperately (see Listing \ref{lst:checkadjacent}).
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -468,6 +480,7 @@ Using the intersections stored in each plane, shapes can be created. These shape
 In order to assemble the stacked plates, we connect them with shafts (Figure \ref{fig:shafts}). Our approach for this: if two shapes which are located in adjacent planes intersect, they have to be connected by at least one shaft. The shaft finding algorithm has three steps: First, we iterate over all shapes and connect as many as possible. Next, we fix shapes which are not yet connected. Afterwards, we clean up shafts which are only connected to one shape.
 
 \begin{figure}
+    \centering
     \includegraphics[width=1.0\columnwidth]{Images/plates_shafts.png}
     \caption{Connecting plates with shafts.}
     \label{fig:shafts}
@@ -491,7 +504,7 @@ Instead of the actual shapes, the corresponding polygons are used, which enable 
 
 When processing a new polygon, we first mark that it has not been added to any shaft yet. Now, we iterate over all shaft candidates. If the current level (the layer) is bigger than the shaft's last added polygon's level plus one, there was no polygon from the last layer added to the shaft. Since we do not want shafts to create "bridges" spanning between unconnected layers, the shaft is marked as completed. If that is not he case, we try to add the polygon to the shaft.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -539,7 +552,7 @@ findShafts: ->
 
 Listing \ref{lst:addpolytoshaft} shows the calculations run when adding a polygon to a shaft. First, the shaft's intersection and the new polygon are intersected. The resulting intersection is checked if it is big enough to fit the shaft. If that is the case, the shaft's intersection is updated and the polygon is added to the shaft.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -570,7 +583,7 @@ In some cases, not all polygons - and thus not all plates - are connected to the
 
 Each polygon is checked how well it is connected to other polygons. If it is connected to both a polygon below and above (\mintinline{coffeescript}{connection.isConnected} is true), we do not have to connect it further. Otherwise, the shafts connecting it from above and below are checked. We try to expand these to connect more polygons in the given direction. If this succeeds, handling for this polygon is completed. Otherwise, we create a new shaft at this polygon and try to expand it in both directions.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
@@ -619,7 +632,7 @@ fixUnconnectedPlates: (shaftCandidates) ->
 
 As a result of this method, polygons which are not adjacent to any other polygon get assigned an own shaft. Since this does not improve the models stability, these are removed again, as shown in Listing \ref{lst:cleanupshafts}.
 
-\begin{listing}[ht]
+\begin{listing}
 \begin{minted}[
 linenos
 ]{coffeescript}

@@ -2,13 +2,218 @@
 \begin{document}
 
 %************************************************
-\chapter{Processing Pipeline / Sven or Dimitri}\label{ch:processingPipeline}
+\chapter{Processing Pipeline / Dimitri}\label{ch:processingPipeline}
+% \secauthor{DS}
 %************************************************
 
-\section{Einzelne Pipeline steps kurz erklärt}
+In this chapter we give a short overview over the already mentioned processing pipeline and therewith associated data structures. The text serves as an reference point to fit the individual sections into the overall concept.
 
-\section{Begriffe erklärt: EdgeLoop, Shape, Plate etc.}
+As described in chapter \ref{ch:architecture} Architecture there are three fabrication methods that implement different pipelines: \emph{Plate}, \emph{StackedPlate} and \emph{Classifier}. Each pipeline consists of pipeline steps that can be described as computation units. Each step performs an operation on the given data and provides its result for the following steps.
 
-\section{model loading and storage}
+
+\section{Fabrication Methods}
+
+\subsection{Plate}
+
+\emph{Plate} is the default fabrication method and converts the given model to an approximation consisting of plates. The pipeline is build up of following steps in the stated order: 
+
+\begin{itemize}
+    \item MeshCleanup
+    \item ModelStorage
+    \item Simplification
+    \item MeshSetup
+    \item CoplanarFaces
+    \item ShapesFinder
+    \item HoleDetection
+    \item InherentPlates
+    \item ExtrudedPlates
+    \item RemoveContainedPlatesInherent
+    \item RemoveContainedPlatesExtruded
+    \item PlateGraph
+    \item FingerJoints
+    \item AssemblyInstructions
+    \item Calibration
+    \item ShapeLayouter
+    \item MarkupGenerator
+    \item ZipGenerator
+\end{itemize}
+
+
+\subsection{Stacked Plate}
+
+\emph{StackedPlate} converts the given model with plates that are stacked on top of each other. The pipeline is build up of following steps in the stated order:
+
+\begin{itemize}
+    \item MeshCleanup
+    \item ModelStorage
+    \item MeshSetup
+    \item CoplanarFaces
+    \item ShapesFinder
+    \item HoleDetection
+    \item StackedPlates
+    \item StackedPlatesAssemblyInstructions
+    \item MarkupGenerator
+    \item ZipGenerator
+\end{itemize}
+
+
+\subsection{Classifier}
+
+\emph{Classifier} does not produce a final conversion yet. It analyses the given model with several classifiers trying to identify the various primitives contained in the mesh. The pipeline is build up of following steps in the stated order:
+
+\begin{itemize}
+    \item MeshCleanup
+    \item ModelStorage
+    \item MeshSetup
+    \item CoplanarFaces
+    \item ShapesFinder
+    \item HoleDetection
+    \item LabelledShapes
+    \item GeometryClassification
+\end{itemize}
+
+
+
+\section{Pipeline Steps}
+
+\subsection*{MeshCleanup}
+
+\emph{MeshCleanup} searches the mesh for zero faces and removes them. This ensures the mesh's two-manifoldness.
+
+
+\subsection*{ModelStorage}
+
+\emph{ModelStorage} stores the input model for easy access within the pipeline.
+
+
+\subsection*{Simplification}
+
+\emph{Simplification} takes the loaded 3D model, reduces its complexity and removes unwanted features. Therefore the processing gets easier and faster. 
+
+
+\subsection*{MeshSetup}
+
+During \emph{MeshSetup} the face-vertex mesh of meshlib is transformed into the \emph{faceVertexMesh} data structure. Then the edges and faces are traversed to built a look-up table and the corresponding reverse look-up table. These tables greatly speed up algorithms that work with the mesh data, e.g. \emph{CoplanarFaces}.
+
+
+\subsection*{CoplanarFaces}
+
+\emph{CoplanarFaces} groups faces which are both connected and coplanar, which allows the creation of more complex shapes.
+
+
+\subsection*{ShapesFinder}
+
+
+
+
+\subsection*{HoleDetection}
+
+\emph{HoleDetection} takes the found \emph{shapes} and classifies their \emph{edgeLoops} either as outer contour or hole.
+
+
+\subsection*{InherentPlates}
+
+\emph{InherentPlates} searches the model for plates which consist of both a top and a bottom side which are included in the mesh.
+
+
+\subsection*{ExtrudedPlates}
+
+\emph{ExtrudedPlates} creates plates by translating shapes along their normal, resulting in two sides of a plate.
+
+
+\subsection*{RemoveContainedPlatesInherent}
+
+\emph{RemoveContainedPlatesInherent} deletes unecessary plates produced by the \emph{InherentPlates} step.
+
+
+\subsection*{RemoveContainedPlatesExtruded}
+
+\emph{RemoveContainedPlatesExtruded} deletes unecessary plates produced by the \emph{ExtrudedPlates} step.
+
+
+\subsection*{PlateGraph}
+
+The \emph{PlateGraph} analyses plate adjacencies to find intersections between plates and prepare these for connecting them.
+
+\subsection*{FingerJoints}
+
+The \emph{FingerJoints} step creates the desired type of joints for each previously found plate intersection and adds them to the plates. This is required so the plates can be connected without glue or screws when cut and assembled.
+
+
+\subsection*{AssemblyInstructions}
+
+Each layouted shape is labelled with numbers for each connection to another plate. These numbers help the user to find plates that need to be assembled to each other.
+
+
+\subsection*{Calibration}
+
+\emph{Calibration} offsets all outlines of all plates by half the laser cutter’s kerf. Thus we incorporate that the plates will be smaller by a tenth of a millimeter after cutting. This is necessary so we can assemble all plates without using glue or skrew.
+
+
+\subsection*{ShapeLayouter}
+
+The \emph{ShapeLayouter} arranges the shapes in the cutting plan. It tries to pack them dense to avoid waste of material.
+
+
+\subsection*{MarkupGenerator}
+
+The \emph{MarkupGenerator} receives the \emph{threejs} shapes of the \emph{ShapeLayouter} step. These shapes represent the outlines of all plates in 3D space. The pipeline step converts the \emph{threejs} datastructure into a tree of React Components. This Component tree is then rendered to SVG markup.
+
+
+\subsection*{ZipGenerator}
+
+The \emph{ZipGenerator} writes all previously generated SVG files into a ZIP file. Additionally, it collects meta data from the pipeline state and stores it as a JSON file. The meta data can be used by third party applications to reconstruct the internal data representation.
+
+
+\subsection*{StackedPlates}
+
+\emph{StackedPlates} slices the model in even intervals. By stacking the resulting plates on top of each other, the original model is approximated.
+
+
+\subsection*{StackedPlatesAssemblyInstructions}
+
+\emph{StackedPlatesAssemblyInstructions} enumerates all plates, telling the user in which order they should be assembled.
+
+
+\subsection*{ShapeLayouterWithoutPlateGraph}
+
+
+
+
+\subsection*{LabelledShapes}
+
+Each shape is transformed into a \emph{labelledShape}. \emph{LabelledShapes} are used during \emph{GeometryClassification} to assign classified primitives to their original faces and vertices in the mesh.
+
+
+\subsection*{GeometryClassification}
+
+
+
+
+\section{Data Structures}
+
+\subsection*{Mesh}
+
+\emph{Mesh} is the data that represents the complete 3D model which is loaded into our system. It contains the triangles a model is made of. Concretely the specific points and edges of the geometry.
+
+\subsection*{FaceVertexMesh}
+
+\emph{FaceVertexMesh} is the data object produced by \emph{meshlib} which is responsible for the model import. We improve the data by adding indices which results in faster operations. Furthermore it contains the information to map altered or newly generated points and faces to the original geometry.
+
+\subsection*{Shape}
+
+A \emph{shape} is a flat 2D surface in 3D space. It contains \emph{edgeLoops} that represent outer contour and holes. It is used to build up \emph{plates}. Furthermore it provides the functionality to represent its \emph{edgeLoops} in 2D space which is needed for several oparations like joint generation.
+
+\subsection*{EdgeLoop}
+
+An \emph{edgeLoop} contains set of connected edges all lying in a plane in 3D space. The edges are implicitly given by the stored vertices.
+
+\subsection*{Plate}
+
+A \emph{plate} is a \emph{shape} with a thickness and therefore a three dimensional object instead of a 2D surface.
+
+\subsection*{Polygon}
+
+A \emph{Polygon} is a set of vertices in 2D space used in \emph{PlateGraph} and finger joint generation. General generation of new geometry is done in 2D space, therefore 3D data is transformed into \emph{polygons} and retransformed into 3D space when the operations are finished.
 
 \end{document}
