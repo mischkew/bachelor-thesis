@@ -212,7 +212,7 @@ A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangular
 
 After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} \emph{Simplification} provides a simplified version for all subsequent processing steps. It is directly followed by \emph{MeshSetup} and \emph{CoplanarFaces} which analyses the given mesh to combine multiple faces. 
 
-This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in the  \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
+This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in the fabrication method \emph{StackedPlates}.
 
 \subsubsection{Details with stacked plates}
 
@@ -220,9 +220,9 @@ If sliced in an advantageous direction tiny details of a {\threedmodel} can be o
 
 In general \emph{Simplification} removes such details as shown in Figure \ref{fig:3mmMakerbotMake}. With a welding distance of 3mm the result is a smooth surface while the original model shown in Figure \ref{fig:origMakerbotMake} contains the text 'Make:'.
 
-To simplify a model without loosing such a text is not possible with the implemented vertex welding due to the nature of these texts: The labeled surface differs barely from a smooth surface. Therefore the vertices are so close to each other that welding will occur with every chosen welding distance. To obtain those texts the algorithm has to know areas where it must not weld. If you try to outline the text with a smaller welding distance there will always be some kind of artifacts: missing or degenerated letters like in Figure \ref{fig:08mmMakerbotMake}.
+To simplify a model without loosing such a text is not possible with the implemented vertex welding due to the nature of these texts: The labeled surface differs barely from a smooth surface. Therefore the vertices are so close to each other that welding will occur with every chosen welding distance. To obtain those texts the algorithm has to know areas where it must not weld. If tried to outline the text with a smaller welding distance there will always be some kind of artifacts: missing or degenerated letters like in Figure \ref{fig:08mmMakerbotMake}.
 
-In order to be able to represent such texts with stacked plates \emph{Simplification} is not run in \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
+In order to be able to represent such texts with stacked plates \emph{Simplification} is not run in the fabrication method \emph{StackedPlates}.
 
 
 \begin{figure}
@@ -247,7 +247,7 @@ In order to be able to represent such texts with stacked plates \emph{Simplifica
 
 Most 3D editors offer to prettify objects by using curvatures instead of sharp edges. This can be done in various nuances to determine the smoothness of the curve.
 
-Obviously it is much easier to reproduce two connected plates without a beveled edge in \myNotes{InherentPlates (richtiger Name einzusetzen)}. Since these curvatures are just for aesthetic reasons we revert the rounding without any loss of functionality.
+Obviously it is much easier to reproduce two connected plates without a beveled edge in the pipeline step \emph{InherentPlates}. Since these curvatures are just for aesthetic reasons we revert the rounding without any loss of functionality.
 
 Figure \ref{fig:beveled} shows three beveled cubes where the edge is subdivided into one, two and ten parts. All three result in the cube with straight edges after the \emph{Simplification}. The granularity of the created beveled edge does not make any difference for the outcome:
 The higher the number of parts the denser the vertices while the absolute distance between start and end of a beveled edge remains the same. Therefore all vertices in this area get merged to the desired point independently from the edge segmentation.
@@ -264,7 +264,7 @@ In addition all sorts of surface modification like engravings and small attachme
 \begin{figure}
 \includegraphics[width=0.5\columnwidth]{Images/04-approx-welding-beveled-extruded.png}
 \includegraphics[width=0.5\columnwidth]{Images/04-approx-welding-beveled-extruded-result.png}
-\caption{Extruded details}
+\caption{Extruded details get removed}
 \label{fig:extruded_details}
 \end{figure}
 

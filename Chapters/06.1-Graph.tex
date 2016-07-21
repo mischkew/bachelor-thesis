@@ -72,7 +72,7 @@ Now that all lines are found we have to test if the lines actually go through bo
 In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates. In order to find these boundaries we calculate the intersections of the lines with all boundary edges of the plates. The result is shown in figure \ref{fig:allBoundaries}.\\
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth]{Images/HeadAllBoundaries.png}
+\includegraphics[width=\columnwidth]{Images/AllIntersectionsHMD.png}
 \caption{All intersections that were found. }
 \label{fig:allBoundaries}
 \end{figure}
@@ -181,7 +181,7 @@ Now that all main lines are known we need to shorten the lines so that no other 
 If we now have a look at only the inner intersections of plates in a model, seen in fig. \ref{fig:innerBoundaries}, we can identify the overlaps.
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth]{Images/HeadInnerBoundaries.png}
+\includegraphics[width=\columnwidth]{Images/TruncatedIntersectionsHMD.png}
 \caption{The inner boundaries of the plates overlap. In the next step when joints will be created they are only supposed to be on the inner part of the line. Therefore the lines have to be truncated.}
 \label{fig:innerBoundaries}
 \end{figure}
