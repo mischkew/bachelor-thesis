@@ -20,8 +20,7 @@
 \begin{document}
 
 %************************************************
-\chapter{Approximation / Dimitri}\label{ch:approximation}
-
+\chapter{Approximation}\label{ch:approximation}
 % \secauthor{DS}
 %************************************************
 
@@ -50,7 +49,7 @@ After the model is loaded and stored we decrease its complexity to speed up foll
 
 \paragraph*{Abstraction}
 
-Furthermore we eliminate beveled edges that are not functional but created by 3D-modeling software because of aesthetic reasons. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce.
+Furthermore we eliminate beveled edges that are not functional but created by 3D-modeling software because of aesthetic reasons. These can be removed since they do not serve any functionality and raise the complexity for conversion. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce.
 
 \paragraph*{Elimination of redundant information created by our processing pipeline}
 
@@ -95,13 +94,13 @@ To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{
 
 Vertex Welding merges vertices and works as shown in Figure \ref{fig:vertex_welding}:
 
-A set of triangles is given. We choose a welding distance so points that lie further away of each other will not get merged. This is also the maximum distance a vertex can be moved from its original position. Therefore it describes the variance of input and resulting vertex set.
+A set of triangles is given. We choose a welding distance so points that lie further away of each other will not get merged. This is also the maximum distance a merged vertex can be away from its original position. Therefore it describes the variance of input and resulting vertex set.
 
-For each cluster of vertices that get merged a new vertex is created (which is typically in the middle of all corresponding points). The original vertices are replaced by this new one in each triangle.
+For each cluster of vertices that gets merged, a new vertex is created which is typically in the middle of all corresponding points. The original vertices are replaced by this new one in each triangle.
 
-In case a triangle ($ABC$) has two points in the same merge cluster ($A$ and $B$) both get replaced by the new vertex $V$. As a result the triangle consists of the points $VVC$ while it does not contain three distinct vertices anymore - it is a line. If all three of its points lie in a cluster the outcome is a single point ($VVV$). In these cases the triangle gets deleted. The initial area of these deleted triangles is now covered by its adjacent triangles.
+In case a triangle $ABC$ has two points in the same merge cluster $A$ and $B$, both get replaced by the new vertex $V$. As a result the triangle consists of the points $VVC$ while it does not contain three distinct vertices anymore - it is a line. If all three of its points lie in a cluster the outcome triangle $VVV$ is a single point. In these cases the triangle gets deleted. The initial area of these deleted triangles is now covered by its adjacent triangles.
 
-The result is an approximation of the input with fewer vertices and faces while the maximum variance equals the specified welding distance. As illustrated in Figure \ref{fig:vertex_welding} the resulting shape can also completely equal the original one without any differences: Only vertices inside the rectangle got merged which does not affect the outline of the object.
+The result is an approximation of the input with fewer vertices and faces while the maximum variance equals the specified welding distance. As illustrated in Figure \ref{fig:vertex_welding}, the resulting shape can also completely equal the original one without any differences: Only vertices inside the rectangle got merged which does not affect the outline of the object.
 
 
 
@@ -111,30 +110,11 @@ The result is an approximation of the input with fewer vertices and faces while 
 \label{fig:vertex_welding}
 \end{figure}
 
-\subsubsection{Usage}
+\subsubsection{How the vertex algorithm is esed in our software}
 
-For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed (for instance while using very small welding distances).
+For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed (for instance while using very small welding distances).
 
 \emph{VertexWelding} provides five functions:
-
-% \begin{description}
-
-% \item[preProcessModel] \hfill \\
-% preprocesses the given meshlib model.
-
-% \item[preProcessVertices] \hfill \\
-% preprocesses the given array of vertices. A Vertex may be any object containing \emph{x}, \emph{y} and \emph{z} values.
-
-% \item[preProcessVertex] \hfill \\
-% preprocesses the given vertex which may be any object containing \emph{x}, \emph{y} and \emph{z} values.
-
-% \item[getCorrespondingVertex] \hfill \\
-% returns a new vertex based on the given one. This function is called for replacing each point of your object.
-
-% \item[replaceVerticesAndDeleteNonTriangularFaces] \hfill \\
-% handles the welding process for the given meshlib model: It replaces all vertices and deletes triangles that are not needed any more.
-
-% \end{description}
 
 \subsubsection*{preProcessModel}
 
@@ -157,7 +137,7 @@ returns a new vertex based on the given one. This function is called for replaci
 handles the welding process for the given meshlib model: It replaces all vertices and deletes triangles that are not needed any more.
 
 
-So if you want to weld a set of vertices, you can call \emph{preprocessVertices}, iterate over all points and replace them with the vertex from \emph{getCorrespondingVertex} or just replace them without preprocessing.
+So a set of vertices is welded by calling \emph{preprocessVertices}, iterating over all points and replacing them with the vertex from \emph{getCorrespondingVertex} or just replacing them without preprocessing.
 
 
 \subsubsection{Implementation}
@@ -220,7 +200,7 @@ $ \vec{v}_{weighted} = \vec{v}_{weighted} + \frac{\vec{v}_{new} - \vec{v}_{weigh
 
 \paragraph{Vertex Replacement}
 
-The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
+The actual vertex replacement is done manually for each point with \emph{getCorrespondingVertex}, meaning \emph{VertexWelding} just provides the new vertices and does not replace the old ones. It iterates over the weighted vertex list and returns a point if it is in welding distance. After iteration it adds the vertex to its weighted vertex list in case there was no corresponding one. This automatically handles welding without preprocessing: Each passed vertex is added to the list as long there is no vertex in welding distance yet. Therefore the first vertex serves as representant for all following ones that lie nearby.
 
 A complete model can be handled with \emph{replaceVerticesAndDeleteNonTriangularFaces}. It takes a \emph{meshlib} model and iterates over all faces. Each three points get replaced and a face get deleted if its points are not distinct anymore.
 
@@ -243,7 +223,6 @@ To simplify a model without loosing such a text is not possible with the impleme
 
 In order to be able to represent such texts with stacked plates \emph{Simplification} is not run in \myNotes{StackedPlatesMethod (richtiger Name einzusetzen)}
 
-\myNotes{letzten Satz weglassen? steht ja schon vor dieser section...}
 
 \begin{figure}
 \includegraphics[width=0.8\columnwidth]{Images/04-approx-welding-make-unwelded.png}
@@ -274,7 +253,6 @@ The higher the number of parts the denser the vertices while the absolute distan
 
 In addition all sorts of surface modification like engravings and small attachments get removed which simplifies the plate recognition. In Figure \ref{fig:extruded_details} there is text on top of the actual surface and in Figure \ref{fig:pushed_in_details} there is text pushed into the surface while both text is removed in the resulting object.
 
-\myNotes{statt an "extruded details" lieber an makerbot von vorher erklären?}
 
 \begin{figure}
 \includegraphics[width=1.0\columnwidth]{Images/04-approx-welding-beveled.png}
@@ -297,17 +275,10 @@ In addition all sorts of surface modification like engravings and small attachme
 \end{figure}
 
 
-\subsubsection{Processing Time Improvement}
-
-\myNotes{TODO: processing time improvement}
-
-\myNotes{TODO: Zahlen Runtime Vergleich: mit und ohne Simplification}
-
 \subsubsection{Process}
 
-The pipeline step clones the model due to our immutable state approach so the original model can be accessed at any point in time.
+The pipeline step clones the model due to our immutable state approach so the original model can be accessed at any point in time. The immutable state approach is described in chapter \ref{ch:Architecture} Architecture.
 
-\myNotes{immutable state approach sollte in Kap. Architecture erklärt sein}
 
 \paragraph{Welding Distance}
 
@@ -442,7 +413,6 @@ As described in the master thesis the algorithm may produce small plates that li
 
 So if two plates have orthogonal normals we check if one of them lies completely in the other and remove it.
 
-\myNotes{TODO: further explanation}
 
 \subsection{Overlapping parallel plates}
 
@@ -482,25 +452,22 @@ The pipeline step \emph{HoleDetection} is run after \emph{ShapesFinder} and cate
 
 \myNotes{Diese subsection wird im Classifier-Kapitel eingefügt}
 
-\myNotes{TODO: Herangehensweise erklären, etc.}
 
 A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives (usually faces or shapes).
 
-To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill \myNotes{hat Sven flood fill erklärt?}.
+To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill.
 
 \subsubsection{Bucket System}
 \label{sec:PrismBucketSystem}
 
-The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$ whose \myNotes{(whose ist falsch, was muss da hin?)} calculation is explained later in this text.
+The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their whose calculation is explained below.
 
 \begin{equation*}
     \vec{n} = \colvec{3}{x}{y}{z}
 \end{equation*}
 
-\myNotes{TODO: buckets sind minimal größer als threshold...}
 
-
-All normals lie on the surface of the unit ball \myNotes{(Einheitskugel, wie Einheitskreis, richtiger Begriff?)} because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
+All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal (planes with $(1,0,0)$ and $(-1,0,0)$ normals are parallel), all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
 
 
 \begin{listing}[!h]
@@ -726,7 +693,7 @@ Consequently the maximum bucket index is calculated with the maximum angle of 36
 
 \myNotes{TODO: Klassendiagramm}
 
-The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. \myNotes{(sind dependencies vorher erklärt? sollte so sein)} It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism.
+The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism.
 
 \paragraph{PrismClassifier}
 
@@ -737,7 +704,7 @@ linenos, breaklines
 ]{coffeescript}
 run: ->
     return new Promise( (resolve) =>
-        buckets = new PrismShapeNormalsBuckets(_bucketFactor * _angleThreshold)
+        buckets = new PrismShapeNormalsBuckets(_angleThreshold)
 
         @_putIntoBuckets @shapes, buckets
 
@@ -752,11 +719,9 @@ run: ->
 \label{lst:PrismClassifierRun}
 \end{listing}
 
-Listing \ref{lst:PrismCalssifierRun} shows the implementation of the \emph{PrismClassifier} run method:
+Listing \ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
 
-At first the normal buckets are initialised with a slightly greater threshold than the actual angle as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) and \emph{\_bucketFactor} $ = 1.1 $ so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
-
-Since $ {\gamma}_{1} = 0.153886 $ with $\phi = 0.15$ the \emph{\_bucketFactor} should be at least $1.026$. We choose a value of $1.1$ to support later changes of the threshold as described in section \ref{sec:PrismFutureWork} Future Work without having to change the \emph{\_bucketFactor}. With this value all thresholds $ \leq 0.832 = 48\degree$ are covered.
+At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
 
 Then all shapes are put into the corresponding buckets. This is done by iterating over all shapes and passing them to the bucket system which handles the classification on its own.
 
@@ -782,7 +747,7 @@ While determining the surrounding rings following special cases need to be consi
 
 First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
 
-Second: The ring with index 0 "is adjacent to itself" because the unit ball got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).
+Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket (180° away).
 
 
 \paragraph{Ring}

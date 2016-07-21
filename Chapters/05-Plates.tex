@@ -11,9 +11,7 @@ There are multiple approaches for finding plates contained in a 3D~mesh. Two of 
 
 Inherent plates are modeled in the mesh, with both a top and a bottom side (see Figure \ref{fig:inhplates}). Between these, a plate is constructed. This is the most obvious approach, since it finds plates which a human would identify as well. It is discussed in Section \ref{sec:inherentplates}. The second approach, extruding plates, uses the mesh surface to extrude plates into the object (Figure \ref{fig:extplates}). It is inspired by the extrusion manufacturing process, where a malleable material is pressed through a die. Here, a flat part of the model's surface is translated along its normal, resulting in the opposite side of the plate. This is described further in Section \ref{sec:extrudedplates}. Our algorithm uses a combination of these two concepts. First, the model is searched for inherent plates. Afterwards, all surfaces of the model which were not used for creating a plate yet are forwarded to the extruding algorithm. While the first step finds plates which were actually sculpted in the model, the second step approximates a filled objects hull. Thus, we can handle complex meshes which feature both types of plates. 
 
-The concept of stacking plates is described in Section \ref{sec:stackedplates}.
-
-The second approach, extruded plates, uses the mesh surface to extrude plates into the object (Figure \ref{fig:extplates}). While this method works on more meshes then the inherent approach, it can produce doubled plates if they are modeled in the mesh. The third approach is to stack plates, creating a filled approximation of the mesh (Figure \ref{fig:staplates}).
+The concept of stacking plates is described in Section \ref{sec:stackedplates}. The model is sliced in regular intervals, with plates being created based on the cross sections. When these plates are put on top of each other, they approximate the original model (Figure \ref{fig:staplates}). Additionally, special plates, called shafts, are added. These are perpendicular to the other plates and help with aligning them during assembly.
 
 \begin{figure}
     \centering
@@ -38,6 +36,10 @@ The second approach, extruded plates, uses the mesh surface to extrude plates in
 
 \section{Prerequisites for finding plates}
 
+Before these plate finding algorithms can process the model, it has to be prepared properly. The surface has to analyzed, with the faces being grouped into planar shapes. These shapes can be used as surfaces of plates. 
+
+\platener solves this by running multiple pipeline steps beforehand. The first, called \emph{Coplanar Faces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section \ref{sub:coplanarfaces}. In the next step, \emph{edge loops} are created based on the previously generated groups of faces. An edge loop is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener.
+
 Before finding plates, the model's faces have to be grouped into planar surfaces (Figure \ref{fig:coplanar}). This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
 
 \begin{figure}
@@ -47,7 +49,7 @@ Before finding plates, the model's faces have to be grouped into planar surfaces
     \label{fig:coplanar}
 \end{figure}
 
-\subsection{Coplanar Faces}
+\subsection{Coplanar Faces}\label{sub:coplanarfaces}
 
 The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
 

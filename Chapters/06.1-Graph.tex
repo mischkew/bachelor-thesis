@@ -66,7 +66,7 @@ Now that all lines are found we have to test if the lines actually go through bo
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=1\columnwidth]{Images/06-1-graph-fourIntersectionLines.png}
-\caption{Single plate pair with all of its intersection lines. The marked part is the segment that we continue to work with.}
+\caption{Single plate pair with all of its intersection lines. The infinite line has been clipped to the length of the other lines.}
 \label{fig:infiniteIntersections}
 \end{figure}
 In addition, this step retrieves the exact start and end points of the line segment that defines the intersection of both plates. In order to find these boundaries we calculate the intersections of the lines with all boundary edges of the plates. The result is shown in figure \ref{fig:allBoundaries}.\\
@@ -104,11 +104,19 @@ In such cases the infinitely long plane intersection line will be clipped to mat
 % \label{fig:planeClipping}
 % \end{figure}
 
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=.5\columnwidth, angle = 90]{Images/06-1-graph-clippingResult.jpg}
-\caption{When the shapes have been cut in 2D they are rotated back to form a 3-dimensional plate again. This figure depicts the volume which was cut off by the algorithm leaving the remaining plates p$_1$ and p$_2$}
-\label{fig:3dPlaneClipping}
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\columnwidth]{Images/BlocksIntersecting.png}
+        \caption{Two plates before clipping.}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\columnwidth]{Images/BlocksIntersectingshortened.png}
+        \caption{Two plates after clipping.}
+    \end{subfigure}
+    \caption{When the shapes have been cut in 2D they are rotated back to form a 3-dimensional plate again. This figure depicts the volume which was cut off by the algorithm leaving the remaining plates p$_1$ and p$_2$}
+    \label{fig:3dPlaneClipping}
 \end{figure}
 
 
@@ -131,7 +139,25 @@ Thanks to the previous clipping step we can find out when the angle has to be ad
 As can be seen in figure \ref{fig:touchingOrNot}, plates with an acute angle still touch when cut back and plates with an obtuse angle do not.
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth]{Images/06-1-graph-TouchingOrNotAfterClipping.jpg}
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/Blocks_One_Edge.png}
+\caption{Plates with an acute angle.}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/Blocks_One_Edge_shortened.png}
+\caption{Plates still touch after clipping.}
+\end{subfigure}
+
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/Blocks_Intersecting.png}
+\caption{Plates with an obtuse angle.}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/Blocks_Intersecting_shortened.png}
+\caption{Plates do not touch after clipping anymore.}
+\end{subfigure}
 \caption{After the clipping process the plate pair might be not touching anymore. This means that the angle between the plates has to be larger than 90$^\circ$.}
 \label{fig:touchingOrNot}
 \end{figure}
@@ -143,7 +169,7 @@ In order to know where to add the joints to the plate we have to identify one li
 For that we compare the distances of the new edges of the two plates which are shown in figure \ref{fig:mainLinesAfterClipping}. The lines belonging to the smallest distance determine where to place the joints.
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth, angle=90]{Images/06-1-graph-mainLinesAfterClipping.jpg}
+\includegraphics[width=.5\columnwidth]{Images/Blocks_No_Touch.png}
 \caption{The distances between the new edges after the clipping process reveals which of them are the inner lines. Those lines will be used for adding joints in the next step.}
 \label{fig:mainLinesAfterClipping}
 \end{figure}
@@ -220,32 +246,51 @@ When looking for plate intersections we also calculate all possible intersection
 
 \subsection{Representation of the joint location}
 As seen before in the section \hyperref[mainLine]{Main Lines} we calculate one line per intersection and plate which determines where we will place the joints. We chose this approach because it is a straight forward way. The joints only have to be moved onto the line and can directly be added to the plates. \\
-A different, more future oriented, approach is to work with the axis going through the middle of where the joints will be. This means it also defines the axis around which the plates could rotate when their angle changes. 
-\TODO{Include image that shows hinge twice. One where the axis is marked and one where our two main lines are marked!}
+A different, more future oriented, approach is to work with the axis going through the middle of where the joints will be. This means it also defines the axis around which the plates could rotate when their angle changes, see both options shown in figure \ref{fig:hinges}. 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/woodenFingers.jpg}
+\caption{Axis going through the middle of the joints.}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/woodenFingers2.jpg}
+\caption{Plate specific intersection lines}
+\end{subfigure}
+\caption{Two possible representations of where to place joints.}
+    \label{fig:hinges}
+\end{figure}
 In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should be similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
 In our use case the single line approach for an edge of a plate is completely sufficient.
 
 \subsection{Finding main lines by checking if they lie on a corner of the shape}
-As already mentioned when plates intersect there can be up to four intersection lines. We need to define which of them is the most important one in order to know where to put joints. The line we wanted to choose had to touch both plates.
-\TODO{Image of the four lines and showing which one should always be the main line}
+As already mentioned when plates intersect there can be up to four intersection lines. We need to define which of them is the most important one in order to know where to put joints. The line we wanted to choose had to touch both plates.\\
 This means all lines which intersected with any points of the shapes of the plates were ignored. The other line became main line.\\
 Our assumption, see fig. \ref{fig:assumption}, which we adopted from the Platener thesis \cite{master-thesis} for finding the main line is the following:\\
 Two plates always touch one another edge-to-edge. Therefore, if an intersection line does not lie on an outer boundary of the shape it is the main line.
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}
-\caption{Our assumption was that we only need to define one main line per plate pair. If there was just one intersection at all it was obvious. And when there were more than one intersection we thought the inner intersection should be the main line. }
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/1Touching.png}
+\caption{The only intersection line was immediately marked as main line.}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.45\textwidth}
+\includegraphics[width=\columnwidth]{Images/2InsideOverlap.png}
+\caption{The orange square marks the inner intersection line which we chose as main line.}
+\end{subfigure}
+\caption{Our assumption was that we only need to define one main line per plate pair. If there was just one intersection at all it was definitely the correct one. And when there were more than one intersection we thought the inner intersection should be the main line. }
 \label{fig:assumption}
 \end{figure}
 
 But the problem is that plates can intersect in many different ways, see fig. \ref{fig:obtuseAssumption}, which do not all verify our first assumption. 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=.5\columnwidth]{Images/06-1-graph-assumptionMainLine.jpg}
-\caption{In this case the angle between the plates is obtuse. If we just took the inner intersection here without first clipping of the plates there would be no space for joints. }
+\includegraphics[width=\columnwidth]{Images/Blocks_obtuse_overintersect.png}
+\caption{In this case the angle between the plates is obtuse. If we just took the inner intersection here without first clipping of the plates there would be no space for joints. Additionally, none of the intersection lines marked here in red lie on an outer boundary point. Therefore they would all have been marked as main. }
 \label{fig:obtuseAssumption}
 \end{figure}
-\TODO{replace this with image of two planes where this doesnt work}
 This is why we replaced this algorithm with the one from the previous section \hyperref[mainLine]{Main Lines}.
 
 \subsection{Adjusting angles based on which sides of the plates touch}
@@ -262,7 +307,6 @@ For an angle to be in need to be adjusted the following conditions need to be sa
     \item Their directions are both positive OR both negative
 \end{itemize}
 But as mentioned before all of these calculations are based on the assumption that the previous main line calculation only yielded one line.\\
-\TODO{Include image that shows when this is not the case, with captions explaining why our current algorithm fails here}
 In this case the previous algorithm fails which is why we developed a new approach for finding the correct angle as already explained in the section \hyperref[angleCalculation]{Angle Calculation}.
 
 \section{Future work}
@@ -271,7 +315,7 @@ A few more things have to be accomplished to allow for a smooth conversion.
 Currently, we only calculate one line per edge but as can be seen in figure \ref{fig:twoLineSegments} this is not enough. To solve this the line segments should be found and for each segment a new edge should be created to be handles seperately. 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.5\columnwidth]{Images/06-2-joints-moreThanOneLinePerEdge.jpg}
+\includegraphics[width=\columnwidth]{Images/Blocks_two_contact(1).png}
 \caption{Plate 2 touches Plate 1 twice. This should result in two edges and intersections which should be handled seperately.}
 \label{fig:twoLineSegments}
 \end{figure}
@@ -294,49 +338,5 @@ In the master thesis \cite{master-thesis} it was mentioned that plates can be sp
         \item If they have the same thickness the intersection lines need to be checked to be parallel and overlaps between P1 and P3, and P2 and P3.
         \item When determined that P1 and P2 should actually be one plate which has been parted by P3 then they need to be unioned and marked for receiving a t-junction in the next step.
     \end{enumerate}
-
-
-
-
-
-
-% Dummy algorithm:\\
-% \begin{algorithm}[H]
-% 	\DontPrintSemicolon
-% 	\KwData{input Data}
-% 	\KwResult{result Data}
-% 	initialize variables here\;
-%    \caption{Name of Algorithm}
-
-% \end{algorithm}
-
-
-
-% \begin{algorithm}[H]
-% \DontPrintSemicolon
-% 	\KwData{this text}
-% 	\KwResult{how to write algorithm with \LaTeX2e }
-% 	initialization\;
-% 	\While{not at end of this document}{
-% 	read current\;
-% 	\eIf{understand}{
-% 	go to next section\;
-% 	current section becomes this one\;
-% 	}{
-% 	go back to the beginning of current section\;
-% 	}
-%      \For{all I know}{
-%      look at this link to learn more about \LaTeX2e:\;
-%      http://ctan.space-pro.be/tex-archive/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf\;
-%      }
-% 	}
-%    \caption{How to write algorithms}
-
-% \end{algorithm}
-
-
-
-
-
 
 \end{document}

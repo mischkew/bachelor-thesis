@@ -59,7 +59,7 @@ The least squares solution is the following plane equation: $z = Ax + By + C$.
 The minimal set for a cylinder are two points \{$p_1, p_2$\}, see fig. \ref{fig:cylinder} for the reconstruction sketch. Those points are assumed to lie on the shell of the cylinder. The axis can be calculated by calculating the cross product of their normals $n_1$ and $n_2$. Based on the axis a projection plane is formed which is perpendicular to the axis. The two lines $l_1 = p_1 + x*n_1$ and $l_2 = p_2 + x*n_2$ are projected onto this plane and should have an intersection. If they do not intersect the candidate is invalid. Otherwise, the intersection point is marked as the center of the cylinder-candidate. The radius is the mean value of the distance of both points to the center on the axis.
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=\columnwidth]{Images/10-classifiers-cylinderClassification.jpg}
+    \includegraphics[width=\columnwidth]{Images/cylinder.png}
     \caption{Two points are enough to represent a cylinder. The axis can be reconstructed, as well as the radius.}
     \label{fig:cylinder}
 \end{figure}
