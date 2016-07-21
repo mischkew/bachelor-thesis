@@ -279,9 +279,11 @@ newRotMat = newRotMat.multiply rotMat.clone()
 
 \subsection{Search for best surface development}
 
-The current implementation does not always find the best solution. While traversing the graph it is possible that there multiple different paths thrue  which result in unequally well sets of bent plates. One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first. Because the currently only one attempt to traverse the graph is made the second possibility would not be found.
+The current implementation does not always find the best solution. While traversing the graph it is possible that there multiple different paths through the graph. This results in unequally good sets of bent plates. One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first. Because the currently only one attempt to traverse the graph is made the second possibility would not be found.
 To avoid this a possible solution is the following: If one plate that should be added to a bent plate but overlaps with one other plate of the bent plate to also check if removing the older plate (and the only via this plate connected plates) and add the new plate results in a better solution.
 This will increase the run time and will only result in better solutions for models where the bendable parts of the \threedmodel{} form a highly connected graph.
+
+\note{TO DO: figure}
 
 \subsection{Curved joints}
 
