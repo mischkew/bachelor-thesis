@@ -1,7 +1,7 @@
 \documentclass[../../ClassicThesis.tex]{subfiles}
 \begin{document}
 
-\section{Platener Is Implemented In {\convertify}}
+\section{{\platener} Is Implemented in {\convertify}}
 \label{sec:application-platener}
 
  % - Section overview
@@ -18,17 +18,17 @@ describes the implementation of {\platener} within the
 with the system events and rendering engine of
 {\convertify}. As proposed in the preceding section, it uses
 several plugins to bring its features to the WebGL
-scene. Section~\ref{sec:platener-uses-plugins} describes
+scene. Section~\sectionref{sec:platener-uses-plugins} describes
 these plugins briefly.
-Section~\ref{sec:platener-pipeline-plugin} shows
+Section~\sectionref{sec:platener-pipeline-plugin} shows
 architectural details to the most important plugin:
 the \name{PlatenerPipeline} plugin. This plugin
 implements different conversion strategies for
-{\threedmodel}s. In Section~\ref{sec:client-to-application}
+{\threedmodel}s. In Section~\sectionref{sec:client-to-application}
 we explain how the application combines user interfaces with
 the \class{Dispatcher} and the plugins.
 
-\subsection{Platener Uses Plugins to Implement Its Features}
+\subsection{platener Uses Plugins to Implement Its Features}
 \label{sec:platener-uses-plugins}
 
 The plugins composed into {\platener} provide its computation
@@ -37,7 +37,7 @@ each plugin in the following paragraphs.
 Figure~\ref{fig:plugin-constellation} shows all available plugins of
 {\platener}.
 
-\subsubsection{Platener Pipeline Plugin}
+\subsubsection{platener Pipeline Plugin}
 
 The \name{PlatenerPipeline} plugin does the major work on
 converting {\threedmodel}s to 2D~plates. The plugin defines
@@ -48,7 +48,7 @@ Figure~\ref{fig:conversion:stacked} show two conversion
 results. This plugin generates a set of 2D~paths, so that
 the conversion can be produced with a {\lasercutter}. The
 paths are depicted in Figure~\ref{fig:conversion:paths}.
-Section~\ref{sec:platener-pipeline-plugin} explains the
+Section~\sectionref{sec:platener-pipeline-plugin} explains the
 architecture of the \name{PlatenerPipeline} plugin in
 detail.
 
@@ -81,7 +81,7 @@ detail.
 % 3D-output. For example, construction plans in the format of
 % {\svgfile}s are such an output, see Figure~\ref{}
 % \note{construction plans figure}.
-% Section~\ref{sec:platener-pipeline-plugin} explains the
+% Section~\sectionref{sec:platener-pipeline-plugin} explains the
 % architecture of the \name{PlatenerPipeline} plugin in detail.
 
 \subsubsection{Node Visualizer Plugin}
@@ -91,7 +91,7 @@ plugin in the WebGL view. The \name{NodeVisualizer} plugin
 renders the results of each conversion and its intermediate
 computation steps respectively. With the help of this we
 debug the results of the computation visually. As explained
-in Section~\ref{ch:userinteraction}, we select a
+in Section~\sectionref{ch:userinteraction}, we select a
 single visualization at a time to inspect the results of the
 step associated with the visualization.
 Figure~\ref{fig:steps-plate} shows a head-mounted display in
@@ -102,10 +102,10 @@ the \name{Plate} step.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\textwidth]{03-architecture-hmd-plates}
-  \label{fig:steps-plate}
   \caption{Visual debugging of intermediate conversion
-    results.A head-mounted display, consisting of plates
+    results. A head-mounted display, consisting of plates
     only.}
+  \label{fig:steps-plate}
 \end{figure}
 
 \subsubsection{Scorer Plugin}
@@ -127,7 +127,7 @@ best score.
 This plugin provides orientation enhancements for the WebGL
 scene. Rendering xyz-axes and an axis-aligned grid, users
 can grasp alignment and dimensions of {\threedmodel}s.
-Figure \ref{fig:architecture_overview_coordinate_system}
+Figure~\ref{fig:architecture_overview_coordinate_system}
 shows the coordinate system in the WebGL view. The
 Coordinate System is taken from \emph{Brickify} as
 is\cite[p.~92]{bachelor-thesis}.
@@ -442,12 +442,12 @@ web application in the frontend package and a command line interface
 in the backend package.
 
 The {\convertify} code package was described in detail in
-Section~\ref{sec:framework-convertify}.
+Section~\sectionref{sec:framework-convertify}.
 
 The plugins package contains seven plugins, where each plugin is a
 separate subpackage. The plugins implement the computational and
 render logic of {\platener}. We introduced these plugins in
-Section~\ref{sec:platener-uses-plugins}.
+Section~\sectionref{sec:platener-uses-plugins}.
 
 %     - We have a WebApp and a Server package, which are both Client
 %       code, because we have two types of applications
@@ -460,11 +460,11 @@ frontend application enables users to convert
 browser. The web application is build with React components.
 React is a {\javascript} library for building user
 interfaces. We will introduce React and our React setup in
-Section~\ref{sec:ui-with-react}. The backend application is
+Section~\sectionref{sec:ui-with-react}. The backend application is
 a command line interface running on {\nodejs}. With the
 backend application users can batch-process a set of models
 without using a browser. We give details about the CLI-tool
-in Section~\ref{sec:cli-tool}. Also, we provide a server
+in Section~\sectionref{sec:cli-tool}. Also, we provide a server
 which manages a repository of {\threedmodel}s and their
 conversions.
 
@@ -677,7 +677,7 @@ The backend package of {\platener} provides a command line interface
 {\threedmodel}s in a queue. Results are read from and stored in
 a directory. We receive detailed summaries and logs for each
 conversion. A walkthrough of our CLI is given in
-Section~\ref{sec:walkthrough-cli}.
+Section~\sectionref{sec:walkthrough-cli}.
 
 A command line interface is an application solely consisting of
 textual input and output. A CLI is typically more flexible and

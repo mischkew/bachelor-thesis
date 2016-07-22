@@ -9,6 +9,7 @@
 \manualmark
 \markboth{\spacedlowsmallcaps{\contentsname}}{\spacedlowsmallcaps{\contentsname}}
 \tableofcontents 
+
 \automark[section]{chapter}
 \renewcommand{\chaptermark}[1]{\markboth{\spacedlowsmallcaps{#1}}{\spacedlowsmallcaps{#1}}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection\enspace\spacedlowsmallcaps{#1}}}
@@ -25,10 +26,12 @@
     % List of Figures
     %*******************************************************    
     %\phantomsection 
-    \refstepcounter{dummy}
-    %\addcontentsline{toc}{chapter}{\listfigurename}
-    \pdfbookmark[1]{\listfigurename}{lof}
-    % \listoffigures
+    % \refstepcounter{dummy}
+    % \addcontentsline{toc}{chapter}{\listfigurename}
+    \setcounter{lofdepth}{1}
+    % \pdfbookmark[1]{\listfigurename}{lof}
+    % \addcontentsline{toc}{chapter}{\listfigurename}
+    \listoffigures
 
     \vspace*{8ex}
 
@@ -39,7 +42,7 @@
     \refstepcounter{dummy}
     %\addcontentsline{toc}{chapter}{\listtablename}
     \pdfbookmark[1]{\listtablename}{lot}
-    %\listoftables
+    % \listoftables
         
     \vspace*{8ex}
 %   \newpage

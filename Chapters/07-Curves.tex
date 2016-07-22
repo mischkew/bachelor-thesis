@@ -2,28 +2,28 @@
 \begin{document}
 
 %************************************************
-\chapter{Curves/Deus}\label{ch:curves}
+\chapter{Curves}\label{ch:curves}
 %************************************************
 
-\section{Cutting curved shapes}
+\section{Cutting Curved Shapes}
 
-Approximating curved shapes with parts created by the laser cutter is a special challenge because only 2D shapes can be cut. There are several approaches to make the cut material bendable, for example, paper can be bent because of the material properties. Acrylic becomes bendable when heated, while bending wood is made possible by the use of a special cutting pattern, the so-called living hinges (see Section \ref{sec:living_hinges}).
+Approximating curved shapes with parts created by the laser cutter is a special challenge because only 2D shapes can be cut. There are several approaches to make the cut material bendable, for example, paper can be bent because of the material properties. Acrylic becomes bendable when heated, while bending wood is made possible by the use of a special cutting pattern, the so-called living hinges (see Section~\sectionref{sec:living_hinges}).
 
 Theoretically, this only enables the possibility to create shapes from developable surfaces, like cylinders, but no doubly curved ones, like spheres. But since our meshes consists of triangles, which are themselves two-dimensional, our meshes are always developable.
 
-\section{General approach}
+\section{Bend Joints are Used as Alternative for Finger Joints}
 
-In our implementation, we use the  \emph{bend} joint type as an alternative to, for example, finger joints. Like the finger joint generation, the calculation of bends is based on the plate graph. The bent plate generation is separated into two steps. First, our implementation analyses which parts can be bent. Second, it creates a flat shape from the curved parts, which can be cut with a laser cutter. 
+In our implementation, we use the \emph{bend} joint type as an alternative to, for example, finger joints. Like the finger joint generation, the calculation of bends is based on the plate graph. The bent plate generation is separated into two steps. First, our implementation analyses which parts can be bent. Second, it creates a flat shape from the curved parts, which can be cut with a laser cutter. 
 
-\section{Prerequisites creating bent plates}
+\section{Prerequisites Creating Bent Plates}
 
 %Because we use bends as a connection type the bent plate creation is based on the plate graph.
 The algorithm uses the plates and connections from the plate graph. The plates provide their shape, normal and rotation matrix, which is used for laying it into the xy-plane. Additionally, the connections intersection line and angle are used. Before calculating bends, the finger joints have to be created, with the resulting shapes being stored in the corresponding connection.
 
-\section{Living hinges}
+\section{Living Hinges Make Rigid Materials Flexible}
 \label{sec:living_hinges}
 
-Living hinges are segments of a rigid material that are made flexible locally. There are several techniques to do this, e.g. thinning the material in this area. Using the \lasercutter{} a living hinge can be created by dense parallel cuts. They are disconnected every few centimeters and the breaks are offset to the next parallel cut (see Figure \ref{fig:living_hinge}).
+Living hinges are segments of a rigid material that are made flexible locally. There are several techniques to do this, e.g. thinning the material in this area. Using the \lasercutter{} a living hinge can be created by dense parallel cuts. They are disconnected every few centimeters and the breaks are offset to the next parallel cut (see Figure~\ref{fig:living_hinge}).
 
 \begin{figure}[h]
   \centering
@@ -41,9 +41,9 @@ Living hinges are segments of a rigid material that are made flexible locally. T
   \label{fig:living_hinge}
 \end{figure}
 
-\section{Developable surface}
+\section{Developable Surfaces Can be Bend}
 
-Formally developable surfaces are defined as surfaces with zero Gaussian curvature. Practically this means they can be created from a flat surface by cutting, bending and folding and without compressing or stretching. Examples for objects with and without developable surfaces are shown in Figure \ref{fig:developable_surface_examples}.
+Formally developable surfaces are defined as surfaces with zero Gaussian curvature. Practically this means they can be created from a flat surface by cutting, bending and folding and without compressing or stretching. Examples for objects with and without developable surfaces are shown in Figure~\ref{fig:developable_surface_examples}.
 
 \begin{figure}[h]
   \centering
@@ -61,18 +61,18 @@ Formally developable surfaces are defined as surfaces with zero Gaussian curvatu
   \label{fig:developable_surface_examples}
 \end{figure}
 
-\section{The bent plate object}
+\section{The Bent Plate Object}
 
-\class{Bent plate} is a data structure we use to represent a set of plates which are connected directly or indirectly with bend connections. Thus a bent plate can be cut as one piece. A \class{bent plate} consists of a set of \class{plates}. It provides the method \mintinline{coffeescript}{generateShape} which develops the surface of the connected shapes (see Section \ref{sec:generateShape}). Another method implemented by \class{bent plate} is \mintinline{coffeescript}{generateBendLines} which creates cuttable marks where two plates are merged (see Section \ref{sec:generateBendLines}).
+\class{Bent plate} is a data structure we use to represent a set of plates which are connected directly or indirectly with bend connections. Thus a bent plate can be cut as one piece. A \class{bent plate} consists of a set of \class{plates}. It provides the method \mintinline{coffeescript}{generateShape} which develops the surface of the connected shapes (see Section~\sectionref{sec:generateShape}). Another method implemented by \class{bent plate} is \mintinline{coffeescript}{generateBendLines} which creates cuttable marks where two plates are merged (see Section~\sectionref{sec:generateBendLines}).
 
-\subsection{The generateShape function}
+\subsection{The GenerateShape Function/ Mehr Umschreibender Title}
 \label{sec:generateShape}
 
 To generate the \class{shape} of the \class{bent plate} we first check how many \class{plates} this \class{bent plate} contains. If none are contained, the generated \class{shape} is \emph{null}. If there is just one \class{plate} then its \class{shape} is used.
 
-If there are multiple plates in the bent plate the generation is done the following way: For each of the plates in the bent plate, the corresponding shape is transformed using the bend matrix (see section \ref{sec:traverse-along-bend-connection}). Afterwards, they are converted into polygons suitable for using with the \jsclipper{} and merged using the \emph{union} function.
+If there are multiple plates in the bent plate the generation is done the following way: For each of the plates in the bent plate, the corresponding shape is transformed using the bend matrix (see Section~\sectionref{sec:traverse-along-bend-connection}). Afterwards, they are converted into polygons suitable for using with the \jsclipper{} and merged using the \emph{union} function.
 
-To avoid unconnected polygons after merging caused by floating point inaccuracy we use vertex welding before merging (see Section \ref{sec:vertex_welding}). The resulting polygon is converted back to a shape (see Listing \ref{lst:generateShape}).
+To avoid unconnected polygons after merging caused by floating point inaccuracy we use vertex welding before merging (see Section~\sectionref{sec:vertex_welding}). The resulting polygon is converted back to a shape (see Listing~\ref{lst:generateShape}).
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -131,12 +131,12 @@ generateShape: ->
 \label{lst:generateShape}
 \end{listing}
 
-\subsection{The generateBendLines function}
+\subsection{The generateBendLines Function}
 \label{sec:generateBendLines}
 
 This method generates a dashed line located at the connection line between two plates of the bent plate. This marks where the user must bend the material. Additionally, it weakens the material and allows for easier bending.
 
-To locate the general placement of the bend line all intersection lines of the bent plate are processed. They are checked whether they belong to a bend connection and are not used for creating a bend line yet. To place them into the shape they are transformed by the corresponding bend matrix (see Listing \ref{lst:generateBentLines}).
+To locate the general placement of the bend line all intersection lines of the bent plate are processed. They are checked whether they belong to a bend connection and are not used for creating a bend line yet. To place them into the shape they are transformed by the corresponding bend matrix (see Listing~\ref{lst:generateBentLines}).
 
 \begin{listing}[ht]
 \begin{minted}[
@@ -166,9 +166,9 @@ generateBendLines: ->
 
 At this position we create a dashed cutting line.
 
-\section{Setting the joint type}
+\section{Setting the Joint Type}
 
-In this step, we try to find out which connections can be implemented as a bending joint. The resulting shape of the connected plates is developable without overlaps. The difference between a model which surface is developable without overlaps and one which in not is shown in Figure \ref{fig:overlaps}.
+In this step, we try to find out which connections can be implemented as a bending joint. The resulting shape of the connected plates is developable without overlaps. The difference between a model which surface is developable without overlaps and one which in not is shown in Figure~\ref{fig:overlaps}.
 
 \begin{figure}[h]
   \centering
@@ -203,7 +203,7 @@ In this step, we try to find out which connections can be implemented as a bendi
 To do so, we start with one plate and run a series of tests for all of its connections:
 \begin{itemize}
 \item Is the type of this connection not yet set (it is set to \emph{unset} instead of e.g. \emph{bend joint})?
-\item Is the connection angle close enough to 180\textdegree{}, allowing the material to be bent this far? (What near enough means depends on the used material see Section \ref{sec:material_dependant_bend_angle})
+\item Is the connection angle close enough to 180\textdegree{}, allowing the material to be bent this far? (What near enough means depends on the used material see Section~\sectionref{sec:material_dependant_bend_angle})
 \item Is it possible to add the to-be-connected plate's shape to the currently processed plate's shape without overlapping?
 \end{itemize}
 If all checks succeed, the connected plate is added to this plate and they form a bent plate. If the connection type is not yet set but one of the other tests fails a finger joint is used.
@@ -217,11 +217,11 @@ Afterwards, we calculate the intersection of this two. If the result is empty, t
 
 %If one of the conditions is not fulfilled the connection can not be a bend and is annotated as finger joint.
 
-\section{Building the bent plates}
+\section{Building the Bent Plates}
 %TODO find subsection title
 For building the bent plates our implementation starts with one plate of the plate graph and traverses the graph along the marked bend connections. This way all directly or indirectly connected plates (via bend connections) are collected into a array. From these plates one bent plate is created. If there are plates in the plate graph which are not added to a bent plate, the process is repeated until no plate is left.
 
-\subsection{Traversing along bend connections}
+\subsection{Traversing Along Bend Connections}
 \label{sec:traverse-along-bend-connection}
 
 While traversing along the bend connections, the transformation matrices for the plates are calculated.
@@ -315,35 +315,57 @@ newRotMat = newRotMat.multiply rotMat.clone()
 \label{lst:bend-matrix}
 \end{listing}
 
-\section{Alternative solutions}
+\section{Alternative Solutions}
 
-\subsection{Search for best surface development}
+\subsection{Search for Best Surface Development}
 
 The current implementation does not always find the best solution. While traversing the graph it is possible that there multiple different paths through the graph. This results in unequally good sets of bent plates. For example one way of traversing could create more but smaller bent plates then another.
 %One path could be cut by another via an overlap but the better solution would be if the second path along the graph would cut the first.
-Because currently only one attempt to traverse the graph is made, the second and probably better option would not be found.
+Because currently only one attempt to traverse the graph is made, the second and probably better option would not be found (see Figure~\ref{fig:better_surface_development}).
 
 We propose following solution to avoid this problem: If a plate which should be added to a bent plate intersects a already added plate, we try removing the present plate and check if adding the new one yields better results.
 
 This will increase the run time and results in better solutions for models where the bendable parts of the \threedmodel{} form a highly connected graph.
 
-\note{TO DO: figure}
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-good_surface_development}
+    \caption{A surface development of a icosphere without overlaps is possible.}
+    \label{fig:overlaps:no-3d}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-bad_surface_development}
+    \caption{If the plate graph is not traversed in a optimal way, overlaps force the algorithm to split the surface into multiple parts.}
+    \label{fig:overlapsh:no-2d}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-surface_development_model}
+    \caption{The model from which the developments where created.}
+    \label{fig:overlapsh:no-2d}
+  \end{subfigure}
+  \caption{The model from which the developments where created.}
+  \label{fig:better_surface_development}
+\end{figure}
 
-\subsection{Joints at curved edges}
+\subsection{Joints at Curved Edges}
 
 Currently the finger joints are generated just based on the plates but not on the bent plates. If multiple small plates which each have to small edges to place finger joints on them are merged into a bent plate, the result would not have finger joints added to it as well.
 
 To avoid this, a new method must be found to generate finger joints at curved edges. Since the edge of the plate that connects to the bent plate  will be curved, the current finger joint algorithm can not be used here. Because adding a plate to the bent plate changes the finger joints, we have to check for overlaps constantly. Thus, the finger joints have to be generate for every attempt to add a new plate.
 
-\subsection{More bend line types}
+\subsection{More Bend Line Types}
 \label{sec:more_bend_line_types}
 
  Independently of the used material, a dashed line is added as the bend line. This is good for folding paper. While acrylic can not be bend as easily, we propose engraving a continuous line, which tells the user where to bend the material without weaken the material to much. For wood, on the other side, living hinges should be generated to make the wood bendable at all.
 
-\subsection{Material dependant bend angle}
+\subsection{Material Dependant Bend Angle}
 \label{sec:material_dependant_bend_angle}
 
-Currently the the maximal allowed bending angle is fixed. But because the flexibility of the cut plates differs depending on the used material and thickness, thus should also influence the maximal bend angle. It is also influenced by the bend lines, especially by living hinges, which are designed to change the flexibility (see Section \ref{sec:more_bend_line_types} and \ref{sec:living_hinges}).
+Currently the the maximal allowed bending angle is fixed. But because the flexibility of the cut plates differs depending on the used material and thickness, thus should also influence the maximal bend angle. It is also influenced by the bend lines, especially by living hinges, which are designed to change the flexibility (see Section~\sectionref{sec:more_bend_line_types} and \sectionref{sec:living_hinges}).
 
 
 \end{document}

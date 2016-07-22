@@ -11,10 +11,15 @@
 \chapter*{Abstract}
 % Write Abstract here, use \bigskip for creating distances between paragraphs
 
-Paragraph 1 
+We present platener, a web service that converts 3D models originally designed for 3D printing to a representation that can be fabricated using a laser cutter.\\
+Designing three-dimensional objects for laser cutting is difficult today, because it requires users to break down their idea into a set of two-dimensional parts and to add appropriate joints between these. Both aspects require substantial engineering knowledge. Our service eliminates the need for engineering knowledge by offering an alternative workflow. In this workflow, users model their 3D idea using a 3D editor of their choice; users then obtain the 2D representation required for the laser cutter by converting their 3D model with platener. As a side effect, this workflow allows converting models from 3D printing model repositories; this is beneficial, as those repositories already hold many more models as there currently are models for laser cutting. 
 
 \bigskip
-Paragraph 2
+platener creates two-dimensional cutting plans as follows. First, it identifies flat surfaces in the 3D model. Second, it locates laser cuttable elements by finding plates of appropriate thicknesses as pairs of parallel surfaces with appropriate distance. Third, the software generates joints to connect the plates. \\
+The software system is designed primarily with the objective of converting functional objects, such as mechanical tools and low-fidelity prototypes. Unlike existing conversion systems, such as \emph{123DMake} and \emph{Brickify} it focuses on maintaining the functional aspect and stability of the input model while still enabling the benefits of laser cutting, such as the ability to use a wider choice of materials.
+
+
+% To validate our system we exhibited our software solution at several Maker Faires where we received positive feedback and got the overall response that 
 
 \pagebreak
 
@@ -23,10 +28,12 @@ Paragraph 2
 \chapter*{Zusammenfassung}
 % Write german Abstract here(if necessary), use \bigskip for creating distances between paragraphs
 
-Paragraph 1
+Wir präsentieren platener, einen web service, der 3D Modelle, die ursprünglich für den 3D Druck gedacht waren, in eine Representation umwandelt, die mit einem Lasercutter hergestellt werden kann.\\
+Das Designen von drei-dimensionalen Objekten für den Lasercutter ist heutzutage noch schwer, denn der Nutzer muss seine Idee in zwei-dimensionale Teile aufspalten und zwischen ihnen Verbindungen hinzufügen. Beide Aspekte erfordern erhebliche technische Vorkenntnisse. Unser Webservice eliminiert die Notwendigkeit von solchem technischen Vorwissen durch die Bereitstellung eines alternativen Vorgangs. In diesem Vorgang modelliert der Nutzer seine Idee in 3D mit einem 3D Editor seiner Wahl; Anschließend erhalten Nutzer die 2D Representation, die für den Lasercutter benötigt wird, dank der Konvertierung des 3D Modells von platener. Ein Seiteneffekt ist, dass dieser Vorgang die Konvertierung von Modellen aus bereits existierenden 3D Druck Modell-Sammlungen ermöglicht; Dies ist sehr nützlich, da solche Sammlungen bereits mehr Modelle beinhalten, als aktuell für den Lasercutter verfügbar sind.
 
 \bigskip
-Paragraph 2
+platener erstellt zwei-dimensionale Schnittpläne wie folgt: Zunächst werden ebene Flächen im 3D Modell erkannt. Als zweites werden daraus lasercutbare Elemente extrahiert durch das Finden von Platten mit passenden Dicken. Platten bestehen aus einem Flächenpaar, die in einem angemessenen Abstand zueinander parallel stehen. Letztlich erzeugt die Software Verbindungen, um die Platten zu verknüpfen.\\
+Das Softwaresystem wurde hauptsächlich zum Zweck der Konvertierung von funktionalen Objekten, wie mechanischen Werkzeugen und Prototypen erstellt. Anders als bei bisherigen Konvertierungssystemen, wie \emph{123DMake} und \emph{Brickify}, fokussiert sich unser System darauf die Funktionalität und Stabilität des Modells zu erhalten; Währenddessen können trotzdem die Vorteile von Lasercutting genutzt werden, wie die Möglichkeit aus einer breiten Palette an vielfältigen Materialien zu wählen.
 
 
 

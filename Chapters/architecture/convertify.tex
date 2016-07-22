@@ -5,7 +5,7 @@
 %   can introduce the separated client/ server package in the platener
 %   chaper}
 
-\section{Convertify}
+\section{{\convertify}}
 \label{sec:framework-convertify}
 
 In this section we present {\convertify}, a web framework
@@ -22,7 +22,7 @@ integrate with either frontend or backend applications that
 use {\convertify}. The frontend package contains components
 for rendering and scene management. These components
 implement a render loop and scene graphs which we discussed
-in Section~\ref{sec:cg-web}. The backend package provides
+in Section~\sectionref{sec:cg-web}. The backend package provides
 similar components as the frontend package, but they work
 without a document object model (DOM). The DOM is the main
 data structure for visual elements in a web browser. When
@@ -40,7 +40,7 @@ set of features. A plugin interacts with the scene and its
 \name{PlatenerPipeline} plugin provides all computation
 logic to transform a face-vertex mesh of a 3D~model into
 laser cuttable {\svgfile}. We elaborate on plugins in
-Section~\ref{sec:plugin-system}. The client package gives
+Section~\sectionref{sec:plugin-system}. The client package gives
 the look and feel of the application. It contains frontend
 components which produce HTML elements and it wires up the
 {\userinterface} with the computation logic.
@@ -53,13 +53,13 @@ components which produce HTML elements and it wires up the
 \end{figure}
 
 We will explain core features of {\convertify} in
-Section~\ref{sec:convertify-core-features}. Then we will dive into
-its plugin system in Section~\ref{sec:plugin-system}. {\convertify} is
+Section~\sectionref{sec:convertify-core-features}. Then we will dive into
+its plugin system in Section~\sectionref{sec:plugin-system}. {\convertify} is
 based on previous work by \citet{bachelor-thesis}. We will give a
 short comparison of their work with {\convertify} in
-Section~\ref{sec:brickify-comparison}. We elaborate on the client
+Section~\sectionref{sec:brickify-comparison}. We elaborate on the client
 package when we talk about our application {\platener} in
-Section~\ref{sec:application-platener}.
+Section~\sectionref{sec:application-platener}.
 
 \subsection{Introduction to the Core System of {\convertify}}
 \label{sec:convertify-core-features}
@@ -150,7 +150,7 @@ entities to the screen. The \class{Renderer} sets up a WebGL
 context and initializes {\threejs}. In {\convertify} we use
 plugins in which we can provide additional features. Plugins
 are described in detail in
-Section~\ref{convertify-emits-events}. We associate each
+Section~\sectionref{convertify-emits-events}. We associate each
 plugin with a \class{THREE.Object3D} and vice-versa. Thus,
 we enable plugins to enhance the scene with new objects. The
 \class{Renderer} then traverses the hierarchy of each
@@ -158,7 +158,7 @@ associated \class{THREE.Object3D} and renders it.
 
 The \class{Node} contains the input model. A plugin accesses
 \class{Nodes} via system events. We explain system events in
-Section~\ref{convertify-emits-events}. The plugin uses the
+Section~\sectionref{convertify-emits-events}. The plugin uses the
 \class{Node} to append the input model data to its
 associated \class{THREE.Object3D}.
 
@@ -239,7 +239,7 @@ provided by {\platener} is implemented by the
 Figure~\ref{fig:plugin-constellation} shows our seven
 plugins and how they relate to each other. We give an
 overview for each plugin in
-Section~\ref{sec:platener-uses-plugins}.
+Section~\sectionref{sec:platener-uses-plugins}.
 
 \begin{figure}[h]
   \centering
@@ -462,7 +462,7 @@ context of an application.
 % easy customization -> e.g. synching scenes of multiple instances of convertify -> animations/ controls/ loaded models
 
 
-\subsection{{\convertify} is a cross-platform isomorphic framework}
+\subsection{{\convertify} Is a Cross-platform Isomorphic Framework}
 \label{sec:convertify-is-isomorphic}
 
 {\convertify} is a cross-platform framework. Cross-platform
@@ -504,7 +504,7 @@ This enables us to write applications that can be integrated
 into other environments or workflows. In the case of our
 application {\platener} we can batch process 3D-models from
 a command line interface. The CLI is described in
-Section~\ref{sec:cli-tool}.
+Section~\sectionref{sec:cli-tool}.
 
 % \note{explain isomorphic = headless}
 % \note{explain what
@@ -514,11 +514,11 @@ Section~\ref{sec:cli-tool}.
 % \note{explain why convertify is isomorphic (pros)}
 
 
-\subsection{{\convertify} is built on {\brickify}}
+\subsection{{\convertify} Is Built on {\brickify}}
 \label{sec:brickify-comparison}
 
 The web application {\brickify} was introduced in
-Section~\ref{sec:related-work}. {\brickify} provides several
+Section~\sectionref{sec:related-work}. {\brickify} provides several
 features that we reuse for {\convertify}. We integrate the
 rendering engine with its scene management and event system.
 We greatly improve the event system by using a
@@ -529,7 +529,7 @@ combines {\userinterface} elements with its logic
 components. With {\convertify} we have a modular framework
 that is completely decoupled from any {\userinterface} code.
 
-\subsection{A Variety of Possible Applications Can Be Built With the {\convertify} Architecture}
+\subsection{A Variety of Possible Applications Can Be Built with the {\convertify} Architecture}
 \label{sec:variety-of-applications}
 
 Based on {\brickify}'s groundwork and our improvements to

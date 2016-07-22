@@ -65,6 +65,9 @@
 \newcommand{\class}[1]{\emph{#1}}
 \newcommand{\name}[1]{\textit{#1}}
 
+% command for referencing with both numer and title
+\newcommand{\sectionref}[1]{\ref{#1} \nameref{#1}}
+
 
 
 % \usepackage[absolute]{textpos}
@@ -118,11 +121,11 @@
 \include{FrontBackmatter/DirtyTitlepage}
 \include{FrontBackmatter/Titlepage}
 \include{FrontBackmatter/Titleback}
-\cleardoublepage\include{FrontBackmatter/Dedication}
+%\cleardoublepage\include{FrontBackmatter/Dedication}
 %\cleardoublepage\include{FrontBackmatter/Foreword}
 \cleardoublepage\include{FrontBackmatter/Abstract}
-\cleardoublepage\include{FrontBackmatter/Publication}
-\cleardoublepage\include{FrontBackmatter/Acknowledgments}
+%\cleardoublepage\include{FrontBackmatter/Publication}
+%\cleardoublepage\include{FrontBackmatter/Acknowledgments}
 \pagestyle{scrheadings}
 \cleardoublepage\include{FrontBackmatter/Contents}
 \setlength{\parskip}{2mm}
@@ -137,16 +140,15 @@
 %\part{Introduction}
 \subfile{Chapters/01-Introduction-new}
 %\include{Chapters/01-Introduction}
-\cleardoublepage
 
 %\part{User Interaction}
 \subfile{Chapters/02-Userinteraction}
 %\include{Chapters/02-Userinteraction}
-\cleardoublepage
+%\clearpage
 
 %\part{Toolchain}
 \subfile{Chapters/02.5-Toolchain}
-\cleardoublepage
+%\clearpage
 
 % %\part{Architecture}
 % % Sven
@@ -158,7 +160,7 @@
 % Sven or Dimitri
 \subfile{Chapters/03.2-Processing_Pipeline}
 %\include{Chapters/03.2-Processing_Pipeline}
-\cleardoublepage
+%\clearpage
 
 %\part{Approximation}
 % Dimitri

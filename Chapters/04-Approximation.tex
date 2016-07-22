@@ -41,7 +41,7 @@ Furthermore we eliminate obsolete vertices during shape generation with point on
 
 Mesh simplification reduces the complexity of a {\threedmodel} by decreasing the amount of vertices and faces. In this process the original object gets approximated with less information. While doing so the differences between the processing results of an original and an approximated object are kept as low as possible.
 
-Our mesh simplification tackles three issues:
+Our mesh simplification tackles three issues: Processing time, abstraction and elimination of redundant information.
 
 \paragraph*{Processing Time}
 
@@ -49,16 +49,16 @@ After the model is loaded and stored we decrease its complexity to speed up foll
 
 \paragraph*{Abstraction}
 
-Furthermore we eliminate beveled edges that are not functional but created by 3D-modeling software because of aesthetic reasons. These can be removed since they do not serve any functionality and raise the complexity for conversion. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce.
+Furthermore we eliminate beveled edges. These are created by 3D-modeling software because of aesthetic reasons. Therefore they do not serve any functionality and raise the complexity for conversion. The vertex welding approach gives us the needed shape abstraction to extract tiny details and minor curvatures we do not want to reproduce.
 
 \paragraph*{Elimination of redundant information created by our processing pipeline}
 
 The algorithm can be reused in further processing to ensure unambiguous vertices that may occur due to rounding differences during transformations.
 
 
-The used technique is known as vertex welding in computer graphics: We merge two or more vertices that lie in a specified distance to each other. Then the mesh contains fewer vertices. As a consequence of the smaller vertex set, thin faces no longer consist of three distinct vertices: Two nearby vertices are just represented by one vertex and the face gets deleted.
+The used technique is known as vertex welding in computer graphics. We merge two or more vertices that lie in a specified distance to each other. Then the mesh contains fewer vertices. As a consequence of the smaller vertex set, thin faces no longer consist of three distinct vertices. Two nearby vertices are just represented by one vertex and the face gets deleted.
 
-To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{fig:origBunny} is simplified with an unusually high welding distance of 10mm in Figure \ref{fig:10mmBunny}. The images display each face with a different color to visualize the resulting face set. The loaded model consists of 8662 faces while the simplified bunny is reduced to 616 faces. Note, how smaller details like eyes and ears get lost with higher welding distance while the overall shape still remains. For effect illustration the welding distance is higher than the actual distance for processing.
+To illustrate the method the {\threedmodel} "Stanford Bunny" shown in Figure~\ref{fig:origBunny} is simplified with an unusually high welding distance of 10mm in Figure~\ref{fig:10mmBunny}. The images display each face with a different color to visualize the resulting face set. The loaded model consists of 8662 faces while the simplified bunny is reduced to 616 faces. Note, how smaller details like eyes and ears get lost with higher welding distance while the overall shape still remains. For effect illustration the welding distance is higher than the actual distance for processing.
 
 \begin{figure}
 \includegraphics[width=0.8\columnwidth]{Images/04-approx-welding-rabbit-original.png}
@@ -92,7 +92,7 @@ To illustrate the method the {\threedmodel} Stanford Bunny shown in Figure \ref{
 
 
 
-Vertex Welding merges vertices and works as shown in Figure \ref{fig:vertex_welding}:
+Vertex Welding merges vertices and works as shown in Figure~\ref{fig:vertex_welding}.
 
 A set of triangles is given. We choose a welding distance so points that lie further away of each other will not get merged. This is also the maximum distance a merged vertex can be away from its original position. Therefore it describes the variance of input and resulting vertex set.
 
@@ -100,7 +100,7 @@ For each cluster of vertices that gets merged, a new vertex is created which is 
 
 In case a triangle $ABC$ has two points $A$ and $b$ in the same merge cluster, both get replaced by the new vertex $V$. As a result the triangle consists of the points $VVC$ while it does not contain three distinct vertices anymore - it is a line. If all three of its points lie in a cluster the outcome triangle $VVV$ is a single point. In these cases the triangle gets deleted. The initial area of these deleted triangles is now covered by its adjacent triangles.
 
-The result is an approximation of the input with fewer vertices and faces while the maximum variance equals the specified welding distance. As illustrated in Figure \ref{fig:vertex_welding}, the resulting shape can also completely equal the original one without any differences: Only vertices inside the rectangle got merged which does not affect the outline of the object.
+The result is an approximation of the input with fewer vertices and faces while the maximum variance equals the specified welding distance. As illustrated in Figure~\ref{fig:vertex_welding}, the resulting shape can also completely equal the original one without any differences: Only vertices inside the rectangle got merged which does not affect the outline of the object.
 
 
 
@@ -112,7 +112,7 @@ The result is an approximation of the input with fewer vertices and faces while 
 
 \subsubsection{How the vertex algorithm is used in our software}
 
-For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed, e.g. while using very small welding distances.
+For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed, e.g. while using very small welding distances. Both preprocessing and replacement are explained in the following section \emph{Implementation}.
 
 \emph{VertexWelding} provides five functions:
 
@@ -144,13 +144,13 @@ So a set of vertices is welded by calling \emph{preprocessVertices}, iterating o
 
 \emph{VertexWelding} builds a list of weighted vertices during preprocessing. All original points are replaced with these \emph{weightedVertices} during the welding process so this list contains all vertices that end up in the resulting dataset.
 
-During list setup each new vertex is either merged with an existing \emph{weightedVertex} or added to the list. Therefore all original vertices are represented by a \emph{weightedVertex}. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure \ref{fig:weightedVertex}.
+During list setup each new vertex is either merged with an existing \emph{weightedVertex} or added to the list. Therefore all original vertices are represented by a \emph{weightedVertex}. A \emph{WeightedVertex} saves the number of represented points to merge new vertices correspondingly as shown in Figure~\ref{fig:weightedVertex}.
 
-In this figure point 1 is a \emph{weightedVertex} with $weight = 2 $. Point 2 is the next vertex to be preprocessed and is within welding distance to point 1. Therefore point 2 is merged with point 1. The resulting point 3 lies between point 1 and 2. Since point 1 has $ weight = 2 $ the distance between point 3 and 1 is half the distance between point 3 and 2.
+In this figure point~1 is a \emph{weightedVertex} with $weight = 2 $. Point~2 is the next vertex to be preprocessed and is within welding distance to point~1. Therefore point~2 is merged with point~1. The resulting point~3 lies between point~1 and 2. Since point~1 has $ weight = 2 $ the distance between point~3 and 1 is half the distance between point~3 and 2.
 
 \begin{figure}
 \includegraphics[width=0.4\columnwidth]{Images/04-approx-WeightedVertex.png}
-\caption{Point 3 is the result of merging point 1 and 2. Point 1 is a weightedVertex with weight = 2}
+\caption{weighted vertex~3 is the result of merging weighted~vertex~1 and point~2. Weighted~vertex~1 has weight~=~2. x is the distance between weighted~vertex~1 and point~2.}
 \label{fig:weightedVertex}
 \end{figure}
 
@@ -171,7 +171,7 @@ Preprocessing is done with one of the following methods:
     \item preProcessVertex
 \end{description}
 
-They iterate over the weighted vertex list and weld the new vertex with an existing one if they are in welding distance. The vertex is just added to the list, if it was not merged after complete iteration. This process is explained by listing \ref{lst:weldingLoop} which shows simplified pseudo code.
+They iterate over the weighted vertex list and weld the new vertex with an existing one if they are in welding distance. The vertex is just added to the list, if it was not merged after complete iteration. This process is explained by Listing~\ref{lst:weldingLoop} which shows simplified pseudo code.
 
 \begin{listing}[!h]
 \centering
@@ -213,13 +213,13 @@ After the pipeline step \emph{ModelStorage} saved the unmodified {\threedmodel} 
 
 This processing step serves two purposes: Removal of unwanted details and runtime improvement. Due to the capability of representing details with stacked plates, \emph{Simplification} is not run in the fabrication method \emph{StackedPlates}.
 
-\subsubsection{Details with stacked plates}
+\subsubsection{Details with Stacked Plates}
 
 If sliced in an advantageous direction tiny details of a {\threedmodel} can be obtained with stacked plates. These details may be textures or bump maps like an engraving or a rough surface.
 
-In general \emph{Simplification} removes such details as shown in Figure \ref{fig:3mmMakerbotMake}. With a welding distance of 3mm the result is a smooth surface while the original model shown in Figure \ref{fig:origMakerbotMake} contains the text 'Make:'.
+In general \emph{Simplification} removes such details as shown in Figure~\ref{fig:3mmMakerbotMake}. With a welding distance of 3mm the result is a smooth surface while the original model shown in Figure~\ref{fig:origMakerbotMake} contains the text 'Make:'.
 
-To simplify a model without loosing such a text is not possible with the implemented vertex welding due to the nature of these texts: The labeled surface differs barely from a smooth surface. Therefore the vertices are so close to each other that welding will occur with every chosen welding distance. To obtain those texts the algorithm has to know areas where it must not weld. If tried to outline the text with a smaller welding distance there will always be some kind of artifacts: missing or degenerated letters like in Figure \ref{fig:08mmMakerbotMake}.
+To simplify a model without loosing such a text is not possible with the implemented vertex welding due to the nature of these texts: The labeled surface differs barely from a smooth surface. Therefore the vertices are so close to each other that welding will occur with every chosen welding distance. To obtain those texts the algorithm has to know areas where it must not weld. If tried to outline the text with a smaller welding distance there will always be some kind of artifacts: missing or degenerated letters like in Figure~\ref{fig:08mmMakerbotMake}.
 
 In order to be able to represent such texts with stacked plates \emph{Simplification} is not run in the fabrication method \emph{StackedPlates}.
 
@@ -248,10 +248,10 @@ Most 3D editors offer to prettify objects by using curvatures instead of sharp e
 
 Obviously it is much easier to reproduce two connected plates without a beveled edge in the pipeline step \emph{InherentPlates}. Since these curvatures are just for aesthetic reasons we revert the rounding without any loss of functionality.
 
-Figure \ref{fig:beveled} shows three beveled cubes where the edge is subdivided into one, two and ten parts. All three result in the cube with straight edges after the \emph{Simplification}. The granularity of the created beveled edge does not make any difference for the outcome:
+Figure~\ref{fig:beveled} shows three beveled cubes where the edge is subdivided into one, two and ten parts. All three result in the cube with straight edges after the \emph{Simplification}. The granularity of the created beveled edge does not make any difference for the outcome:
 The higher the number of parts the denser the vertices while the absolute distance between start and end of a beveled edge remains the same. Therefore all vertices in this area get merged to the desired point independently from the edge segmentation.
 
-In addition all sorts of surface modification like engravings and small attachments get removed which simplifies the plate recognition. In Figure \ref{fig:extruded_details} there is text on top of the actual surface and in Figure \ref{fig:pushed_in_details} there is text pushed into the surface while both text is removed in the resulting object.
+In addition all sorts of surface modification like engravings and small attachments get removed which simplifies the plate recognition. In Figure~\ref{fig:extruded_details} there is text on top of the actual surface and in Figure~\ref{fig:pushed_in_details} there is text pushed into the surface while both text is removed in the resulting object.
 
 
 \begin{figure}
@@ -277,7 +277,7 @@ In addition all sorts of surface modification like engravings and small attachme
 
 \subsubsection{Process}
 
-The pipeline step clones the model due to our immutable state approach so the original model can be accessed at any point in time. The immutable state approach is described in chapter \ref{ch:architecture} Architecture.
+The pipeline step clones the model due to our clonable state approach so the original model can be accessed at any point in time. The clonable state approach is described in Chapter~\sectionref{ch:architecture} Architecture.
 
 
 \paragraph{Welding Distance}
@@ -286,7 +286,7 @@ The welding distance is calculated based on the dimensions of the {\threedmodel}
 
 For most models a welding distance of 2mm is applied which removes all beveled edges created by common editors like Blender\footnote{https://www.blender.org}. Due to the nature of beveled edges all beveling methods only modify small areas around corners which results in dense vertices that get merged by our vertex welding.
 
-The user can modify the welding distance in the UI element shown in Figure \ref{fig:weldingUI}. This is useful if the user only needs a rough approximation and does not care about small details so a greater welding distance can be chosen.
+The user can modify the welding distance in the UI element shown in Figure~\ref{fig:weldingUI}. This is useful if the user only needs a rough approximation and does not care about small details so a greater welding distance can be chosen.
 
 \begin{figure}
 \includegraphics[width=0.5\columnwidth]{Images/04-approx-weldingUI.png}
@@ -308,7 +308,7 @@ The mesh preparation itself is extracted into another pipeline step: \emph{MeshS
 
 
 
-\subsection{Reusage for redundant information elimination}
+\subsection{Reusage for Redundant Information Elimination}
 
 The algorithm can be reused in later processing steps. This is done for two reasons:
 
@@ -316,7 +316,7 @@ First a cluster of multiple points lying close together might not bring any addi
 
 Second a set of points that were only one point in the first place. Different operations on a single vertex shared by multiple primitives lead to slightly different resulting vertices in each primitive. This happens because of floating point inaccuracies. Since these were actually just one point they get merged with our vertex welding.
 
-For instance, this may occur during curve creation as described in chapter \ref{ch:curves} Curves where \emph{VertexWelder} is used to eliminate these point cluster. In general whenever a new data object is generated welding can be applied to ensure unambiguous points.
+For instance, this may occur during curve creation as described in Chapter~\sectionref{ch:curves} Curves where \emph{VertexWelder} is used to eliminate these point cluster. In general whenever a new data object is generated welding can be applied to ensure unambiguous points.
 
 
 
@@ -324,11 +324,11 @@ For instance, this may occur during curve creation as described in chapter \ref{
 
 \subsection{Alternative Methods for Vertex Welding}
 
-There are different ways of implementing vertex welding. The three other appropiate approaches are sorting vertices with an octree, via hashing or via binary space partitioning.
+There are different ways of implementing vertex welding. The three other appropiate approaches known in computer graphics are sorting vertices with an octree, via hashing or via binary space partitioning.
 
 We chose our approach because it serves the simplification step with welding the complete {\threedmodel} as well as reusing it in later processing steps whenever we want to weld a data set. Therefore we do not have to implement different welding methods for various usages. Other implementations may not be applicable, may not serve all usages or will not bring any significant time improvement.
 
-However, the welding can be split into different methods in future work if a runtime improvement is needed. Concretely the pipeline step \emph{simplification} will use an octree to speed up the model simplification and the remaining welding operations will be done with the current implementation.
+However, the welding can be split into different methods in future work if a runtime improvement is needed. Concretely the pipeline step \emph{simplification} could use an octree to speed up the model simplification and the remaining welding operations will be done with the current implementation.
 
 \paragraph{Octree}
 
@@ -356,7 +356,9 @@ However, the runtime improvement is marginal compared to an octree and is more c
 
 \section{Point on Line Removal}
 
-\emph{PointOnLineRemover} is used by the \emph{ShapesFinder} to delete unnecessary vertices and therefore reducing their complexity. It checks every \emph{EdgeLoop} of a found shape for vertices that lie on implicit lines given by other vertices as shown in figure \ref{fig:pointOnLine1}: Point 2 lies on the line between point 1 and 3 and gets deleted.
+During shape generation out of faces often more vertices are given than needed to define the shape. So a cleanup is reasonable.
+
+\emph{PointOnLineRemover} is used by the \emph{ShapesFinder} to delete unnecessary vertices and therefore reducing their complexity. It checks every \emph{EdgeLoop} of a found shape for vertices that lie on implicit lines given by other vertices as shown in Figure~\ref{fig:pointOnLine1}: Point 2 lies on the line between point 1 and 3 and gets deleted.
 
 \begin{figure}
     \includegraphics[width=0.4\columnwidth]{Images/04-PointOnLine-1.png}
@@ -366,9 +368,9 @@ However, the runtime improvement is marginal compared to an octree and is more c
 
 \emph{Shapes} may represent only a line or a point instead of a 2D-shape if they do not contain enough vertices. An \emph{EdgeLoop} gets deleted if it contains less than three vertices after point on line removal because it does not span an area any more. In case the contour of a \emph{shape} gets deleted the complete \emph{shape} is obsolete and gets deleted as well.
 
-A threshold for the distance of a point to a line is given by the global config since minor deviations from the line are not relevant.
+A threshold for the distance of a point to a line is given since minor deviations from the line are not relevant.
 
-A simplified pseudo code version of the actual removal algorithm is shown in listing \ref{lst:pointOnLineRemovalAlgo}: \emph{getPreviousIndices()} returns the two previous indices that are not removed and \emph{isPreviousOnLine(index, prev, prevprev)} returns true if $ vertex_{prev}$ lies on the line between $vertex_{index}$ and $vertex_{prevprev}$. So we iterate over all vertices while deleting all its previous vertices until the previous is not on the line.
+A simplified pseudo code version of the actual removal algorithm is shown in Listing~\ref{lst:pointOnLineRemovalAlgo}: \emph{getPreviousIndices()} returns the two previous indices that are not removed and \emph{isPreviousOnLine(index, prev, prevprev)} returns true if $ vertex_{prev}$ lies on the line between $vertex_{index}$ and $vertex_{prevprev}$. So we iterate over all vertices while deleting all its previous vertices until the previous is not on the line.
 
 \begin{listing}[!h]
 \centering
@@ -388,9 +390,9 @@ for index in [0...vertices.length] when index not in removedIndices
 \end{listing}
 
 
-When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \ref{fig:pointOnLine2}: Point 2 gets deleted in case point 3 lies within threshold distance to the line between point 1 and 2. But the actual point that should be deleted is obviously point 3 since it lies directly on the line between point 2 and 4.
+When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in Figure~\ref{fig:pointOnLine2}: Point 2 gets deleted in case point 3 lies within threshold distance to the line between point 1 and 2. But the actual point that should be deleted is obviously point 3 since it lies directly on the line between point 2 and 4.
 
-Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In figure \ref{fig:pointOnLine2} point 2 lies outside of the line between point 1 and 3. With this additional check the resulting triangle consist of the points 1, 2 and 4 as obviously desired.
+Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In Figure~\ref{fig:pointOnLine2} point 2 lies outside of the line between point 1 and 3. With this additional check the resulting triangle consist of the points 1, 2 and 4 as obviously desired.
 
 
 \begin{figure}

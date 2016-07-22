@@ -2,32 +2,32 @@
 \begin{document}
 
 %************************************************
-\chapter{Classifiers / Klara}\label{ch:classifiers}
+\chapter{Classifiers}\label{ch:classifiers}
 \newcommand{\TODO}[1]{\textcolor{red}{\\ \textbf{TODO:} #1 \\}}
 %************************************************
 
-\section{Classifiying idea}
+\section{Classifiying Idea}
 \cite{positionVectorRetrieval}
-In the previous chapters we covered the approach of solely finding plates within 3D models. This approach needs the model to be very 'boxy'. Therefore sometimes the algorithm fails because of too many round edges or other noise. \\
-This is why we tried another approach \cite{ransac} which is also being used by CGAL \cite{cgal}. We look for all kinds of primitive shapes in addition to plates. This allows us to split the model into separate objects which can then be independently converted to lasercutable plates. During the conversion we choose a specific method to realise this part with plates which often helps to achieve a more appropriate solution than to directly start finding plates. Due to the tolerance of the algorithm to noise we can even detect surface when there is a lot of texture.
-Currently, our software system does not include the findings of the classifiers for a conversion. Instead we wanted to find out how well the algorithm works for our use case. \\
-In order to properly include the classifiers we built up a theoretical structure to make the most of the findings. \\
-A Classifier finds a particular shape like a plane, plate, box, sphere, cylinder, prism, etc. Classifiers can use findings of others for example the box finder depends on the previously found planes. As soon as all classifiers have finished their process all findings are hierarchichally grouped based on the depencies of the classifiers. Each finding is represented as a \emph{graphObject} which can either be of the type volume, like a box or cylinder for example, or a freeform. Freeforms are objects that could not be classified. But we check if this object is some kind of connector of volumes. This is valuable information for the conversion step because it means there needs to be something between specified volumes but this can be anything that the conversion method might choose. Then a graph is created which keeps all objects and their connections. Finally, the reconstruction starts. Volumes will be converted by its specific converter. For example a box converter. Connectors will result in plates which are connected to all volumes it belongs to. And from  unclassified objects we create plates based on the shapes found in this part of the mesh. \\
+In the previous chapters we covered the approach of solely finding plates within 3D models. This approach needs the model to be 'boxy'. Therefore sometimes the algorithm fails because of too many round edges or other noise. \\
+This is why we tried another approach, called RANSAC \cite{ransac}, which is also being used by CGAL \cite{cgal}. We look for all kinds of primitive shapes in addition to plates. This allows us to split the model into separate objects that can then be independently converted to laser cutable plates. During the conversion we choose a specific method to realise this part with plates which often helps to achieve a more appropriate solution than to directly start finding plates. Due to the tolerance of the algorithm to noise we can even detect surface when there is a lot of texture.
+Currently, our software system does not finding the classifiers for a conversion. Instead we wanted to find out how well the algorithm works for our use case. \\
+In order to properly include the classifiers we built a theoretical structure to make the most of the findings. \\
+A Classifier finds a particular shape like a plane, plate, box, sphere, cylinder, prism, etc. Classifiers can use findings of others for example the box finder depends on the previously found planes. As soon as all classifiers have finished their process all findings are hierarchichally grouped based on the depencies of the classifiers. Each finding is represented as a \emph{graphObject} which can either be of the type volume, like a box or cylinder for example, or a freeform. Freeforms are objects that could not be classified. Nevertheless we check if this object is some kind of connector of volumes. This is valuable information for the conversion step because it means there needs to be something between specified volumes this can be anything that the conversion method might choose. Then a graph is created which keeps all objects and their connections. Finally, the reconstruction starts: Each volume will be converted by its specific converter. The box converted is an example. Connectors will result in plates which are connected to all volumes it belongs to. And from  unclassified objects we create plates based on the shapes found in this part of the mesh. \\
 \*\\
 % \paragraph{What is it usually used for? - pointclouds... which points do we intend to take for the algorithm?}
-Usually, RANSAC is used with pointclouds. This means we need a lot of points and the more noise there is within the points the better for the algorithm. In our case we work with meshes where a model of a box might only have 8 points. This is a problem because the diagonals of the box look just like another plane to the algorithm because the sides and the diagonals are all supported by 4 points. 
-On the other hand, when this box consisted of thousands of points they would all be somewhere on the sides. Meaning that the diagonal would not be found as a plane because it is maybe only supported by up to 10 points. In contrast, each side is supported by up to hundreds of points. Therefore, the RANSAC approach can definitely not be used in every case with any 3D model. Instead it should be used as an additional way to split the model.
+Usually, RANSAC is used with pointclouds. This means we need a lot of points and the more noise there is within the points the better for the algorithm. We work with meshes where a model of a box might only have 8 points. This is a problem because the diagonals of the box look just like another plane to the algorithm because the sides and the diagonals are supported by 4 points. 
+On the other hand, when this box consisted of thousands of points they would all be somewhere on the sides. Meaning that the diagonal would not be found as a plane because it is maybe only supported by up to 10 points. In contrast, each side is supported by up to hundreds of points. Therefore, the RANSAC approach can not be used with every 3D model. Instead it should be used as an additional option to split the model.
 \section{RANSAC - Random Sample Consensus}
-The RANSAC-approach firstly chooses a defined number of random points. These points are a minimal set from the point data and its number is defined by the shape which is being classified.\\
+The RANSAC-approach firstly chooses a defined number of random points. These points are a subset from the point data and its number is defined by the shape that has been classified. This subset should be choses as small as possible.\\
 On the basis each of these minimal sets a candidate shape is generated and tested against all points in the data set. The candidate gets a score which tells how well the randomly chosen points represent the shape. This score can result from counting the points which lie within the candidate.\\
-Based on this score a best model is saved or overwritten after several candidate attempts.
+Based on this score the best model is saved or overwritten after several candidate attempts.
 \section{Primitives}
-In order to classify primitives a minimum number of points has to be defined which enable a reconstruction of the shape.
+In order to classify primitives, a minimum number of points has to be defined to enable a shape reconstruction.
 \subsection{Plane}
-The minimal set for a plane are three points \{p1, p2, p3\} because three points uniquely identify a plane.\\
-Once a plane candidate has been found it is necessary to check its plausibility. The deviations of the plane normal to the according point normals of p1, p2 and p3 should be less than an angle $\alpha$.\\
+The minimal set for a plane consists of three points \{p1, p2, p3\} because three points uniquely identify a plane.\\
+Once a plane candidate has been found it is necessary to check its plausibility. The deviations of the plane normal to the according point normals of p1, p2 and p3 should be less than an angle $\alpha$, currently set to 0.1 .\\
 \*\\
-After the detection of a best model it may be necessary to refit the candidate to all its inliers. We use the Least Squares method \cite{leastSquares}. We are aware that this method can only compute planes where its z-values are dependent on the x- and y-values which is not the case the the plane is perpendicular to the x-y-plane. Therefore we ignore planes to which this applies. Another possibility would be to work with eigenvectors where this would not be an issue.\\
+After the detection of the best model it may be necessary to refit the candidate to all its inliers. We use the Least Squares method \cite{leastSquares}. We are aware that this method can only compute planes where its z-values are dependent on the x- and y-values this is not the case the the plane is perpendicular to the x-y-plane. Therefore we ignore planes to that are affected by this circumstance. Another possibility would be to work with eigenvectors where this would not be an issue.\\
 When using the least squares method the problem can be transformed into an equation of the form Ax = b. Where A is a matrix consisting of the sum of all x values of the points, y values, x times y and x squared and y squared. \\
 
 %sums
@@ -58,7 +58,7 @@ The least squares solution is the following plane equation: \\
 $z = Ax + By + C$.
 
 \subsection{Cylinder}
-The minimal set for a cylinder are two points \{$p_1, p_2$\}, see fig. \ref{fig:cylinder} for the reconstruction sketch. Those points are assumed to lie on the shell of the cylinder. The axis can be calculated by calculating the cross product of their normals $n_1$ and $n_2$. Based on the axis a projection plane is formed which is perpendicular to the axis. The two lines $l_1 = p_1 + x*n_1$ and $l_2 = p_2 + x*n_2$ are projected onto this plane and should have an intersection. If they do not intersect the candidate is invalid. Otherwise, the intersection point is marked as the center of the cylinder-candidate. The radius is the mean value of the distance of both points to the center on the axis.
+The minimal set for a cylinder consists of two points \{$p_1, p_2$\}. In Figure~\ref{fig:cylinder} the reconstruction process is sketched. Those randomly picked points are assumed to lie on the shell of the cylinder. If they are not actually lying on the shell then later there will not be enough candidates to support the cylinder which means it will be discarded. The axis can be calculated by calculating the cross product of their normals $n_1$ and $n_2$. Based on the axis a projection plane is formed which is perpendicular to the axis. The two lines $l_1 = p_1 + x*n_1$ and $l_2 = p_2 + x*n_2$ are projected onto this plane and should have an intersection. If they do not intersect the candidate is invalid. Otherwise, the intersection point is marked as the center of the cylinder-candidate. The radius is the mean value of the distance of both points to the center on the axis.
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=\columnwidth]{Images/cylinder.png}
@@ -66,7 +66,7 @@ The minimal set for a cylinder are two points \{$p_1, p_2$\}, see fig. \ref{fig:
     \label{fig:cylinder}
 \end{figure}
 
-After a valid candidate has been formed we have to check the plausibility. For this we look for three indication. Firstly, the randomly chosen points p1 and p2 should not be the same, secondly, the calculated radius has to be larger than zero and lastly, the distances of the two points to the center should not exceed an epsilon value $\epsilon$.
+After a valid candidate has been formed we have to check the plausibility. For this we look for three indicators. Firstly, the randomly chosen points p1 and p2 should not equal, secondly, the calculated radius has to be larger than zero and lastly, the distances of the two points to the center should not exceed an epsilon value $\epsilon$.
 
 
 
@@ -81,14 +81,14 @@ To find the prisms all shapes have to be checked for parallelism. The comparison
 \subsubsection{Bucket System}
 \label{sec:PrismBucketSystem}
 
-The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
+The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surrounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
 
 \begin{equation*}
     \vec{n} = \colvec{3}{x}{y}{z}
 \end{equation*}
 
 
-All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal like planes with normals $(1,0,0)$ and $(-1,0,0)$ are parallel, all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
+All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal like planes with normals $(1,0,0)$ and $(-1,0,0)$ are parallel, all normals are transformed into a hemisphere as shown in Listing~\ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
 
 
 \begin{listing}[!h]
@@ -125,7 +125,7 @@ _normalInHemisphere: (normal) ->
 \end{figure}
 
 
-This hemisphere is separated into rings. Each ring covers the threshold angle $\phi$ in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. Each normal is sorted into a ring by its correlating angle $\alpha$ which is used to determine the ring index. It is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}: the angle between $\vec{n}$ and $(x,y,0)$:
+This hemisphere is separated into rings. Each ring covers the threshold angle $\phi$ in $z$-direction and is visualized in Figure~\ref{fig:rings_FromSide} and Figure~\ref{fig:rings_FromTop}. Each normal is sorted into a ring by its correlating angle $\alpha$ which is used to determine the ring index. It is proporional to its coordinates as demonstrated in Figure~\ref{fig:ringAngle}: the angle between $\vec{n}$ and $(x,y,0)$:
 
 \begin{equation*}
 \begin{split}
@@ -166,7 +166,7 @@ The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends 
 
 
 
-Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value $z_{I_{Ring}}$.
+Figure~\ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value $z_{I_{Ring}}$.
 
 \begin{figure}
     \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
@@ -204,7 +204,7 @@ Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 \end{equation}
 
 
-Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
+Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure~\ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure~\ref{fig:projection} and leads to this calculation:
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
@@ -312,7 +312,7 @@ Consequently the maximum bucket index is calculated with the maximum angle of 36
 
 \subsubsection{Implementation}
 
-The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism. Its structure is represented in the class diagram figure \ref{fig:prismClassifierDiagram}.
+The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism. Its structure is represented in the class diagram Figure~\ref{fig:prismClassifierDiagram}.
 
 \begin{figure}
 \includegraphics[width=1.0\columnwidth]{Images/04-prismClassifier.png}
@@ -344,7 +344,7 @@ run: ->
 \label{lst:PrismClassifierRun}
 \end{listing}
 
-Listing \ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
+Listing~\ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
 
 At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
 
@@ -357,7 +357,7 @@ At the end a set of all prisms is returned which can be used for further primiti
 
 \paragraph{Prism Shape Normals Buckets}
 
-\emph{PrismShapeNormalsBuckets} is based on the specification in section \ref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
+\emph{PrismShapeNormalsBuckets} is based on the specification in Section~\sectionref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
 
 The constructor saves the angle threshold, instantiates the rings as a javascript map and calculates the maximum ring index $I_{MaxRing}$.
 
@@ -377,7 +377,7 @@ Second: The ring with index 0 "is adjacent to itself" because the unit sphere go
 
 \paragraph{Ring}
 
-A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
+A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in Section~\sectionref{sec:PrismBucketSystem}. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
 
 The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
 
@@ -386,7 +386,7 @@ The method \emph{push} sorts a given shape into the corresponding bucket, \emph{
 
 \paragraph{Prism}
 
-A \emph{Prism} contains two parallel shapes that span a prism. In future work this should be extended by the lateral surface which is not handlet yet.
+A \emph{Prism} contains two parallel shapes that span a prism. In future work this should be extended by the lateral surface which is not handled yet.
 
 \subsubsection{Future Work}
 \label{sec:PrismFutureWork}
@@ -417,11 +417,11 @@ A \emph{Prism} contains two parallel shapes that span a prism. In future work th
 
 
 
-\subsection{Other primitives}
+\subsection{Other Primitives}
 In addition to the just mentioned objects any other primitive can be included in the search with RANSAC. \\
-For this a number of minimum support points are needed. This number of points need to suffice to reconstruct the object. \\
-Other points from the dataset can then be tested if they support the just constructed object. 
-\section{Problems with non-pointcloud input}
-In our usecase we do not have a pointcloud as input. Instead we operate on the much fewer points in a polygon mesh.\\
-This has large influences on the threshold values that are used. The values taken from CGAL almost never achieved the desired results. We tried finding new values for any model which turned out to be infeasible. Therefore we tried adjusting the thresholds based on the number of vertices in the mesh or the volume of the bounding box. We have not encountered a working combination yet. This is a problem that needs to be tackled in future work.
+For this a number of minimum support points is needed. This number of points needs to suffice to reconstruct the object. \\
+Other points from the dataset can then be tested if they support the constructed object. 
+\section{Problems with Non-Point-Cloud Input}
+In our use case we do not get a point-cloud as input. Instead we operate on the much fewer points in a polygon mesh.\\
+This has large influence on the threshold values that are used. The values taken from CGAL almost never achieve the desired results. We tried to find new values for any model which turned out to be infeasible. Therefore we tried adjusting the thresholds based on the number of vertices in the mesh or the volume of the bounding box. We have not encountered a working combination yet. This is a problem that needs to be tackled in future work.
 \end{document}
