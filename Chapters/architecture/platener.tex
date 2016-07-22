@@ -66,7 +66,7 @@ detail.
   \end{subfigure}
   \begin{subfigure}[c]{0.3222\textwidth}
     \includegraphics[width=\textwidth]{03-architecture-cutting-plan-box-hull}
-    \caption{2D-paths of the box converted with hull approximation.}
+    \caption{2D~paths of the box converted with hull approximation.}
     \label{fig:conversion:paths}
   \end{subfigure}
   \caption{Results of the \name{PlatenerPipeline} plugin.}
@@ -91,34 +91,27 @@ plugin in the WebGL view. The \name{NodeVisualizer} plugin
 renders the results of each conversion and its intermediate
 computation steps respectively. With the help of this we
 debug the results of the computation visually. As explained
-in Section~\ref{}\note{section walkthrough}, we select a
+in Section~\ref{ch:userinteraction}, we select a
 single visualization at a time to inspect the results of the
 step associated with the visualization.
-Figure~\ref{fig:steps:plate} shows a head-mounted display in
-the \name{Plate} step. Figure~\ref{fig:steps:ui} shows the
-selection of that visualization in the user interface.
+Figure~\ref{fig:steps-plate} shows a head-mounted display in
+the \name{Plate} step.
+% Figure~\ref{fig:steps:ui} shows the
+% selection of that visualization in the user interface.
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[a]{0.48\textwidth}
-    \includegraphics[width=\textwidth]{03-architecture-hmd-plates}
-    \caption{A head-mounted display, consisting of plates only.}
-    \label{fig:steps:plate}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.48\textwidth}
-    \includegraphics[width=\textwidth]{03-architecture-hmd-interface}
-    \caption{The selection of the intermediate plate step in
-      the user interface.}
-    \label{fig:steps:ui}
-  \end{subfigure}
-  \label{fig:steps}
-  \caption{Visual debugging of intermediate conversion results.}
+  \includegraphics[width=\textwidth]{03-architecture-hmd-plates}
+  \label{fig:steps-plate}
+  \caption{Visual debugging of intermediate conversion
+    results.A head-mounted display, consisting of plates
+    only.}
 \end{figure}
 
 \subsubsection{Scorer Plugin}
 
-We run multiple conversion approaches sequentially. Then, we choose
-the best fitted conversion as output. Thus each conversion
+We run multiple conversion approaches sequentially and choose
+the best fitted conversion as output. Therefore, each conversion
 is scored by a scoring algorithm. This
 plugin provides such scoring algorithms.
 
@@ -164,7 +157,7 @@ pre-defined input.
 
 The \name{PlatenerPipeline} is the main computation unit of
 {\platener}. It contains algorithms and data structures to
-bring the {\threedmodel} into a 2D-representation suitable
+bring the {\threedmodel} into a 2D~representation suitable
 for a {\lasercutter}. Here we will outline the details about
 the computation process. First we look at {\platener}'s
 three conversion approaches. Then we explain the
@@ -198,16 +191,16 @@ algorithms. We refer to a sequence of algorithms as
 \class{Pipeline}. Each algorithm in the \class{Pipeline} is
 an intermediate computation step, called
 \class{PipelineStep}. The first \class{PipelineStep} works
-on the face-vertex-mesh of the model. The last
+on the face-vertex mesh of the model. The last
 \class{PipelineStep} returns a directly exportable data
 format, in our case a {\zipfile} containing the
-2D-construction plans. The composition of
+2D construction plans. The composition of
 \class{PipelineSteps} into a \class{Pipeline} is shown in
 Figure~\ref{fig:pipeline-from-steps}. \class{PipelineSteps}
 are independent from the \class{\fabmethod} and thus, can be
 shared between different \class{{\fabmethod}s}. {\platener}
-provides three \class{{\fabmethod}s}. The following paragraphs
-present each method briefly.
+provides three \class{{\fabmethod}s}.
+% The following paragraphs present each method briefly.
 
 \begin{figure}[h]
 \centering
@@ -219,18 +212,19 @@ present each method briefly.
 
 \paragraph{Plate Method}
 
-This \class{\fabmethod} does hull and surface reconstructions of the
-input model. We produce a set of plates which are connected via finger
-joints to approximate the original {\threedmodel}. Therefore, we first
-detect the outlines of all surfaces in the model. Then, we search for
-existing plates based on that surfaces. For example two parallel
-surfaces form an \name{inherent} plate, when they are about three to
-five millimeters apart. After we find all \name{inherent} plates, we
-construct plates from the remaining surfaces by \name{extruding} the
-planar shapes. Then, we connect the plates with finger joints where
-they touch each other. Figure~\ref{fig:overview-plate-steps} depicts
-the important \class{PipelineSteps} of the \name{Plate Method} and
-their visualizations.
+This \class{\fabmethod} does hull and surface
+reconstructions of the input model. Plates are connected via
+finger joints to approximate the original {\threedmodel}.
+First, the outlines of all surfaces in the model are
+detected. Then, plates are formed from the outlines. For
+example two parallel planar surfaces form an \name{inherent}
+plate, when they are about three to five millimeters apart.
+Next, plates are constructed from the remaining surfaces by
+\name{extruding} the planar shapes. Then, we connect the
+plates with finger joints.
+Figure~\ref{fig:overview-plate-steps} depicts the important
+\class{PipelineSteps} of the \name{Plate Method} and their
+visualizations.
 
 % Figure~\ref{fig:model-fingers} shows
 % plates connected with finger joints.
@@ -250,19 +244,15 @@ their visualizations.
   \label{fig:overview-plate-steps}
 \end{figure}
 
-
-\note{ref to chapters which explain the algorithms to that
-  method in detail}
-
 \paragraph{Stacked Plates Method}
 
 This \class{\fabmethod} does volume reconstructions of the
 input model. It stacks plates onto each other to approximate
 the shape of the original model, see
 Figure~\ref{fig:stacked-rabbit}. This preserves the look and
-feel of the model. We slice the model into equally thick
-layers which form the plates. The plates are then connected
-via shafts to simplify the assembly process.
+feel of the model. The model is sliced into equally thick
+layers which form the plates. The plates are connected via
+shafts to simplify the assembly process.
 
 \begin{figure}[h]
   \centering
@@ -271,8 +261,6 @@ via shafts to simplify the assembly process.
     stacking.}
   \label{fig:stacked-rabbit}
 \end{figure}
-\note{ref to chapters which explain the algorithms to that
-  method in detail}
 
 \paragraph{Classifier Method}
 
@@ -294,9 +282,7 @@ primitives we know a conversion approach to plates which
 will give better results than approximating a set of faces.
 The \name{Classifier Method} is a proposal and part of
 future work. We can currently classify a subset of the
-primitive geometries. In Chapter~\ref{} \note{ref the
-  chapter!} we give details about the \name{Classifier
-  Method}.
+primitive geometries.
 
 \begin{figure}[h]
   \centering
@@ -344,20 +330,22 @@ obtained between the \class{PipelineSteps}.
 \end{figure}
 
 
-The encapsulated data in the state can be hierarchical and complex. We
-provide a fully cloneable data structure. That means, any nested data
-structure in the \class{PipelineState} implements a cloneable
-interface and supports copying as well. Thus, the clone of an instance
-of \class{PipelineState} is a deep copy.
+The encapsulated data in the state can contain multiple
+fields and can be hierarchical. We provide a fully cloneable
+data structure. That means, any nested data structure in the
+\class{PipelineState} implements a cloneable interface
+%and supports copying as well.
+The clone of an instance of \class{PipelineState} is a
+deep copy.
 
-A deep copy of a data structure is a
-clone of all fields of that data structure. That means if a
-data structure references dynamically allocated memory, we
-do not clone the reference of the allocated memory to the
-copy of the data structure. Instead, we allocate new memory
-and duplicate the data to the newly allocated memory. Thus,
-we make sure modifications on the copy do not alter the
-original.
+A deep copy of a data structure is a clone of all fields and
+recursively the nested fields of all fields of that data
+structure. That means if a data structure references
+dynamically allocated memory, we do not clone the reference
+of the allocated memory to the copy of the data structure.
+Instead, we allocate new memory and duplicate the data to
+the newly allocated memory. Thus, we make sure modifications
+on the copy do not alter the original.
 
 When we take a snapshot of the results of a
 \class{PipelineStep} we ensure that modifications of a
@@ -377,7 +365,7 @@ joints, the edge visualization will also show the finger joints
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[a]{0.3222\textwidth}
+  \begin{subfigure}[b]{0.3222\textwidth}
     \includegraphics[width=\textwidth]{03-architecture-box-shapes}
     \caption{The shapes of a box.}
     \label{fig:corrupt:shapes}
@@ -387,7 +375,7 @@ joints, the edge visualization will also show the finger joints
     \caption{Corrupted shapes of a box, showing the finger joints.}
     \label{fig:corrupt:shapes-fingers}
   \end{subfigure}
-  \begin{subfigure}[c]{0.3222\textwidth}
+  \begin{subfigure}[b]{0.3222\textwidth}
     \includegraphics[width=\textwidth]{03-architecture-box-fingers}
     \caption{A box with finger joints.}
     \label{fig:corrupt:fingers}
@@ -498,7 +486,7 @@ conversions.
 The frontend package bundles React components, building the web
 application's user interface. It accesses {\convertify}'s
 \class{Bundle} to control the rendering engine and scene
-management as well as loading the plugins. Also, we implement
+management as well as loading the plugins. We implement a
 \class{Dispatcher} in the frontend package which connects the plugins
 with the {\userinterface}.
 
@@ -591,7 +579,7 @@ store.dispatch({
 The intended state change of an action is propagated by a
 reducer. Every reducer is a pure function. A pure function
 has no side effects. A reducer applies a data transformation
-on the state tree. Listing~\ref{sec:action-reducer} shows a
+on the state tree. Listing~\ref{lst:action-reducer} shows a
 sample reducer which changes the state according to the
 selected algorithm. The pipeline reducer checks for
 the dispatched action and creates a new state object with the
@@ -618,8 +606,8 @@ pipeline = (state = initialState, action) ->
 \label{lst:action-reducer}
 \end{listing}
 
-When the state is changed by a reducer all React Components
-that use data from the changed portion of the state are
+When the state is changed by a reducer each React Component
+that uses data from the changed portion of the state is
 updated. A re-render is triggered. Thus, we emphasize a
 purely data-driven update flow in our frontend application.
 This brings explicit dependencies and avoids race conditions
@@ -687,7 +675,7 @@ approach connecting our framework with {\platener}.
 The backend package of {\platener} provides a command line interface
 (CLI). With the CLI of {\platener} we can process multiple
 {\threedmodel}s in a queue. Results are read from and stored in
-a dictionary. We receive detailed summaries and logs for each
+a directory. We receive detailed summaries and logs for each
 conversion. A walkthrough of our CLI is given in
 Section~\ref{sec:walkthrough-cli}.
 
@@ -709,14 +697,14 @@ frontend package we implement a \class{Dispatcher} instance which
 connects the CLI commands and actions to {\convertify}.
 
 When a conversion finishes we log details of the progress.
-Therefore, we only store the conversion's meta data into a
-\class{Report} instance. The garbage collector of
-the {\javascript} engine frees the occupied memory of the
+Figure~\ref{fig:reports} shows the variety of available
+reports. We only store the conversion's meta data into a
+\class{Report} instance. The garbage collector of the
+{\javascript} engine frees the occupied memory of the
 {\threedmodel}. The \class{Reports} are printed to the
 console after all conversions finish. On top of the
 individual report per object we summarize all data and give
-a brief statistical overview. Figure~\ref{fig:reports} shows
-the variety of available reports.
+a brief statistical overview.
 
 \begin{figure}
   \centering

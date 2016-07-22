@@ -6,8 +6,6 @@
 \label{ch:toolchain}
 %************************************************
 
-\note{check all footnotes}
-
 \section{The Software Is a Web Service}
 
 Our application {\platener} is a web service. {\platener}
@@ -15,12 +13,14 @@ can be used without installation on desktop and mobile
 devices. We aim to enable any user to produce 3D~objects
 with a laser cutter. We minimize the system requirements of
 our software by providing a cross-platform web application.
-{\platener} is based on HTML~5, CSS, {\coffeescript} and
-WebGL. The web server runs in {\nodejs}. All code is written
-in such a way that it can be executed without a browser in
-{\nodejs} only. This enables power users to run {\platener}
-as a command line interface. Third party applications can
-utilize {\platener} by integrating the {\nodejs} package.
+{\platener} is based on HTML~5, CSS,
+{\coffeescript}\footnote{\url{http://coffeescript.org/}} and
+WebGL. The web server runs in {\nodejs}. The application is
+written in such a way that it can be executed without a
+browser in {\nodejs} only. This enables power users to run
+{\platener} as a command line interface. Third party
+applications can utilize {\platener} by integrating the
+{\nodejs} package.
 
 \section{Libraries Improve the Development Experience}
 
@@ -37,26 +37,34 @@ used by {\platener}.
   transpiles to {\javascript}. It provides useful syntactic
   sugar for function and class definitions.
 
-\item \name{React} is a {\javascript} library for building modular
+\item
+  \name{React}\footnote{\url{https://facebook.github.io/react/}}
+  is a {\javascript} library for building modular
   {\userinterface}s.
 
-\item \name{Redux} is a predictable state container which
-  helps us to manage the application state in a data-driven
-  way.
+\item \name{Redux}\footnote{\url{http://redux.js.org/}} is a
+  predictable state container which manages the application
+  state in a data-driven way.
 
-\item \name{stylus} is a powerful CSS pre-processor. Instead
-  of writing pure CSS we can benefit from \name{stylus}'
-  scoping, inheritance and mixin features. {\platener} is
-  based on the \name{Bootstrap~3} CSS framework.
+\item \name{stylus}\footnote{\url{http://stylus-lang.com/}}
+  is a powerful CSS pre-processor. Instead of writing pure
+  CSS we can benefit from \name{stylus}' scoping,
+  inheritance and mixin features. {\platener} is based on
+  the
+  \name{Bootstrap~3}\footnote{\url{http://getbootstrap.com/}}
+  CSS framework.
 
-\item \name{\threejs} provides high-level abstractions of
-  the WebGL API.
+\item \name{\threejs}\footnote{\url{http://threejs.org/}}
+  provides high-level abstractions of the WebGL API.
 
-\item \name{webpack} is a module bundler. It prepares all
-  source code and assets into an deployable package.
+\item
+  \name{webpack}\footnote{\url{https://webpack.github.io/}}
+  is a module bundler. It prepares all source code and
+  assets into an deployable package.
 
-\item \name{Grunt} is a {\javascript} task runner with which
-  we automate our setup and build process.
+\item \name{Grunt}\footnote{\url{http://gruntjs.com/}} is a
+  {\javascript} task runner with which we automate our setup
+  and build process.
 \end{itemize}
 
 \section{Development With a Build System}
@@ -81,15 +89,12 @@ toolchain.
 \end{figure}
 
 With our setup the code automatically rebuilds when files
-are changed by a developer. Once the new code is built the
-sources are loaded into the browser. Loading sources from the
-server can take several seconds. We reduce the waiting by
-performing hot reloads. A hot reload patches the existing
-and already loaded code base with a change set. This greatly
-improves the development speed.
-
-
-
+are changed by a developer. Once the new code is built, the
+sources are loaded into the browser. Loading sources from
+the server can take several seconds. We reduce the waiting
+time by performing hot reloads. A hot reload patches the
+existing and already loaded code base with a change set.
+This greatly improves the development speed.
 
 
 % {\coffeescript} transpiles to {\javascript}. In order to

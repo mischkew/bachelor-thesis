@@ -14,20 +14,20 @@ graphs in Section~\ref{sub:render-and-graph}.
 \subsection{{\threedmodel} Representation}
 \label{sub:model-representation}
 
-This section explains the mesh 'data structure and the {\stlfile}
+This section explains the mesh data structure and the {\stlfile}
 format that is used to represent {\threedmodel}s on disk.
 
 The model geometry is represented by a set of connected
 polygons, approximating the model surface. These connected
 polygons form a mesh. Figure~\ref{fig:term-mesh:mesh} shows
-a mesh. We use triangles as polygons, because then we
+a mesh. We use triangles as polygons, because they
 benefit from hardware acceleration. A triangle in the mesh
 is called face. Figure~\ref{fig:term-mesh:face} illustrates
 the terminology. Each face is described by a list of three
 points in 3D~space. Such a point is called vertex. A single
 vertex is described by three floating point numbers for the
 x-, y- and z-coordinates. An edge is the line between two
-connected vertices \cite[p.~3]{cg-intro}.
+connected vertices \cite[p.~3]{intro-cg}.
 
 \begin{figure}[h]
   \centering
@@ -60,7 +60,7 @@ the software requires two-manifold meshes.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\textwidth]{03-architecture-non-manifold}
-  \caption{A non-manifold cutout of a mesh.}
+  \caption{A non-manifold cut-out of a mesh.}
   \label{fig:non-manifold}
 \end{figure}
 
@@ -76,12 +76,12 @@ points judging only from the vertices. The face normal
 determines the orientation of the face.
 Listing~\ref{alg:stl-file} shows an {\stlfile} in ASCII
 encoding. An {\stlfile} can also be stored in a binary
-format. The binary format is used commonly, because it
+format. The binary format is commonly used because it
 requires less disk-space than the ASCII encoding
 \cite[p.~8]{stl-file}.
 
 \begin{listing}
-\begin{CVerbatim}
+\begin{verbatim}
 solid name
  facet normal n1 n2 n3
   outer loop
@@ -91,7 +91,7 @@ solid name
   endloop
  endfacet
 endsolid name
-\end{CVerbatim}
+\end{verbatim}
 \caption{General format of a STL-file in ASCII encoding.}
 \label{alg:stl-file}
 \end{listing}
@@ -99,18 +99,19 @@ endsolid name
 % Reconstructing the original {\threedmodel} from an
 % {\stlfile} does not always result in an one-to-one solution.
 The vertices are stored as floating point numbers. Two faces
-that share the same vertex do refer to that vertex by
+that share the same vertex refer to that vertex by
 floating point numbers as well. Due to rounding errors the
 same vertex can be represented by slightly different
 floating point numbers. Without a look-up table, in which
 vertices are referred to by a unique index, vertices cannot
-be distinguish fail-safe. We have to assume that two
+be distinguished fail-safe. We have to assume that two
 overlapping points represent an identical vertex. We use the
-library {\meshlib} to create an indexed face-vertex mesh
-from the possibly ambiguous {\stlfile}. The face-vertex mesh
-is converted to a {\threejs} geometry by {\meshlib}. With a
-{\threejs} geometry we can render a {\threedmodel} in
-{\convertify}.
+library
+{\meshlib}\footnote{\url{https://github.com/brickify/meshlib}}
+to create an indexed face-vertex mesh from the possibly
+ambiguous {\stlfile}. The face-vertex mesh is converted to a
+{\threejs} geometry by {\meshlib}. With a {\threejs}
+geometry we can render a {\threedmodel} in {\convertify}.
 
 To support a variety of {\threedprinter} optimized models,
 we use the {\stlfile} format. We import the files with the
@@ -148,16 +149,16 @@ Each object is part of a scene. A scene is the visual space,
 in which the rendered objects can be seen. We use
 representations of objects which are organized in a
 hierarchical tree data structure. We refer to this
-hierarchical structure as scene graph\ref{}\note{reference
-  scene graph data structure}. A simple scene graph is
-depicted in Figure~\ref{fig:scene-graph}. The graph contains
-a box as single root node. The sides of the box are children
-of the root node. With this abstraction transformations are
-applied to parts of the model only, without necessarily
-touching each face or vertex. Every object that is
-recognized by {\convertify}, is part of a scene graph.
-Finally, the vertices of an object in the scene graph are
-rendered to the screen.
+hierarchical structure as scene graph\ref{scene-graph}. A
+simple scene graph is depicted in
+Figure~\ref{fig:scene-graph}. The graph contains a box as
+single root node. The sides of the box are children of the
+root node. With this abstraction transformations are applied
+to parts of the model only, without necessarily touching
+each face or vertex. Every object that is recognized by
+{\convertify} is part of a scene graph. Finally, the
+vertices of an object in the scene graph are rendered to the
+screen.
 
 \begin{figure}[H]
   \centering
