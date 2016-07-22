@@ -78,23 +78,28 @@ each time a line of code changes or a new package is
 installed. We utilize \name{Grunt} and \name{webpack} to
 create a build system. A build system is a tool, which
 automates the process of compiling a computer program
-\cite{build-system}. Figure~\ref{} gives an overview of our
-toolchain.
-\note{include this image here correctly}
-% \begin{figure}[h]
-%   \centering
-%   \includegraphics[width=\textwidth]{025-toolchain.jpg}
-%   \caption{Toolchain and build system of {\platener}.}
-%   \label{fig:toolchain}
-% \end{figure}
+\cite{build-system}. Figure~\ref{fig:toolchain} gives an
+overview of our toolchain. \name{Grunt} runs the
+\name{webpack} tasks for the web application and the CLI
+application in either development or production mode.
 
-With our setup the code automatically rebuilds when files
-are changed by a developer. Once the new code is built, the
-sources are loaded into the browser. Loading sources from
-the server can take several seconds. We reduce the waiting
-time by performing hot reloads. A hot reload patches the
-existing and already loaded code base with a change set.
-This greatly improves the development speed.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{025-toolchain}
+  \caption{Build system of {\platener} with development and
+    production bundles.}
+  \label{fig:toolchain}
+\end{figure}
+
+In development mode the code automatically rebuilds when
+files are changed by a developer. Once the new code is
+built, the sources are loaded into the browser or served as
+the CLI. Loading sources from the server can take several
+seconds. We reduce the waiting time by performing hot
+reloads. A hot reload patches the existing and already
+loaded code base with a change set. This greatly improves
+the development speed.
 
 
 % {\coffeescript} transpiles to {\javascript}. In order to
