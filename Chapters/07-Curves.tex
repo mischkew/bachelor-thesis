@@ -25,13 +25,41 @@ The algorithm uses the plates and connections from the plate graph. The plates p
 
 Living hinges are segments of a rigid material that are made flexible locally. There are several techniques to do this, e.g. thinning the material in this area. Using the \lasercutter{} a living hinge can be created by dense parallel cuts. They are disconnected every few centimeters and the breaks are offset to the next parallel cut (see Figure \ref{fig:living_hinge}).
 
-\note{TO DO: add image of living hinge}
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-sealing_clip}
+    \caption{A sealing clip where a thinned part act as living hinge.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{07-living_hinge_wood}
+    \caption{Laser cut living hinges in a wooden smart phone stand.}
+  \end{subfigure}
+  \caption{Two typical types of living hinges.}
+  \label{fig:living_hinge}
+\end{figure}
 
 \section{Developable surface}
 
 Formally developable surfaces are defined as surfaces with zero Gaussian curvature. Practically this means they can be created from a flat surface by cutting, bending and folding and without compressing or stretching. Examples for objects with and without developable surfaces are shown in Figure \ref{fig:developable_surface_examples}.
 
-\note{TO DO: add images of developable and not developable surfaces}
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-developable_surfaces}
+    \caption{Objects like cubes, cylinders, cones and also sphere approximations like an icosphere have developable surfaces.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{07-not_developable_surfaces}
+    \caption{So called doubly curved surfaces like from a sphere or torus are not developable.}
+  \end{subfigure}
+  \caption{Two typical types of living hinges.}
+  \label{fig:developable_surface_examples}
+\end{figure}
 
 \section{The bent plate object}
 
@@ -216,29 +244,41 @@ For calculating the final transformation matrix for this plate, the transformati
   \centering
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{07-no_overlaps}
-    \caption{\note{info}}
+    \includegraphics[width=\textwidth]{07-traversing_along_bend_connections_01}
+    \caption{Two plates which should be connected with a bend.}
     \label{fig:bend-matrix:1}
   \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=1\textwidth]{07-no_overlaps_2d}
-    \caption{\note{info}}
+    \includegraphics[width=1\textwidth]{07-traversing_along_bend_connections_02}
+    \caption{For the first one the transformations matrix is known already.}
     \label{fig:bend-matrix:2}
   \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{07-overlaps}
-    \caption{\note{info}}
+    \includegraphics[width=\textwidth]{07-traversing_along_bend_connections_03}
+    \caption{The bend angle (red) is 180\textdegree{} minus the angle between the plates (magenta).}
     \label{fig:bend-matrix:3}
   \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=1\textwidth]{07-overlaps_2d}
-    \caption{\note{info}}
+    \includegraphics[width=1\textwidth]{07-traversing_along_bend_connections_05}
+    \caption{The bend axis is the cross product of the bent plate's normals.}
     \label{fig:bend-matrix:4}
   \end{subfigure}
-  \caption{\note{how the bend matrix is created}}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{07-traversing_along_bend_connections_08}
+    \caption{The bend axis and the second plate are transformed with the matrix of the first plate.}
+    \label{fig:bend-matrix:5}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{07-traversing_along_bend_connections_07}
+    \caption{With the new generated transformation matrix the second plate lies in the xy-plane next to the first plate.}
+    \label{fig:bend-matrix:6}
+  \end{subfigure}
+  \caption{Creation steps of the bend matrix.}
   \label{fig:bend-matrix}
 \end{figure}
 
