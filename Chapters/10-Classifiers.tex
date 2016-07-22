@@ -7,6 +7,7 @@
 %************************************************
 
 \section{Classifiying idea}
+\cite{positionVectorRetrieval}
 In the previous chapters we covered the approach of solely finding plates within 3D-models. This approach needs the model to be very 'boxy'. Therefore sometimes the algorithm fails because of too many round edges or other noise. \\
 This is why we tried another approach \cite{ransac} which is also being used by CGAL \cite{cgal}. We look for all kinds of primitive shapes in addition to plates. This allows us to split the model into separate objects which can then be independently converted to lasercutable plates. During the conversion we choose a specific method to realise this part with plates which often helps to achieve a more appropriate solution than to directly start finding plates. Due to the tolerance of the algorithm to noise we can even detect surface when there is a lot of texture.
 Currently, our software system does not include the findings of the classifiers for a conversion. Instead we wanted to find out how well the algorithm works for our use case. \\
@@ -53,7 +54,8 @@ C
 \end{bmatrix}
 
 
-The least squares solution is the following plane equation: $z = Ax + By + C$.
+The least squares solution is the following plane equation: \\
+$z = Ax + By + C$.
 
 \subsection{Cylinder}
 The minimal set for a cylinder are two points \{$p_1, p_2$\}, see fig. \ref{fig:cylinder} for the reconstruction sketch. Those points are assumed to lie on the shell of the cylinder. The axis can be calculated by calculating the cross product of their normals $n_1$ and $n_2$. Based on the axis a projection plane is formed which is perpendicular to the axis. The two lines $l_1 = p_1 + x*n_1$ and $l_2 = p_2 + x*n_2$ are projected onto this plane and should have an intersection. If they do not intersect the candidate is invalid. Otherwise, the intersection point is marked as the center of the cylinder-candidate. The radius is the mean value of the distance of both points to the center on the axis.
