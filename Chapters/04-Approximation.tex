@@ -688,9 +688,13 @@ Consequently the maximum bucket index is calculated with the maximum angle of 36
 
 \subsubsection{Implementation}
 
-\myNotes{TODO: Klassendiagramm}
+The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism. Its structure is represented in the class diagram figure \ref{fig:prismClassifierDiagram}.
 
-The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism.
+\begin{figure}
+\includegraphics[width=1.0\columnwidth]{Images/04-prismClassifier.png}
+\caption{class diagram of the PrismClassifier}
+\label{fig:prismClassifierDiagram}
+\end{figure}
 
 \paragraph{PrismClassifier}
 

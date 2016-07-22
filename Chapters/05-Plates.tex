@@ -38,9 +38,11 @@ The concept of stacking plates is described in Section \ref{sec:stackedplates}. 
 
 Before these plate finding algorithms can process the model, it has to be prepared properly. The surface has to analyzed, with the faces being grouped into planar shapes. These shapes can be used as surfaces of plates. 
 
-\platener solves this by running multiple pipeline steps beforehand. The first, called \emph{Coplanar Faces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section \ref{sub:coplanarfaces}. In the next step, \emph{edge loops} are created based on the previously generated groups of faces. An edge loop is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener.
+\platener solves this by running multiple pipeline steps beforehand. The first, called \emph{Coplanar Faces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section \ref{sub:coplanarfaces}. In the next step, \emph{edge loops} are created based on the previously generated groups of faces. An edge loop is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener. These edge loops are created by the \emph{shapes finder}, which is discussed in Section \ref{sub:shapesfinder}. The shapes finder can create multiple edge loop for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{hole detection}. It separates these by calculating the edge loops' area. This is further explained in Section \ref{sub:holedetection}.
 
-Before finding plates, the model's faces have to be grouped into planar surfaces (Figure \ref{fig:coplanar}). This is done by checking the angle between adjacent faces. Afterwards, the resulting shapes' edge loops are generated and the contour is differentiated from the holes.
+The result of these calculations is a list of shapes, which contain one or multiple edge loops. A label contains information about wether the edge loop is the shapes contour or a hole.
+
+\subsection{Coplanar Faces are Grouped Based on their Normal}\label{sub:coplanarfaces}
 
 \begin{figure}
     \centering
@@ -48,8 +50,6 @@ Before finding plates, the model's faces have to be grouped into planar surfaces
     \caption{Finding inherent surfaces.}
     \label{fig:coplanar}
 \end{figure}
-
-\subsection{Coplanar Faces}\label{sub:coplanarfaces}
 
 The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
 
@@ -163,13 +163,72 @@ else
 
 After all faces have been processed and assigned a group, the \mintinline{coffeescript}{faceGroups}, \mintinline{coffeescript}{faceGroupNormals} and \mintinline{coffeescript}{outerEdgeGroups} are injected into the face-vertex mesh, along with the \mintinline{coffeescript}{faceToFaceGroup} lookup table.
 
-\subsection{Shape Finder / Deus}
+\subsection{Shape Finder / Deus}\label{sub:shapesfinder}
+
+The shape finder creates shapes from the outer edge loops of the found coplanar faces. The outer edge loop is a set of edges in the format [vertex\_index\_1, vertex\_index\_2]. This is converted into a set of continuous edge loops of the form [vertex\_index\_1, vertex\_index\_2, ..., vertex\_index\_n, vertex\_index\_1].
+
+To do so the \emph{mergeEdges} function is called until no edge segments can be merged anymore (see Listing \ref{lst:mergeEdges}). This try to merge two edge segments which is possible if the starting or ending point of one of them matches the starting or ending point of the other (see Listing \ref{lst:mergeEdgeStrings}).
 
 \note{TODO}
 
-The shape finder creates shapes from the outer edge loops of the found coplanar faces. The outer edge loop is a set of edges in the format [vertex_index_1, vertex_index_2]. This is converted into a set of continuous edge loops of the form [vertex_index_1, vertex_index_2, ..., vertex_index_n, vertex_index_1].
+\begin{listing}
+\begin{minted}[
+linenos,breaklines
+]{coffeescript}
+mergeEdges: (inEdges, same) ->
+  # take first edgeloop
+  edges = [inEdges.shift()]
 
-\subsection{Hole Detection / Dimitri}
+  # try to merge into other edgeloop
+  merged = no
+  for inEdge in inEdges
+    added = no
+    for edge, i in edges when not added
+      newEdge = @mergeEdgeStrings edge, inEdge, same
+      if newEdge
+        added = yes
+        edges[i] = newEdge
+    if not added
+      edges.push inEdge
+    else
+      merged = yes
+  return { edges, merged }
+\end{minted}
+\caption{Merging edge segments to continuous edge loops.}
+\label{lst:mergeEdges}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[
+linenos,breaklines
+]{coffeescript}
+mergeEdgeStrings: (
+  edgeString,
+  otherEdgeString,
+  comparator = identityComparator
+  ) ->
+  lastIndex = edgeString.length - 1
+  otherLastIndex = otherEdgeString.length - 1
+
+  if comparator(edgeString[0], otherEdgeString[otherLastIndex])
+    return otherEdgeString.concat(edgeString.slice(1))
+
+  if comparator(otherEdgeString[0], edgeString[lastIndex])
+    return edgeString.concat(otherEdgeString.slice(1))
+
+  if comparator(edgeString[0], otherEdgeString[0])
+    return edgeString.slice().reverse().concat(otherEdgeString.slice(1))
+
+  if comparator(edgeString[lastIndex], otherEdgeString[otherLastIndex])
+    return otherEdgeString.concat(edgeString.slice(0, -1).reverse())
+
+  return null
+\end{minted}
+\caption{Merging edge segments to continuous edge loops.}
+\label{lst:mergeEdgeStrings}
+\end{listing}
+
+\subsection{Hole Detection / Dimitri}\label{sub:holedetection}
 
 PASTE HERE
 

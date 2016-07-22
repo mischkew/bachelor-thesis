@@ -185,7 +185,7 @@ If we now have a look at only the intersections of plates in a model, seen in fi
 \caption{All found intersections have been overlaping. After the truncation they only cover exactly the line which is needed for adding joints later.}
 \label{fig:innerBoundaries}
 \end{figure}
-For truncating the lines we use the following algorithm \ref{truncateLines} to achieve the result shown in figure \ref{innerBoundaries}.
+For truncating the lines we use the following algorithm \ref{truncateLines} to achieve the result shown in figure \ref{fig:innerBoundaries}.
 First, we take two of all the found lines and check if they intersect. They only intersect when their intersection point is on both of their line segments. Then, the two parts of both lines can be created since we calculated the intersection point which splits the lines. We assume that the part of the line we want to keep will always be the larger part. Therefore, we discard the shorter lines and return the others.\\
 \begin{algorithm}[H]
 	\DontPrintSemicolon
@@ -234,7 +234,7 @@ Finally, we found all plate adjacencies and necessary information on the connect
 The solutions presented in this chapter may not be the only way to go. Therefore, we want to give an overview of other algorithms we tried or are aware of and why we replaced them.
 
 \subsection{Possible data structures for intersection tracking}
-Dustin Beyer \citeauthor{master-thesis} used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Their indices corresponded to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.\\
+\citeauthor{master-thesis} used an adjacency matrix for keeping track of neighboring plates. All the plates were kept in a plate array. Their indices corresponded to the rows and columns of the matrix. Each cell contained a set of plate adjacency objects. This made it possible that one plate could have more than one connection.\\
 \*\\
 Instead of an adjacency matrix we used the previously explained plategraph class structure because it allows for traversal along the plates and, additionally, the found edges. \\
 Moreover, our structure is open for adding additional objects beside plates. For example 3D-printable snippets which were not converted to plates by our software.
@@ -259,6 +259,7 @@ A different, more future oriented, approach is to work with the axis going throu
 \caption{Plate specific intersection lines}
 \end{subfigure}
 \caption{Two possible representations of where to place joints.}
+\source{\url{http://www.technologystudent.com/images/fingjt1.jpg} \visited}
     \label{fig:hinges}
 \end{figure}
 In the case that our software will be extended with an editor the user might want to select an edge and define that the connection should be similar to a hinge. For this you would want rather one axis than two lines specific to a plate. But then the calculation for where to place the joints at the plate becomes more expensive.\\
@@ -303,10 +304,10 @@ Additionally, we look at the direction of the normals. The direction is positive
 For an angle to be in need to be adjusted the following conditions need to be satisfied.
 \begin{itemize}
     \item The two plates touch with the same type of side 
-    \item[] AND
-    \item Their directions are both positive OR both negative
+    \item[] and
+    \item Their directions are both positive or both negative
 \end{itemize}
-But as mentioned before all of these calculations are based on the assumption that the previous main line calculation only yielded one line.\\
+But, as mentioned before, all of these calculations were based on the assumption that the previous main line calculation only yielded one line.\\
 In this case the previous algorithm fails which is why we developed a new approach for finding the correct angle as already explained in the section \hyperref[angleCalculation]{Angle Calculation}.
 
 \section{Future work}
