@@ -356,9 +356,13 @@ However, the runtime improvement is marginal compared to an octree and is more c
 
 \section{Point on Line Removal}
 
-\emph{PointOnLineRemover} is used by the \emph{ShapesFinder} to delete unnecessary vertices and therefore reducing their complexity. It checks every \emph{EdgeLoop} of a found shape for vertices that lie on implicit lines given by other vertices as shown in figure \myNotes{figure einzusetzen}: Point 2 lies on the line between point 1 and 3 and gets deleted.
+\emph{PointOnLineRemover} is used by the \emph{ShapesFinder} to delete unnecessary vertices and therefore reducing their complexity. It checks every \emph{EdgeLoop} of a found shape for vertices that lie on implicit lines given by other vertices as shown in figure \ref{fig:pointOnLine1}: Point 2 lies on the line between point 1 and 3 and gets deleted.
 
-\myNotes{TODO: figure}
+\begin{figure}
+    \includegraphics[width=0.4\columnwidth]{Images/04-PointOnLine-1.png}
+    \caption{point 2 gets deleted because it lies on the line between point 1 and 3}
+    \label{fig:pointOnLine1}
+\end{figure}
 
 \emph{Shapes} may represent only a line or a point instead of a 2D-shape if they do not contain enough vertices. An \emph{EdgeLoop} gets deleted if it contains less than three vertices after point on line removal because it does not span an area any more. In case the contour of a \emph{shape} gets deleted the complete \emph{shape} is obsolete and gets deleted as well.
 
@@ -384,394 +388,394 @@ for index in [0...vertices.length] when index not in removedIndices
 \end{listing}
 
 
-When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \myNotes{figure einzusetzen}: Point 1 gets deleted in case point 2 lies within threshold distance to the line between point 0 and 1. But the actual point that should be deleted is obviously point 2 since it lies directly on the line between point 1 and 3.
+When checking if a point lies on a line it is not sufficient to calculate the distance only as illustrated in figure \ref{fig:pointOnLine2}: Point 2 gets deleted in case point 3 lies within threshold distance to the line between point 1 and 2. But the actual point that should be deleted is obviously point 3 since it lies directly on the line between point 2 and 4.
 
-Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In figure \myNotes{figure einzusetzen} point 1 lies outside of the line between point 0 and 2. With this additional check the resulting triangle consist of the points 0, 1 and 3 as obviously desired.
-
-\myNotes{TODO: figure}
-
-
-
-
-
-
-
-
-
-\section{Remove Contained Plates - in Lukas Kapitel}
-% \secauthor{DS}
-
-\emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software.
-
-There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
-
-We iterate over all plates and compare them to all other plates. The comparison is based on their normals while further checks are not necessary most of the time because the normal check excludes most of them. Therefore the comparison is fast enough and the amount of comparisons must not be reduced with a different iteration algorithm.
-
-\subsection{Plate completely inside another}
-
-As described in the master thesis the algorithm may produce small plates that lie completely inside the actual modeled plate. These plates are orthogonal.
-
-So if two plates have orthogonal normals we check if one of them lies completely in the other and remove it.
-
-
-\subsection{Overlapping parallel plates}
-
-A 3D block can not be represented by one single plate if it is thicker than a plate. The software creates two plates instead. The resulting plates will overlap in case this block is thinner than those two plates together.
-
-So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections. In case they overlap one of the plates gets deleted.
-
-
-
-
-
-
-
-
-
-
-\section{Hole Detection - in Plates Kapitel}
-% \secauthor{DS}
-
-The pipeline step \emph{HoleDetection} is run after \emph{ShapesFinder} and categorises every \emph{edgeLoop} of each \emph{shape} either as outer contour or as hole. This is done by computing their areas and comparing them: The \emph{edgeLoop} with the biggest area is the outer contour and all others are holes.
-
-
-
-
-
-
-
-
-
-
-
-
-\chapter{Classifiers}
-\section{primitives}
-\subsection{Prism - Dimitri}
-% \secauthor{DS}
-
-A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives which are usually faces or shapes.
-
-To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill.
-
-\subsubsection{Bucket System}
-\label{sec:PrismBucketSystem}
-
-The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
-
-\begin{equation*}
-    \vec{n} = \colvec{3}{x}{y}{z}
-\end{equation*}
-
-
-All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal like planes with normals $(1,0,0)$ and $(-1,0,0)$ are parallel, all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
-
-
-\begin{listing}[!h]
-\centering
-\begin{minted}[
-linenos
-]{coffeescript}
-_normalInHemisphere: (normal) ->
-    if normal.z < 0
-        return normal.clone().negate()
-    else
-        return normal
-\end{minted}
-\caption{Normals are transformed into hemisphere}
-\label{lst:_normalInHemisphere}
-\end{listing}
-
-\begin{figure}
-    \includegraphics[width=0.9\columnwidth]{Images/PrismCl-Rings.png}
-    \caption{rings visualised from side}
-    \label{fig:rings_FromSide}
-\end{figure}
-
-\begin{figure}
-    \includegraphics[width=0.9\columnwidth]{Images/PrismCl-RingsFromTop.png}
-    \caption{rings visualised from top}
-    \label{fig:rings_FromTop}
-\end{figure}
-
-\begin{figure}
-    \includegraphics[width=0.4\columnwidth]{Images/PrismCl-RingAngle.png}
-    \caption{angle of a normal which is used for sorting it into a ring}
-    \label{fig:ringAngle}
-\end{figure}
-
-
-This hemisphere is separated into rings. Each ring covers the threshold angle $\phi$ in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. Each normal is sorted into a ring by its correlating angle $\alpha$ which is used to determine the ring index. It is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}: the angle between $\vec{n}$ and $(x,y,0)$:
-
-\begin{equation*}
-\begin{split}
-    \sin{\alpha} & = \frac{z}{ \sqrt{x^{2} + y^{2}} } \\
-    => \alpha  & = \arcsin{ \frac{z}{ \sqrt{x^{2} + y^{2}} } }
-\end{split}
-\end{equation*}
-
-
-The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to get the actual ring index $I_{Ring}$:
-
-\begin{equation*}
-    I_{Ring} = \floor*{
-                    \arcsin{
-                        \frac{z}{ \sqrt{ x^{2} + y^{2} } }
-                    }
-                    / \phi
-                }
-\end{equation*}
-
-The maximum angle is 90°. Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
-
-\begin{equation*}
-    I_{MaxRing} = \floor*{
-                    \frac{\pi}{2}
-                    / \phi
-                  }
-\end{equation*}
-
-
-
-The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends on index and threshold:
-
-\begin{equation}
-\label{equ:AlphaIRing}
-    {\alpha}_{I_{Ring}} = (I_{Ring} + 0.5) * \phi \qquad \forall{ I_{Ring} \in [0, I_{MaxRing}] }
-\end{equation}
-
-
-
-Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value $z_{I_{Ring}}$.
-
-\begin{figure}
-    \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
-    \caption{geometric visualization of the z value in the middle of a ring}
-    \label{fig:middleZ}
-\end{figure}
-
-\begin{equation}
-\label{equ:VecX}
-    \vec{v}_{x} = (1, 0, 0)
-\end{equation}
-
-\begin{equation}
-\begin{split}
-    \label{equ:VecA}
-    \vec{a}_{I_{Ring}} = (x_{a}, 0, z_{I_{Ring}}) \qquad  & \forall{ I_{Ring} \in [0, I_{MaxRing}] } \\
-    & with \vert \vec{a}_{I_{Ring}} \vert = 1
-\end{split}
-\end{equation}
-
-\begin{equation}
-    \label{equ:XA}
-    \cos{{\alpha}_{I_{Ring}}} = \frac{ \vec{v}_{x} * \vec{a}_{I_{Ring}} }{ \vert \vec{v}_{x} \vert * \vert \vec{a}_{I_{Ring}} \vert }
-    \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} \vec{v}_{x} * \vec{a}_{I_{Ring}}
-    \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} x_{a}
-\end{equation}
-
-\begin{equation}
-\label{equ:ZIRing}
-\begin{split}
-    1 & = \vert \vec{a}_{I_{Ring}} \vert \stackrel{(\ref{equ:VecA})}{=} \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } \\
-    => z_{I_{Ring}} & = \sqrt{1 - x_{a}^{2}}
-    \stackrel{(\ref{equ:XA})}{=} \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
-\end{split}
-\end{equation}
-
-
-Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
-
-\begin{figure}
-    \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
-    \caption{buckets in a ring span the projected angle $\protect\gamma$ of the angle $\protect\phi$}
-    \label{fig:PrismCl-buckets}
-\end{figure}
+Therefore it is needed to check if a point lies in between the points spanning the line and not outside. In figure \ref{fig:pointOnLine2} point 2 lies outside of the line between point 1 and 3. With this additional check the resulting triangle consist of the points 1, 2 and 4 as obviously desired.
 
 
 \begin{figure}
-    \includegraphics[width=1.0\columnwidth]{Images/PrismCl-Projection.png}
-    \caption{projection of the angle $\protect\phi$}
-    \label{fig:projection}
+    \includegraphics[width=0.6\columnwidth]{Images/04-PointOnLine-2.png}
+    \caption{Point 3 gets deleted even if point 2 is within welding distance of the line between point 1 and 3. This is done because point 2 lies not in between point 1 and 3 but outside of them.}
+    \label{fig:pointOnLine2}
 \end{figure}
 
 
-$ \vec{a}_{I_{Ring}}' $ is the projection of $\vec{a}_{I_{Ring}} $:
 
 
-\begin{equation}
-    \label{equ:VecAStrich}
-    \vec{a}_{I_{Ring}}' = (x_{a}, 0)
-\end{equation}
+% \section{Remove Contained Plates - in Lukas Kapitel}
+% % \secauthor{DS}
 
-$ \vec{b}_{I_{Ring}} $ spans the threshold angle $\phi$ with $ \vec{a}_{I_{Ring}} $ and has the same $z$ value $z_{I_{Ring}}$:
+% \emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software.
 
-\begin{equation}
-    \vec{b}_{I_{Ring}} = (x_{b}, y_{b}, z_{I_{Ring}}) \qquad with | \vec{b}_{I_{Ring}}| = 1
-    \label{equ:VecB}
-\end{equation}
+% There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
 
-The corresponding projected vector $ \vec{b}_{I_{Ring}}' $:
+% We iterate over all plates and compare them to all other plates. The comparison is based on their normals while further checks are not necessary most of the time because the normal check excludes most of them. Therefore the comparison is fast enough and the amount of comparisons must not be reduced with a different iteration algorithm.
 
-\begin{equation}
-    \vec{b}_{I_{Ring}}' = (x_{b}, y_{b})
-    \label{equ:VecBStrich}
-\end{equation}
+% \subsection{Plate completely inside another}
 
-Due to the mentioned conditions the coordinates of $ \vec{b}_{I_{Ring}} $ are calculated as follows:
+% As described in the master thesis the algorithm may produce small plates that lie completely inside the actual modeled plate. These plates are orthogonal.
+
+% So if two plates have orthogonal normals we check if one of them lies completely in the other and remove it.
 
 
-\begin{equation}
-    \label{equ:Projection1}
-    \cos{\phi} = \frac{\vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}}}{|\vec{a}| * |\vec{b}|} = \vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}} \stackrel{(\ref{equ:VecA}) + (\ref{equ:VecB})}{=} x_{a}_{I_{Ring}} * x_{b}_{I_{Ring}} + z_{I_{Ring}}^{2}
-\end{equation}
+% \subsection{Overlapping parallel plates}
 
-\begin{equation}
-    \label{equ:XB}
-   (\ref{equ:Projection1}) => x_{b} = \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a} }
-\end{equation}
+% A 3D block can not be represented by one single plate if it is thicker than a plate. The software creates two plates instead. The resulting plates will overlap in case this block is thinner than those two plates together.
 
-\begin{equation}
-\begin{split}
-    \label{equ:YpsilonB}
-    & 1 = |\vec{a}_{I_{Ring}}| = |\vec{b}_{I_{Ring}}| \\
-    & => \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } = \sqrt{ x_{b}^{2} + y_{b}^{2} + z_{I_{Ring}}^{2} } \\
-    & => y_{b} = \sqrt{ x_{a}^{2} - x_{b}^{2} }
-\end{split}
-\end{equation}
-
-
-The angle ${\gamma}_{I_{Ring}}$ which is used to separate a ring into buckets is calculated with the projected vectors $ \vec{a}_{I_{Ring}}' $ and $ \vec{b}_{I_{Ring}}' $ :
-
-\begin{equation}
-\begin{split}
-    \cos{{\gamma}_{I_{Ring}}}& = \frac{\vec{a}_{I_{Ring}}' * \vec{b}_{I_{Ring}}'}{|\vec{a}_{I_{Ring}}'| * |\vec{b}_{I_{Ring}}'|}
-    = \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} +  y_{b}^{2} } } \\
-    & \stackrel{(\ref{equ:YpsilonB})}{=} \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} - x_{b}^{2} +  x_{a}^{2} } }
-    = \frac{ x_{a} * x_{b} }{ x_{a} * x_{a} }
-    = \frac{ x_{b} }{ x_{a} } \\
-    & \stackrel{(\ref{equ:XB})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a}^{2} }
-    \stackrel{(\ref{equ:XA})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
-    & \stackrel{(\ref{equ:ZIRing})}{=} \frac{ \cos{\phi} - ( 1 - cos^{2}{{\alpha}_{I_{Ring}}} ) }{ \cos^{2}{{\alpha}_{I_{Ring}}} }
-    = \frac{ \cos^{2}{{\alpha}_{I_{Ring}}} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } + \frac{ \cos{\phi} - 1 }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
-    & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } \\
-    => {\gamma}_{I_{Ring}} & = \arccos{( 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } )}
-\end{split}
-\end{equation}
-
-
-The corresponding angle $ \beta $ of a normal $ \vec{n} $ is calculated with use of the unit vector in x direction $ \vec{v_{x}'} $. This angle needs to be adapted in case $ y < 0 $ since the maximum angle between two vectors is 180° and we want to cover a complete circle:
-
-\begin{equation}
-\begin{split}
-    \cos{\beta} & = \frac{\vec{n}' * \vec{v_{x}'}}{|\vec{n}'| * |\vec{v_{x}'}|} = \frac{x}{\sqrt{x^{2} + y^{2}}} \\
-    => \beta & = \begin{cases}
-        \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y \geq 0 \\
-        2 \pi - \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y < 0
-    \end{cases}
-\end{split}
-\end{equation}
-
-The angle $ \beta $ is represented as a multiple of the $ \gamma $ angle to get the bucket index $ I_{Bucket} $:
-
-\begin{equation}
-    I_{Bucket} = \floor{\frac{\beta}{ {\gamma}_{I_{Ring}} }}
-\end{equation}
-
-Consequently the maximum bucket index is calculated with the maximum angle of 360°:
-
-\begin{equation}
-    I_{MaxBucket} = \floor{\frac{2 \pi}{ {\gamma}_{I_{Ring}} }}
-\end{equation}
+% So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections. In case they overlap one of the plates gets deleted.
 
 
 
-\subsubsection{Implementation}
-
-The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism. Its structure is represented in the class diagram figure \ref{fig:prismClassifierDiagram}.
-
-\begin{figure}
-\includegraphics[width=1.0\columnwidth]{Images/04-prismClassifier.png}
-\caption{class diagram of the PrismClassifier}
-\label{fig:prismClassifierDiagram}
-\end{figure}
-
-\paragraph{PrismClassifier}
-
-\begin{listing}[!h]
-\centering
-\begin{minted}[
-linenos, breaklines
-]{coffeescript}
-run: ->
-    return new Promise( (resolve) =>
-        buckets = new PrismShapeNormalsBuckets(_angleThreshold)
-
-        @_putIntoBuckets @shapes, buckets
-
-        prisms = @_detectPrisms @shapes, buckets
-
-        log.debug("PrismClassifier found " + prisms.length + " prisms")
-
-        resolve(prisms)
-    )
-\end{minted}
-\caption{run method of the PrismClassifier}
-\label{lst:PrismClassifierRun}
-\end{listing}
-
-Listing \ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
-
-At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
-
-Then all shapes are put into the corresponding buckets. This is done by iterating over all shapes and passing them to the bucket system which handles the classification on its own.
-
-Next we iterate over all shapes again while requesting the potential parallel shapes from the bucket system. The shapes are checked with the given threshold and a \emph{prism} is created in case of parallelism.
-
-At the end a set of all prisms is returned which can be used for further primitive classification.
 
 
-\paragraph{Prism Shape Normals Buckets}
-
-\emph{PrismShapeNormalsBuckets} is based on the specification in section \ref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
-
-The constructor saves the angle threshold, instantiates the rings as a javascript map and calculates the maximum ring index $I_{MaxRing}$.
-
-It provides two functions used by the classifier: \\
-\emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
-
-\emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
-
-\emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath.
-
-While determining the surrounding rings following special cases need to be considered:
-
-First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
-
-Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket 180° away.
 
 
-\paragraph{Ring}
-
-A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
-
-The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
 
 
-\paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.
 
-\paragraph{Prism}
+% \section{Hole Detection - in Plates Kapitel}
+% % \secauthor{DS}
 
-A \emph{Prism} contains two parallel shapes that span a prism. In future work this should be extended by the lateral surface which is not handlet yet.
+% The pipeline step \emph{HoleDetection} is run after \emph{ShapesFinder} and categorises every \emph{edgeLoop} of each \emph{shape} either as outer contour or as hole. This is done by computing their areas and comparing them: The \emph{edgeLoop} with the biggest area is the outer contour and all others are holes.
 
-\subsubsection{Future Work}
-\label{sec:PrismFutureWork}
 
-\paragraph{Planes} \emph{Planes} from the \emph{PlaneClassifier} should be taken into account in addition to the shapes. Ideally the \emph{PlaneClassifier} detects noisy planes that are not represented as shapes. Therefore a better approximation of the original model could be achieved.
 
-\paragraph{Lateral Surface} The lateral surface of the prism has yet to be identified and added to the prism structure. This is needed for further operations and more specific classifications of the prism. For example for classifying a cube the surrounding sides have to be known.
 
-\paragraph{Scoring} Prism scoring is not implemented yet. To rate a prism the actual angle between the two nearly parallel shapes have to be considered. If scoring is implemented the angle threshold for parallelism can be adjusted to a much higher value while big variations to 0° will be reflected in the score.
+
+
+
+
+
+
+
+
+% \chapter{Classifiers}
+% \section{primitives}
+% \subsection{Prism - Dimitri}
+% % \secauthor{DS}
+
+% A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives which are usually faces or shapes.
+
+% To find the prisms all shapes have to be checked for parallelism. The comparison is based on normals which are sorted into buckets to speed up the process. The attached lateral surface can be identified by flood fill.
+
+% \subsubsection{Bucket System}
+% \label{sec:PrismBucketSystem}
+
+% The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
+
+% \begin{equation*}
+%     \vec{n} = \colvec{3}{x}{y}{z}
+% \end{equation*}
+
+
+% All normals lie on the surface of the unit sphere because of their normalisation. Considering opposite normals as equal like planes with normals $(1,0,0)$ and $(-1,0,0)$ are parallel, all normals are transformed into a hemisphere as shown in Listing \ref{lst:_normalInHemisphere}: A normal is negated in case its $z$ value is negative.
+
+
+% \begin{listing}[!h]
+% \centering
+% \begin{minted}[
+% linenos
+% ]{coffeescript}
+% _normalInHemisphere: (normal) ->
+%     if normal.z < 0
+%         return normal.clone().negate()
+%     else
+%         return normal
+% \end{minted}
+% \caption{Normals are transformed into hemisphere}
+% \label{lst:_normalInHemisphere}
+% \end{listing}
+
+% \begin{figure}
+%     \includegraphics[width=0.9\columnwidth]{Images/PrismCl-Rings.png}
+%     \caption{rings visualised from side}
+%     \label{fig:rings_FromSide}
+% \end{figure}
+
+% \begin{figure}
+%     \includegraphics[width=0.9\columnwidth]{Images/PrismCl-RingsFromTop.png}
+%     \caption{rings visualised from top}
+%     \label{fig:rings_FromTop}
+% \end{figure}
+
+% \begin{figure}
+%     \includegraphics[width=0.4\columnwidth]{Images/PrismCl-RingAngle.png}
+%     \caption{angle of a normal which is used for sorting it into a ring}
+%     \label{fig:ringAngle}
+% \end{figure}
+
+
+% This hemisphere is separated into rings. Each ring covers the threshold angle $\phi$ in $z$-direction and is visualized in Figure \ref{fig:rings_FromSide} and Figure \ref{fig:rings_FromTop}. Each normal is sorted into a ring by its correlating angle $\alpha$ which is used to determine the ring index. It is proporional to its coordinates as demonstraded in Figure \ref{fig:ringAngle}: the angle between $\vec{n}$ and $(x,y,0)$:
+
+% \begin{equation*}
+% \begin{split}
+%     \sin{\alpha} & = \frac{z}{ \sqrt{x^{2} + y^{2}} } \\
+%     => \alpha  & = \arcsin{ \frac{z}{ \sqrt{x^{2} + y^{2}} } }
+% \end{split}
+% \end{equation*}
+
+
+% The angle $\alpha$ is represented as a multiple of the threshold angle $\phi$ to get the actual ring index $I_{Ring}$:
+
+% \begin{equation*}
+%     I_{Ring} = \floor*{
+%                     \arcsin{
+%                         \frac{z}{ \sqrt{ x^{2} + y^{2} } }
+%                     }
+%                     / \phi
+%                 }
+% \end{equation*}
+
+% The maximum angle is 90°. Consequently the maximum ring index $I_{MaxRing}$ is calculated as follows:
+
+% \begin{equation*}
+%     I_{MaxRing} = \floor*{
+%                     \frac{\pi}{2}
+%                     / \phi
+%                   }
+% \end{equation*}
+
+
+
+% The angle in the middle of each ring ${\alpha}_{I_{Ring}}$ consequently depends on index and threshold:
+
+% \begin{equation}
+% \label{equ:AlphaIRing}
+%     {\alpha}_{I_{Ring}} = (I_{Ring} + 0.5) * \phi \qquad \forall{ I_{Ring} \in [0, I_{MaxRing}] }
+% \end{equation}
+
+
+
+% Figure \ref{fig:middleZ} implies the calculation of the corresponding middle $z$ value $z_{I_{Ring}}$: We create a normal $\vec{a}_{I_{Ring}}$ with a fixed $y$ value of 0 that forms the angle ${\alpha}_{I_{Ring}}$ with the unit vector in x direction $\vec{v}_{x}$. Consequently all normals that lie in the middle of a ring ($\alpha = {\alpha}_{I_{Ring}}$) have the $z$ value $z_{I_{Ring}}$.
+
+% \begin{figure}
+%     \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
+%     \caption{geometric visualization of the z value in the middle of a ring}
+%     \label{fig:middleZ}
+% \end{figure}
+
+% \begin{equation}
+% \label{equ:VecX}
+%     \vec{v}_{x} = (1, 0, 0)
+% \end{equation}
+
+% \begin{equation}
+% \begin{split}
+%     \label{equ:VecA}
+%     \vec{a}_{I_{Ring}} = (x_{a}, 0, z_{I_{Ring}}) \qquad  & \forall{ I_{Ring} \in [0, I_{MaxRing}] } \\
+%     & with \vert \vec{a}_{I_{Ring}} \vert = 1
+% \end{split}
+% \end{equation}
+
+% \begin{equation}
+%     \label{equ:XA}
+%     \cos{{\alpha}_{I_{Ring}}} = \frac{ \vec{v}_{x} * \vec{a}_{I_{Ring}} }{ \vert \vec{v}_{x} \vert * \vert \vec{a}_{I_{Ring}} \vert }
+%     \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} \vec{v}_{x} * \vec{a}_{I_{Ring}}
+%     \stackrel{(\ref{equ:VecX}) + (\ref{equ:VecA})}{=} x_{a}
+% \end{equation}
+
+% \begin{equation}
+% \label{equ:ZIRing}
+% \begin{split}
+%     1 & = \vert \vec{a}_{I_{Ring}} \vert \stackrel{(\ref{equ:VecA})}{=} \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } \\
+%     => z_{I_{Ring}} & = \sqrt{1 - x_{a}^{2}}
+%     \stackrel{(\ref{equ:XA})}{=} \sqrt{1 - cos^{2}{{\alpha}_{I_{Ring}}}}
+% \end{split}
+% \end{equation}
+
+
+% Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure \ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure \ref{fig:projection} and leads to this calculation:
+
+% \begin{figure}
+%     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
+%     \caption{buckets in a ring span the projected angle $\protect\gamma$ of the angle $\protect\phi$}
+%     \label{fig:PrismCl-buckets}
+% \end{figure}
+
+
+% \begin{figure}
+%     \includegraphics[width=1.0\columnwidth]{Images/PrismCl-Projection.png}
+%     \caption{projection of the angle $\protect\phi$}
+%     \label{fig:projection}
+% \end{figure}
+
+
+% $ \vec{a}_{I_{Ring}}' $ is the projection of $\vec{a}_{I_{Ring}} $:
+
+
+% \begin{equation}
+%     \label{equ:VecAStrich}
+%     \vec{a}_{I_{Ring}}' = (x_{a}, 0)
+% \end{equation}
+
+% $ \vec{b}_{I_{Ring}} $ spans the threshold angle $\phi$ with $ \vec{a}_{I_{Ring}} $ and has the same $z$ value $z_{I_{Ring}}$:
+
+% \begin{equation}
+%     \vec{b}_{I_{Ring}} = (x_{b}, y_{b}, z_{I_{Ring}}) \qquad with | \vec{b}_{I_{Ring}}| = 1
+%     \label{equ:VecB}
+% \end{equation}
+
+% The corresponding projected vector $ \vec{b}_{I_{Ring}}' $:
+
+% \begin{equation}
+%     \vec{b}_{I_{Ring}}' = (x_{b}, y_{b})
+%     \label{equ:VecBStrich}
+% \end{equation}
+
+% Due to the mentioned conditions the coordinates of $ \vec{b}_{I_{Ring}} $ are calculated as follows:
+
+
+% \begin{equation}
+%     \label{equ:Projection1}
+%     \cos{\phi} = \frac{\vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}}}{|\vec{a}| * |\vec{b}|} = \vec{a}_{I_{Ring}} * \vec{b}_{I_{Ring}} \stackrel{(\ref{equ:VecA}) + (\ref{equ:VecB})}{=} x_{a}_{I_{Ring}} * x_{b}_{I_{Ring}} + z_{I_{Ring}}^{2}
+% \end{equation}
+
+% \begin{equation}
+%     \label{equ:XB}
+%   (\ref{equ:Projection1}) => x_{b} = \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a} }
+% \end{equation}
+
+% \begin{equation}
+% \begin{split}
+%     \label{equ:YpsilonB}
+%     & 1 = |\vec{a}_{I_{Ring}}| = |\vec{b}_{I_{Ring}}| \\
+%     & => \sqrt{ x_{a}^{2} + z_{I_{Ring}}^{2} } = \sqrt{ x_{b}^{2} + y_{b}^{2} + z_{I_{Ring}}^{2} } \\
+%     & => y_{b} = \sqrt{ x_{a}^{2} - x_{b}^{2} }
+% \end{split}
+% \end{equation}
+
+
+% The angle ${\gamma}_{I_{Ring}}$ which is used to separate a ring into buckets is calculated with the projected vectors $ \vec{a}_{I_{Ring}}' $ and $ \vec{b}_{I_{Ring}}' $ :
+
+% \begin{equation}
+% \begin{split}
+%     \cos{{\gamma}_{I_{Ring}}}& = \frac{\vec{a}_{I_{Ring}}' * \vec{b}_{I_{Ring}}'}{|\vec{a}_{I_{Ring}}'| * |\vec{b}_{I_{Ring}}'|}
+%     = \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} +  y_{b}^{2} } } \\
+%     & \stackrel{(\ref{equ:YpsilonB})}{=} \frac{ x_{a} * x_{b} }{ x_{a} * \sqrt{  x_{b}^{2} - x_{b}^{2} +  x_{a}^{2} } }
+%     = \frac{ x_{a} * x_{b} }{ x_{a} * x_{a} }
+%     = \frac{ x_{b} }{ x_{a} } \\
+%     & \stackrel{(\ref{equ:XB})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ x_{a}^{2} }
+%     \stackrel{(\ref{equ:XA})}{=} \frac{ \cos{\phi} - z_{I_{Ring}}^{2} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
+%     & \stackrel{(\ref{equ:ZIRing})}{=} \frac{ \cos{\phi} - ( 1 - cos^{2}{{\alpha}_{I_{Ring}}} ) }{ \cos^{2}{{\alpha}_{I_{Ring}}} }
+%     = \frac{ \cos^{2}{{\alpha}_{I_{Ring}}} }{ \cos^{2}{{\alpha}_{I_{Ring}}} } + \frac{ \cos{\phi} - 1 }{ \cos^{2}{{\alpha}_{I_{Ring}}} } \\
+%     & \stackrel{(\ref{equ:AlphaIRing})}{=} 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } \\
+%     => {\gamma}_{I_{Ring}} & = \arccos{( 1 + \frac{ \cos{\phi} - 1 }{ \cos^{2}{( (I_{Ring} + 0.5) * \phi )} } )}
+% \end{split}
+% \end{equation}
+
+
+% The corresponding angle $ \beta $ of a normal $ \vec{n} $ is calculated with use of the unit vector in x direction $ \vec{v_{x}'} $. This angle needs to be adapted in case $ y < 0 $ since the maximum angle between two vectors is 180° and we want to cover a complete circle:
+
+% \begin{equation}
+% \begin{split}
+%     \cos{\beta} & = \frac{\vec{n}' * \vec{v_{x}'}}{|\vec{n}'| * |\vec{v_{x}'}|} = \frac{x}{\sqrt{x^{2} + y^{2}}} \\
+%     => \beta & = \begin{cases}
+%         \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y \geq 0 \\
+%         2 \pi - \arccos{ \frac{x}{\sqrt{x^{2} + y^{2}}} }, & y < 0
+%     \end{cases}
+% \end{split}
+% \end{equation}
+
+% The angle $ \beta $ is represented as a multiple of the $ \gamma $ angle to get the bucket index $ I_{Bucket} $:
+
+% \begin{equation}
+%     I_{Bucket} = \floor{\frac{\beta}{ {\gamma}_{I_{Ring}} }}
+% \end{equation}
+
+% Consequently the maximum bucket index is calculated with the maximum angle of 360°:
+
+% \begin{equation}
+%     I_{MaxBucket} = \floor{\frac{2 \pi}{ {\gamma}_{I_{Ring}} }}
+% \end{equation}
+
+
+
+% \subsubsection{Implementation}
+
+% The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph} and should also take account of \emph{planes} in future development. Therefore it depends on the \emph{PlaneClassifier}. It returns a set of \emph{prisms} and uses \emph{PrismShapeNormalsBuckets} to check shapes for parallelism. Its structure is represented in the class diagram figure \ref{fig:prismClassifierDiagram}.
+
+% \begin{figure}
+% \includegraphics[width=1.0\columnwidth]{Images/04-prismClassifier.png}
+% \caption{class diagram of the PrismClassifier}
+% \label{fig:prismClassifierDiagram}
+% \end{figure}
+
+% \paragraph{PrismClassifier}
+
+% \begin{listing}[!h]
+% \centering
+% \begin{minted}[
+% linenos, breaklines
+% ]{coffeescript}
+% run: ->
+%     return new Promise( (resolve) =>
+%         buckets = new PrismShapeNormalsBuckets(_angleThreshold)
+
+%         @_putIntoBuckets @shapes, buckets
+
+%         prisms = @_detectPrisms @shapes, buckets
+
+%         log.debug("PrismClassifier found " + prisms.length + " prisms")
+
+%         resolve(prisms)
+%     )
+% \end{minted}
+% \caption{run method of the PrismClassifier}
+% \label{lst:PrismClassifierRun}
+% \end{listing}
+
+% Listing \ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
+
+% At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
+
+% Then all shapes are put into the corresponding buckets. This is done by iterating over all shapes and passing them to the bucket system which handles the classification on its own.
+
+% Next we iterate over all shapes again while requesting the potential parallel shapes from the bucket system. The shapes are checked with the given threshold and a \emph{prism} is created in case of parallelism.
+
+% At the end a set of all prisms is returned which can be used for further primitive classification.
+
+
+% \paragraph{Prism Shape Normals Buckets}
+
+% \emph{PrismShapeNormalsBuckets} is based on the specification in section \ref{sec:PrismBucketSystem} Bucket System: It divides a hemisphere into rings with buckets and is initialised with the angle threshold.
+
+% The constructor saves the angle threshold, instantiates the rings as a javascript map and calculates the maximum ring index $I_{MaxRing}$.
+
+% It provides two functions used by the classifier: \\
+% \emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
+
+% \emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
+
+% \emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath.
+
+% While determining the surrounding rings following special cases need to be considered:
+
+% First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
+
+% Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket 180° away.
+
+
+% \paragraph{Ring}
+
+% A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in section \ref{sec:PrismBucketSystem} Bucket System. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
+
+% The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
+
+
+% \paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.
+
+% \paragraph{Prism}
+
+% A \emph{Prism} contains two parallel shapes that span a prism. In future work this should be extended by the lateral surface which is not handlet yet.
+
+% \subsubsection{Future Work}
+% \label{sec:PrismFutureWork}
+
+% \paragraph{Planes} \emph{Planes} from the \emph{PlaneClassifier} should be taken into account in addition to the shapes. Ideally the \emph{PlaneClassifier} detects noisy planes that are not represented as shapes. Therefore a better approximation of the original model could be achieved.
+
+% \paragraph{Lateral Surface} The lateral surface of the prism has yet to be identified and added to the prism structure. This is needed for further operations and more specific classifications of the prism. For example for classifying a cube the surrounding sides have to be known.
+
+% \paragraph{Scoring} Prism scoring is not implemented yet. To rate a prism the actual angle between the two nearly parallel shapes have to be considered. If scoring is implemented the angle threshold for parallelism can be adjusted to a much higher value while big variations to 0° will be reflected in the score.
 
 
 \end{document}

@@ -5,7 +5,7 @@
 \chapter{Plates}\label{ch:plates}
 %************************************************
 
-\section{Overview of approaches for finding plates}
+\section{Plates Can Be Found Inherently, by Extruding or by Stacking}
 
 There are multiple approaches for finding plates contained in a 3D~mesh. Two of these concepts, inherent plates \cite[p.~32]{master-thesis} and extrusion \cite[p.~28]{master-thesis}, are based on existing algorithms. The third approach, stacking plates, was built from the ground up.
 
@@ -34,15 +34,15 @@ The concept of stacking plates is described in Section \ref{sec:stackedplates}. 
     \label{fig:staplates}
 \end{figure}
 
-\section{Prerequisites for finding plates}
+\section{Plates Are Generated from Planar Shapes}
 
 Before these plate finding algorithms can process the model, it has to be prepared properly. The surface has to analyzed, with the faces being grouped into planar shapes. These shapes can be used as surfaces of plates. 
 
-\platener solves this by running multiple pipeline steps beforehand. The first, called \emph{Coplanar Faces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section \ref{sub:coplanarfaces}. In the next step, \emph{edge loops} are created based on the previously generated groups of faces. An edge loop is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener. These edge loops are created by the \emph{shapes finder}, which is discussed in Section \ref{sub:shapesfinder}. The shapes finder can create multiple edge loop for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{hole detection}. It separates these by calculating the edge loops' area. This is further explained in Section \ref{sub:holedetection}.
+\platener{} solves this by running multiple pipeline steps beforehand. The first, called \emph{CoplanarFaces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section \ref{sub:coplanarfaces}. In the next step, \emph{edgeLoops} are created based on the previously generated groups of faces. An \emph{edgeLoop} is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener{}. These \emph{edgeLoops} are created by the \emph{ShapesFinder}, which is discussed in Section \ref{sub:shapesfinder}. The shapes finder can create multiple \emph{edgeLoops} for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{HoleDetection}. It separates these by calculating the \emph{edgeLoops'} area. This is further explained in Section \ref{sub:holedetection}.
 
-The result of these calculations is a list of shapes, which contain one or multiple edge loops. A label contains information about wether the edge loop is the shapes contour or a hole.
+The result of these calculations is a list of shapes, which contain one or multiple \emph{edgeLoops}. A label contains information about whether the \emph{edgeLoop} is the shapes contour or a hole.
 
-\subsection{Coplanar Faces are Grouped Based on their Normal}\label{sub:coplanarfaces}
+\subsection{Coplanar Faces Are Grouped Based on Their Normal}\label{sub:coplanarfaces}
 
 \begin{figure}
     \centering
@@ -51,9 +51,61 @@ The result of these calculations is a list of shapes, which contain one or multi
     \label{fig:coplanar}
 \end{figure}
 
-The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib, the library used for importing models. In a face-vertex mesh, faces only store their vertices' indices, with the vertices being stored in a different lookup table. This allows for easier adjacency checks - only the vertex indices have to be compared. Additionally, the face normals are stored in an array, in the same order as in the face list.
+By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib{}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure \ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces by using a face-vertex mesh based implementation.
 
-Now, two more lookup tables are added: One contains all edges (stored as a sorted pair of vertex indices) belonging to each face, while the second one allows looking up the faces adjacent to an edge. Both lists can be created in one single pass (see Listing \ref{lst:lookuptables}). 
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.8\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/facevertexmesh.png}
+    \caption{Partly annotated mesh. Face are marked in red, vertices in blue and normals in green.}
+    \vspace{.5cm}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \begin{tabular}{ | l | l | }
+      \hline
+      index & vertices \\ \hline
+      0 & 0, 1, 2 \\ \hline
+      1 & 0, 2, 3 \\ \hline
+      2 & 0, 3, 1 \\ \hline
+      ... & ... \\
+      \hline
+    \end{tabular}
+    \caption{Face lookup table.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \begin{tabular}{ | l | l | }
+      \hline
+      index & coordinates \\ \hline
+      0 & (1, 1, 1) \\ \hline
+      1 & (0, 1, 1) \\ \hline
+      2 & (1, 0, 1) \\ \hline
+      3 & (1, 1, 0) \\ \hline
+      ... & ... \\
+      \hline
+    \end{tabular}
+    \caption{Vertex lookup table.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \begin{tabular}{ | l | l | }
+      \hline
+      index & direction \\ \hline
+      0 & (0, 0, 1) \\ \hline
+      1 & (1, 0, 0) \\ \hline
+      2 & (0, 1, 0) \\ \hline
+      ... & ... \\
+      \hline
+    \end{tabular}
+    \caption{Normal lookup table.}
+  \end{subfigure}
+  \caption{Example lookup tables of a face-vertex mesh.}
+  \label{fig:facevertexmesh}
+\end{figure}
+
+In order to enable further computations, two more lookup tables are added: One contains all edges belonging to each face, while the second one allows looking up the faces adjacent to an edge. The edges are stored as a sorted pair of vertex indices. In the face-vertex mesh shown in Figure \ref{fig:facevertexmesh} the face with the index~1 consists of the edges (0, 2), (0, 3) and (2, 3). Correspondingly, the edge (0,2) refers to the faces 0 and 1. Both lists can be created in one single pass (see Listing \ref{lst:lookuptables}).
 
 \begin{listing}
 \begin{minted}[
@@ -80,33 +132,7 @@ setupFaceEdgeEdgeFaceLookup: ->
 \label{lst:lookuptables}
 \end{listing}
 
-Afterwards, the faces are grouped. This in done by iterating over all faces. When a face is found which has not been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index (Listing \ref{lst:iteratefaces}).
-
-\begin{listing}
-\begin{minted}[
-linenos
-]{coffeescript}
-for faceIndex in [0...faceCount] when not faceVisited[faceIndex]
-  faceGroup = [faceIndex]
-  faceGroupIndex = faceGroups.length
-  outerEdgeGroup = []
-  groupNormal = @faceVertexMesh.getFaceNormal(faceIndex)
-  @faceToFaceGroup[faceIndex] = faceGroupIndex
-  faceVisited[faceIndex] = true
-  # connect the adjacent faces
-  edgeQueue = []
-  adjacentEdges = @faceVertexMesh.getEdgesFromFace(faceIndex)
-  for edge in adjacentEdges
-    edgeQueue.push({ edge, faceIndex })
-  @traverseAdjacentFaces(...)
-\end{minted}
-\caption{Iteration over faces with creation of new face groups.}
-\label{lst:iteratefaces}
-\end{listing}
-
-There are multiple important variables being set here: First, we have the new \mintinline{coffeescript}{faceGroup}, containing only the current face. Next, we have the index of the group, used for creating a \mintinline{coffeescript}{faceToFaceGroup} lookup table. The \mintinline{coffeescript}{outerEdgeGroup} contains all edges surrounding the group, which allows the creation of a shape containing the face group. The group's normal vector is initialized with the current face's normal vector. Lastly, the current face is marked as visited in order to avoid checking it multiple times.
-
-After the edges have been pushed in the queue, we start processing it (see Listing \ref{lst:traverseadjacent}).  
+Using these lookup tables, the faces are grouped. A face group contains faces which are connected and are coplanar. This in done by iterating over all faces. When a face is found which has not been visited yet, a new face group is started. Now all of the face's edges are pushed to a queue, along with the current face index. Afterwards, we start working on the queue, using a breadth-first approach. The processing function is shown in Listing \ref{lst:traverseadjacent}.
 
 \begin{listing}
 \begin{minted}[
@@ -135,9 +161,7 @@ traverseAdjacentFaces: tco (...) ->
 \label{lst:traverseadjacent}
 \end{listing}
 
-\todo{list tco code? or just mention?}
-
-This is implemented as a \emph{tail recursion}, the helper function \mintinline{coffeescript}{tco} is based on an existing implementation of tail calls in \coffeescript\footnote{TCO in \coffeescript, \url{https://gist.github.com/adrusi/1905351}}. It runs \mintinline{coffeescript}{traverseAdjacentFaces} as long as \mintinline{coffeescript}{recur} is called each pass. First, the length of the queue is checked. If there a no more edges waiting to be processed, we can jump out of the recursion and continue searching for new groups (Listing \ref{lst:iteratefaces}). Otherwise, we first get the normal of the face from which we came. Next, we extract the new face from the edge and get the face's normal as well. After checking the faces' coplanarity, we signal that there may be more elements in the queue by calling \mintinline{coffeescript}{recur}.
+This is implemented as a \emph{tail recursion}, the helper function \mintinline{coffeescript}{tco} is based on an existing implementation of tail calls in \coffeescript{}\footnote{TCO in \coffeescript, \url{https://gist.github.com/adrusi/1905351}}. It runs \mintinline{coffeescript}{traverseAdjacentFaces} as long as \mintinline{coffeescript}{recur} is called each pass. First, the length of the queue is checked. If there a no more edges waiting to be processed, we can jump out of the recursion and continue searching for new groups. Otherwise, we first get the normal of the face from which we came. Next, we extract the new face from the edge and get the face's normal as well. After checking the faces' coplanarity, we signal that there may be more elements in the queue by calling \mintinline{coffeescript}{recur}.
 
 Listing \ref{lst:coplanarcheck} shows what happens when testing for coplanarity. \mintinline{coffeescript}{isAngleZero} calculates the angle between the normals and compares it to zero. This is done even if the new face was already visited. If the faces are not coplanar, the edge is added to the group's outer edges. In case of coplanarity, we now check if the face was visited. If it was not, it is added to the face group. Additionally, an entry is added to the \mintinline{coffeescript}{faceToFaceGroup} lookup table and the face is marked as visited. After fetching the face's edges, they are pushed into the queue.
 
@@ -169,7 +193,11 @@ The shape finder creates shapes from the outer edge loops of the found coplanar 
 
 To do so the \emph{mergeEdges} function is called until no edge segments can be merged anymore (see Listing \ref{lst:mergeEdges}). This try to merge two edge segments which is possible if the starting or ending point of one of them matches the starting or ending point of the other (see Listing \ref{lst:mergeEdgeStrings}).
 
-\note{TODO}
+The resulting sets of continues edge loops are converted into \class{shapes} (see Listing \ref{lst:createShape}). Therefore from each edge loop the last vertex is removed because it is the same as the first and our \class{edgeLoops} do not need this redundancy. Afterwards all vertex indices are mapped to there corresponding coordinated because we thus for our further calculations. This vertex sets are used to create \class{edgeLoops}.
+
+With the resulting \class{edgeLoops} we try to create a \class{shape}. \note{TO DO: explain InvalidNormalError?}
+
+\note{TO DO: figures?}
 
 \begin{listing}
 \begin{minted}[
@@ -228,34 +256,83 @@ mergeEdgeStrings: (
 \label{lst:mergeEdgeStrings}
 \end{listing}
 
-\subsection{Hole Detection / Dimitri}\label{sub:holedetection}
-
-PASTE HERE
-
-\section{Finding inherent plates}\label{sec:inherentplates}
-
-In order to find inherent plates in a mesh, the first step is to find all coplanar shapes which are parallel and check if the distance between them fits one of the given plate thicknesses (Listing \ref{lst:platecand}).
-
 \begin{listing}
 \begin{minted}[
 linenos,breaklines
 ]{coffeescript}
-candidates = []
-for shape1, index1 in shapes
-  for shape2, index2 in shapes when index1 < index2
-    if @normalsParallelAndSurfacesFacingApart shape1, shape2
-      thickness = @checkPlateThickness shape1, shape2
-        if thickness?
-          candidates.push { shape1, shape2, thickness }
-return candidates
+createShape: (shape, groupIndex, faceVertexMesh) ->
+  newEdgeLoops = []
+  for _edgeLoop in shape
+    edgeLoop = _edgeLoop.slice()
+    edgeLoop.pop()
+
+    for vertex, vertexIndex in edgeLoop
+      vertex *= 3
+      edgeLoop[vertexIndex] = new THREE.Vector3(
+        faceVertexMesh.vertexCoordinates[vertex]
+        faceVertexMesh.vertexCoordinates[vertex + 1]
+        faceVertexMesh.vertexCoordinates[vertex + 2]
+      )
+
+    newEdgeLoop = new EdgeLoop(edgeLoop)
+    newEdgeLoops.push newEdgeLoop
+
+  try
+    shape = new Shape(
+      newEdgeLoops,
+      faceVertexMesh.faceGroupNormals[groupIndex],
+      faceVertexMesh,
+      groupIndex
+    )
+  catch error
+    if error.name is "InvalidNormalError"
+      shape = new Shape(newEdgeLoops, new THREE.Vector3(0, 0, 1))
+      shape.isCorrupted = true
+    else throw error
+  { removalCount, shouldBeDeleted } =
+   PointOnLineRemover.removeUnnecessaryVerticesInShape shape
+  @_removedVerticesCount += removalCount
+  if shouldBeDeleted
+   return null
+  return shape
 \end{minted}
-\caption{Finding plate candidates.}
-\label{lst:platecand}
+\caption{Creating a \class{shape} out of a set of continuous edge loops.}
+\label{lst:createShape}
 \end{listing}
 
-\subsection{Checking parallelism}
 
-While the testing for normal parallelism is done with built-in vector functions, the check if the shapes are facing apart uses a vertex of each of the surfaces and calculates the angle of the resulting vector to one of the normals. If this angle is smaller than 90\textdegree, the surfaces are indeed facing apart.
+
+\subsection{Hole Detection}\label{sub:holedetection}
+
+The pipeline step \emph{HoleDetection} is run after \emph{ShapesFinder} and categorises every \emph{edgeLoop} of each \emph{shape} either as outer contour or as hole. This is done by computing their areas and comparing them: The \emph{edgeLoop} with the biggest area is the outer contour and all others are holes.
+
+
+
+\section{Inherent Plates Require both Top and a Bottom Shape}\label{sec:inherentplates}
+
+In order to find inherent plates in a mesh, all pairs of shapes have to be tested. The shapes have to be parallel to each other. Additionally, the distance between them is checked. In must fit one of the given plate thicknesses.
+
+\subsection{Parallelism Is Checked Using Vector Functions}
+
+The parallelism check uses vector functionality provided by \threejs{}. After ensuring that the normals are parallel, we have to test if they are facing apart. Without this requirement, holes in objects could be recognized as plate. An example is shown in Figure \ref{fig:inherent_faceapart}. The vectors A and B in Figure \ref{fig:inherent_faceapart:no} are facing towards each other. Using a vertex of vector A's shape and a vertex of vector B's shape, a new vector C is created. Since the angle between vector B and C is bigger than 90\textdegree{}, the shaped must face towards each other. Figure \ref{fig:inherent_faceapart:yes} shows a valid example: The angle between vector B and C is smaller than 90\textdegree{}, thus the shapes are facing apart. In this case, a plate can be created.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.7\textwidth]{inherent_faceapart_no.png}
+    \caption{The normals are facing towards each other. No plate should be created.}
+    \label{fig:inherent_faceapart:no}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.7\textwidth]{inherent_faceapart_yes.png}
+    \caption{The normals are facing apart. The test is successful.}
+    \label{fig:inherent_faceapart:yes}
+  \end{subfigure}
+  \caption{Checking if the shapes' normals are facing apart avoids creating unwanted plates.}
+  \label{fig:inherent_faceapart}
+\end{figure}
 
 \subsection{Calculating best plate thickness}
 
@@ -305,7 +382,7 @@ return plates
 \label{lst:faceintersect}
 \end{listing}
 
-The intersection between the shapes is done using the \jsclipper library. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
+The intersection between the shapes is done using the \jsclipper{} library. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
 \section{Extruding plates}\label{sec:extrudedplates}
 
@@ -327,9 +404,34 @@ createPlateFromShape: (shape) ->
 \label{lst:extrude}
 \end{listing}
 
-\section{Removing contained plates / Dimitri}
 
-PASTE HERE
+
+
+\section{Removing contained plates}\label{sec:removingContainedPlates}
+
+\emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software.
+
+There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
+
+We iterate over all plates and compare them to all other plates. The comparison is based on their normals while further checks are not necessary most of the time because the normal check excludes most of them. Therefore the comparison is fast enough and the amount of comparisons must not be reduced with a different iteration algorithm.
+
+\subsection{Plate completely inside another}
+
+As described in the master thesis the algorithm may produce small plates that lie completely inside the actual modeled plate. These plates are orthogonal.
+
+So if two plates have orthogonal normals we check if one of them lies completely in the other and remove it.
+
+
+\subsection{Overlapping parallel plates}
+
+A 3D block can not be represented by one single plate if it is thicker than a plate. The software creates two plates instead. The resulting plates will overlap in case this block is thinner than those two plates together.
+
+So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections. In case they overlap one of the plates gets deleted.
+
+
+
+
+
 
 \section{Stacking plates}\label{sec:stackedplates}
 
