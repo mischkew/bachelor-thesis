@@ -38,7 +38,7 @@ The concept of stacking plates is described in Section~\sectionref{sec:stackedpl
 
 Before these plate finding algorithms can process the model, it has to be prepared properly. The surface has to analyzed, with the faces being grouped into planar shapes. These shapes can be used as surfaces of plates. 
 
-\platener{} solves this by running multiple pipeline steps beforehand. The first, called \emph{CoplanarFaces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section~\sectionref{sub:coplanarfaces}. In the next step, \emph{edgeLoops} are created based on the previously generated groups of faces. An \emph{edgeLoop} is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener{}. These \emph{edgeLoops} are created by the \emph{ShapesFinder}, which is discussed in Section~\sectionref{sub:shapesfinder}. The shapes finder can create multiple \emph{edgeLoops} for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{HoleDetection}. It separates these by calculating the \emph{edgeLoops'} area. This is further explained in Section~\sectionref{sub:holedetection}.
+\platener{} solves this by running multiple pipeline steps beforehand. The first, called \emph{CoplanarFaces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section~\sectionref{sub:coplanarfaces}. In the next step, \emph{edgeLoops} are created based on the previously generated groups of faces. An \emph{edgeLoop} is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener{}. These \emph{edgeLoops} are created by the \emph{ShapesFinder}, which is discussed in Section~\sectionref{sub:shapesfinder}. The \emph{ShapesFinder} can create multiple \emph{edgeLoops} for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{HoleDetection}. It separates these by calculating the \emph{edgeLoops'} area. This is further explained in Section~\sectionref{sub:holedetection}.
 
 The result of these calculations is a list of shapes, which contain one or multiple \emph{edgeLoops}. A label contains information about whether the \emph{edgeLoop} is the shapes contour or a hole.
 
@@ -362,7 +362,7 @@ The parallelism check uses vector functionality provided by \threejs{}. After en
 
 \subsection{Calculating the Best Plate Thickness}
 
-The calculation of the optimal plate thickness is shown in Listing~\ref{lst:checkplatethickness}. First, the actual distance between the shapes is calculated. Next, all possible plate thicknesses are tested if they can approximate the actual thickness well enough. Lastly, the thickness with the lowest absolute deviation is chosen as the best thickness.
+The calculation of the optimal plate thickness is shown in Listing~\ref{lst:checkplatethickness}. First, the actual distance between the shapes is calculated. Next, all possible plate thicknesses are tested if they can approximate the actual thickness well enough. Lastly, the thickness with the lowest absolute deviation is chosen as the best thickness. Since the user selects which materials he has available, only those can be used. Thus, we do not use the actual thickness for our calculations, but rather the chosen best thickness.
 
 \begin{listing}
 \begin{minted}[
@@ -390,7 +390,9 @@ checkPlateThickness: (shape1, shape2) ->
 
 \subsection{Creating Plates}
 
-After finding these plate candidates, the shape which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate, as shown in Listing~\ref{lst:faceintersect}. Now, the intersection of both shapes is calculated. This is done by using the already calculated mapping of vertices into the x-y-plane. The resulting intersection is transformed back into 3D-space using the rotation matrix of the base shape. With the resulting shapes, plates are created.
+The plate creation uses the shapes' 2D representation, which is calculated when creating the shape. The vertices are rotated around the origin so that they have the same x-value. We use the shape's normal to build a rotation matrix, which is applied to a clone of each vertex. This rotation matrix is stored in the shape, while each of the shape's \emph{edgeLoops} contains the corresponding rotated vertices. Since the rotation is performed deterministically, we can use the 2D representation to perform operations like inctersection and union on shapes.
+
+After finding these plate candidates, the shape which plane's distance to the origin (the z-value of all vertices when laid into the x-y-plane) is smaller is selected as the base shape of the plate, as shown in Listing~\ref{lst:faceintersect}. We only use one shape to represent the plate, since both shapes have to be congruent anyway. The other shape can be restored by translating the base shape using its normal and the plate's thickness. Now, the intersection of both shapes is calculated. This is done by using the 2D representation. The resulting intersection is transformed back into 3D space using the rotation matrix of the base shape. With the resulting shape, the plate is created.
 
 \begin{listing}
 \begin{minted}[
@@ -408,11 +410,11 @@ return plates
 \label{lst:faceintersect}
 \end{listing}
 
-The intersection between the shapes is done using the \jsclipper{} library. After parsing them into the library's polygon class, they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
+The intersection between the shapes is done using a customized branch\footnote{\url{https://github.com/platener/jsclipper}} of the \jsclipper{} library, which adds floating poing coordinates support, as well as automatic data type conversion. After parsing them into the library's polygon class (see Section~\sectionref{sec:datasructures}), they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. To obtain the vertices in 3D space, we use the previously calculated rotation matrix. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
 \section{Extruding Plates}\label{sec:extrudedplates}
 
-The extrusion of plates is a simpler approach, which is shown in Listing~\ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded against the face's normal direction. The plane constant of the plates base plane is the same as the z-value of the shapes x-y-representation. After checking the shape's area, the new plate is created.
+The extrusion of plates is a simpler approach in terms of calculation, which is shown in Listing~\ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded in the opposite direction of the face's normal. The plane constant of the plates base plane is the same as the z-value of the shapes x-y-representation. We compare the face's area to a threshold, which filters plates which would be to small to fabricate. Afterwards, the new plate is created.
 
 \begin{listing}
 \begin{minted}[
@@ -430,14 +432,11 @@ createPlateFromShape: (shape) ->
 \label{lst:extrude}
 \end{listing}
 
-
-
-
 \section{Removing Contained Plates}\label{sec:removingContainedPlates}
 
 \emph{RemoveContainedPlates} is executed after plate generation and removes unnecessary ones that appear with our software.
 
-There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
+There are two types of plates that get deleted: First as already described in the master thesis \emph{Platener} \cite{master-thesis} in Section '4.4.4 Removing contained plates', small plates can be created that completely lie inside another plate. Second there may be parallel plates that lie inside each other. That occurs due to extrusion if the the 3D object is modeled with thicker blocks than the available material thickness.
 
 We iterate over all plates and compare them to all other plates. The comparison is based on their normals while further checks are not necessary most of the time because the normal check excludes most of them. Therefore the comparison is fast enough and the amount of comparisons must not be reduced with a different iteration algorithm.
 
@@ -455,14 +454,18 @@ A 3D block can not be represented by one single plate if it is thicker than a pl
 So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections. In case they overlap one of the plates gets deleted.
 
 
-
-
-
-
 \section{Stacking Plates}\label{sec:stackedplates}
 
-As an alternative approach, plates can be stacked. This method does not directly use the models surfaces. However, they can be used for optimization.
-The main function for stacking is shown in Listing~\ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. After clipping the models faces with these planes, the resulting edges are merged into edge loops, which are used for creating shapes and, as wall as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotation in order to align them with the model. 
+As an alternative approach, plates can be stacked. An example is shown in Figure~\ref{fig:stackedbunny}. By putting multiple plates on top of each other, the model is approximated. In order to achieve this, the model is sliced in regular intervals, with plates being created based on the cross sections. In order to enable easy assembly, the plates are connected with shafts. These are additional plates, which are perpendicular to the other plates and help to align them.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.5\textwidth]{Images/bunny_1.png}
+    \caption{Stacked plates can be used to approximate the model.}
+    \label{fig:stackedbunny}
+\end{figure}
+
+The main function for stacking is shown in Listing~\ref{lst:stackedmain}. First, the model is rotated in order to optimize the stacking direction. Afterwards, the clipping planes are calculated. These plates are parallel to the x-y-plane. They are used to create cross-sections of the model. This is done by intersecting each of the model's faces with these plates. Afterwards, the resulting edges are merged into edge loops, which are used for creating shapes and, as helper objects, polygons. With these, shafts can be added, which connect plates for easier assembly. Afterwards, plates are created. These have to be rotated back based on the original rotation in order to align them with the model. 
 
 \begin{listing}
 \begin{minted}[
@@ -493,7 +496,21 @@ findStackedPlates: (model, shapes) ->
 
 \subsection{Rotating the Model}
 
-In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing~\ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
+In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. A good rotation results in fewer plates which are preferably all connected. Figure~\ref{fig:stackingorientations} shows how different rotations yield in different results. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing~\ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{stacked_orientation_good.png}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{stacked_orientation_bad.png}
+  \end{subfigure}
+  \caption{\emph{Different stacking directions yield different results.}
+  \label{fig:stackingorientations}
+\end{figure}
 
 \begin{listing}
 \begin{minted}[
@@ -516,7 +533,7 @@ findRotation: (shapes) ->
 
 \subsection{Finding the Clipping Planes}
 
-Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a \threejs plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates-to-be, which is an approximation which works for most applications. The plane creation is shown in Listing~\ref{lst:clippingplanes}.
+Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a \threejs{} plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates, which is an approximation which works for most applications. The plane creation is shown in Listing~\ref{lst:clippingplanes}.
 
 \begin{listing}
 \begin{minted}[
@@ -538,7 +555,7 @@ getClippingPlanes: ->
 \label{lst:clippingplanes}
 \end{listing}
 
-\subsection{Clipping the Model's Faces}
+\subsection{Intersecting the Model's Faces with the Clipping Planes}
 
 Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing~\ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing~\ref{lst:findplane}. Starting at the median plane (\mintinline{coffeescript}{@planes.length // 2}), we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
 
@@ -592,7 +609,7 @@ The search direction is calculated by clipping the face against the plane (Listi
   \item Three intersections: If any two of the intersection points are the same, a vertex and the opposite edge clip the plane. Otherwise the whole face lies in the plane.
 \end{itemize}
 
-If the face doesn't clip the plane or only intersect with one vertex, we check if it is below or above the plane and return either -1 or 1 as direction (calculation shown in Listing~\ref{lst:facedirection}). In all other cases, 0 is returned, because the face clips the plane and we don't have to search further. 
+If the face does not clip the plane or only intersect with one vertex, we check if it is below or above the plane and return either -1 or 1 as direction (calculation shown in Listing~\ref{lst:facedirection}). In all other cases, 0 is returned, because the face clips the plane and we don't have to search further. 
 
 Additionally, if either two edges, an edge and a vertex or the whole face clips the plane, these intersections are stored in the plane.
 
@@ -633,7 +650,7 @@ getDirectionFromPlaneToFace: (face, plane) ->
 \label{lst:facedirection}
 \end{listing}
 
-After one clipping plane has been found, the adjacent ones have to be checked as well, since a face can span over multiple planes. This is done by iterating over the planes, starting from the next one and moving away. If the returned direction is not 0, we can stop because the plane and all following ones do not clip the face. Both directions, upwards and downwards, are checked separately (see Listing~\ref{lst:checkadjacent}).
+After one plane which intersect the face has been found, the adjacent ones have to be checked as well, since a face can span over multiple planes. This is done by iterating over the planes, starting from the next one and moving away. If the returned direction is not 0, we can stop because the plane and all following ones do not clip the face. Both directions, upwards and downwards, are checked separately (see Listing~\ref{lst:checkadjacent}).
 
 \begin{listing}
 \begin{minted}[
@@ -662,11 +679,11 @@ checkAdjacentPlanes: (face, index) ->
 
 \subsection{Creating Shapes/ Mehr Umschreibender Title}
 
-Using the intersections stored in each plane, shapes can be created. These shapes represent the cross-sections of the model. Since this requires merging the intersection edges, the shapes finder can be re-used for this step. Additionally, the \jsclipper{} library is used to create 2D polygons, which are used in the next step.
+Using the intersections stored in each plane, shapes can be created. This is done using the \emph{ShapesFinder}, which is described in Section~\sectionref{sub:shapesfinder}. Instead of the outer edges of face groups (see Section~\sectionref{sub:coplanarfaces}), the intersecctions between the faces and the clipping planes are used. The resulting shapes represent the cross-sections of the model. Additionally, the \jsclipper{} library is used to create 2D polygons, which are used in the next step.
 
 \subsection{Adding Shafts / Mehr Umschreibender Title}
 
-In order to assemble the stacked plates, we connect them with shafts (Figure~\ref{fig:shafts}). Our approach for this: if two shapes which are located in adjacent planes intersect, they have to be connected by at least one shaft. The shaft finding algorithm has three steps: First, we iterate over all shapes and connect as many as possible. Next, we fix shapes which are not yet connected. Afterwards, we clean up shafts which are only connected to one shape.
+In order to assemble the stacked plates, we connect them with shafts (Figure~\ref{fig:shafts}). Our approach for this: if two shapes which are located in adjacent planes intersect, they have to be connected by at least one shaft. The shaft finding algorithm has three steps: First, we iterate over all shapes and connect as many as possible. Next, we fix shapes which are not yet connected. Afterwards, we clean up shafts which are only connected to one shape. The shaft object contains a list of the polygon it connects, as well as the intersection of all these polygons.
 
 \begin{figure}
     \centering
@@ -674,18 +691,6 @@ In order to assemble the stacked plates, we connect them with shafts (Figure~\re
     \caption{Connecting plates with shafts.}
     \label{fig:shafts}
 \end{figure}
-
-\subsubsection{Properties of the Shaft Object}
-
-A shaft has these properties:
-\begin{itemize}
-    \item polygons - a list of the polygons which the shaft connects
-    \item intersection - the intersection of all the polygon which the shaft connects
-    \item finished - true if the shaft is complete and won't be extended to connect more polygons
-    \item lastlevel - the layer of the last added polygon
-    \item shaftData - contains the shaft's cross section's x and y dimensions
-\end{itemize}
-It contains functions which allow adding new polygons to the shaft, and building the shaft's cross section and contour.
 
 \subsubsection{First Pass / Mehr Umschreibender Title}
 
@@ -828,8 +833,6 @@ linenos
 cleanUpShafts: (shafts) ->
   if shafts.length > 0
     for i in [shafts.length - 1..0]
-      if shafts[i].polygons.length < 1
-        log.error "FOUND SHAFT WITH ZERO POLYGONS"
       if shafts[i].polygons.length < 2
         shafts[i].polygons.forEach((polygon) ->
           polygon.shafts.splice polygon.shafts.indexOf(shafts[i]), 1
