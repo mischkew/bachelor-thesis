@@ -65,7 +65,7 @@ Formally developable surfaces are defined as surfaces with zero Gaussian curvatu
 
 \class{Bent plate} is a data structure we use to represent a set of plates which are connected directly or indirectly with bend connections. Thus a bent plate can be cut as one piece. A \class{bent plate} consists of a set of \class{plates}. It provides the method \mintinline{coffeescript}{generateShape} which develops the surface of the connected shapes (see Section~\sectionref{sec:generateShape}). Another method implemented by \class{bent plate} is \mintinline{coffeescript}{generateBendLines} which creates cuttable marks where two plates are merged (see Section~\sectionref{sec:generateBendLines}).
 
-\subsection{The GenerateShape Function/ Mehr Umschreibender Title}
+\subsection{The GenerateShape Function Creates a Shape of the Developed Surface}
 \label{sec:generateShape}
 
 To generate the \class{shape} of the \class{bent plate} we first check how many \class{plates} this \class{bent plate} contains. If none are contained, the generated \class{shape} is \emph{null}. If there is just one \class{plate} then its \class{shape} is used.
@@ -131,7 +131,7 @@ generateShape: ->
 \label{lst:generateShape}
 \end{listing}
 
-\subsection{The generateBendLines Function}
+\subsection{Bend Lines Help to Bend the Plate}
 \label{sec:generateBendLines}
 
 This method generates a dashed line located at the connection line between two plates of the bent plate. This marks where the user must bend the material. Additionally, it weakens the material and allows for easier bending.
