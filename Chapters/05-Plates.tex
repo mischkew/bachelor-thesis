@@ -38,7 +38,7 @@ The concept of stacking plates is described in Section~\sectionref{sec:stackedpl
 
 Before these plate finding algorithms can process the model, it has to be prepared properly. The surface has to analyzed, with the faces being grouped into planar shapes. These shapes can be used as surfaces of plates. 
 
-\platener{} solves this by running multiple pipeline steps beforehand. The first, called \emph{CoplanarFaces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section~\sectionref{sub:coplanarfaces}. In the next step, \emph{edgeLoops} are created based on the previously generated groups of faces. An \emph{edgeLoop} is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener{}. These \emph{edgeLoops} are created by the \emph{ShapesFinder}, which is discussed in Section~\sectionref{sub:shapesfinder}. The \emph{ShapesFinder} can create multiple \emph{edgeLoops} for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{HoleDetection}. It separates these by calculating the \emph{edgeLoops'} area. This is further explained in Section~\sectionref{sub:holedetection}.
+{\platener} solves this by running multiple pipeline steps beforehand. The first, called \emph{CoplanarFaces}, recreates planar shapes which have been divided when the model was triangulated by the creator. It groups the model's faces based on two test: The faces have to be connected and the angle between their normals must not exceed a given threshold. This step is described in Section~\sectionref{sub:coplanarfaces}. In the next step, \emph{edgeLoops} are created based on the previously generated groups of faces. An \emph{edgeLoop} is a list of vertices, describing a shape which consists of multiple faces. Only the outer edges of the shape are stored, since the triangulation of the mesh is not relevant for \platener{}. These \emph{edgeLoops} are created by the \emph{ShapesFinder}, which is discussed in Section~\sectionref{sub:shapesfinder}. The \emph{ShapesFinder} can create multiple \emph{edgeLoops} for one shape. This means that the shape contains holes. In order to differentiate between the shapes and the contour, another pipeline step is run, which is called \emph{HoleDetection}. It separates these by calculating the \emph{edgeLoops'} area. This is further explained in Section~\sectionref{sub:holedetection}.
 
 The result of these calculations is a list of shapes, which contain one or multiple \emph{edgeLoops}. A label contains information about whether the \emph{edgeLoop} is the shapes contour or a hole.
 
@@ -51,7 +51,7 @@ The result of these calculations is a list of shapes, which contain one or multi
     \label{fig:coplanar}
 \end{figure}
 
-By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by \meshlib{}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel\textregistered{}~Core\texttrademark{}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
+By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by {\meshlib}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel{\textregistered}~Core{\texttrademark}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
 
 \begin{figure}
   \centering
@@ -340,7 +340,7 @@ In order to find inherent plates in a mesh, all pairs of shapes have to be teste
 
 \subsection{Parallelism Is Checked Using Vector Functions}
 
-The parallelism check uses vector functionality provided by \threejs{}. After ensuring that the normals are parallel, we have to test if they are facing apart. Without this requirement, holes in objects could be recognized as plate. An example is shown in Figure~\ref{fig:inherent_faceapart}. The vectors A and B in Figure~\ref{fig:inherent_faceapart:no} are facing towards each other. Using a vertex of vector A's shape and a vertex of vector B's shape, a new vector C is created. Since the angle between vector B and C is bigger than 90\textdegree{}, the shaped must face towards each other. Figure~\ref{fig:inherent_faceapart:yes} shows a valid example: The angle between vector B and C is smaller than 90\textdegree{}, thus the shapes are facing apart. In this case, a plate can be created.
+The parallelism check uses vector functionality provided by \threejs{}. After ensuring that the normals are parallel, we have to test if they are facing apart. Without this requirement, holes in objects could be recognized as plate. An example is shown in Figure~\ref{fig:inherent_faceapart}. The vectors A and B in Figure~\ref{fig:inherent_faceapart:no} are facing towards each other. Using a vertex of vector A's shape and a vertex of vector B's shape, a new vector C is created. Since the angle between vector B and C is bigger than 90\textdegree{}, the shaped must face towards each other. Figure~\ref{fig:inherent_faceapart:yes} shows a valid example: The angle between vector B and C is smaller than 90{\textdegree}, thus the shapes are facing apart. In this case, a plate can be created.
 
 \begin{figure}
   \centering
@@ -410,7 +410,7 @@ return plates
 \label{lst:faceintersect}
 \end{listing}
 
-The intersection between the shapes is done using a customized branch\footnote{\url{https://github.com/platener/jsclipper}} of the \jsclipper{} library, which adds floating poing coordinates support, as well as automatic data type conversion. After parsing them into the library's polygon class (see Section~\sectionref{sec:datasructures}), they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. To obtain the vertices in 3D space, we use the previously calculated rotation matrix. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
+The intersection between the shapes is done using a customized branch\footnote{\url{https://github.com/platener/jsclipper}} of the {\jsclipper} library, which adds floating poing coordinates support, as well as automatic data type conversion. After parsing them into the library's polygon class (see Section~\sectionref{sec:datasructures}), they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. To obtain the vertices in 3D space, we use the previously calculated rotation matrix. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
 \section{Extruding Plates}\label{sec:extrudedplates}
 
@@ -508,7 +508,7 @@ In order to find a good rotation, the model's biggest surface is aligned to the 
     \centering
     \includegraphics[width=\textwidth]{stacked_orientation_bad.png}
   \end{subfigure}
-  \caption{\emph{Different stacking directions yield different results.}
+  \caption{Different stacking directions yield different results.}
   \label{fig:stackingorientations}
 \end{figure}
 
@@ -533,7 +533,7 @@ findRotation: (shapes) ->
 
 \subsection{Finding the Clipping Planes}
 
-Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a \threejs{} plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates, which is an approximation which works for most applications. The plane creation is shown in Listing~\ref{lst:clippingplanes}.
+Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a {\threejs} plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates, which is an approximation which works for most applications. The plane creation is shown in Listing~\ref{lst:clippingplanes}.
 
 \begin{listing}
 \begin{minted}[
@@ -679,7 +679,7 @@ checkAdjacentPlanes: (face, index) ->
 
 \subsection{Creating Shapes/ Mehr Umschreibender Title}
 
-Using the intersections stored in each plane, shapes can be created. This is done using the \emph{ShapesFinder}, which is described in Section~\sectionref{sub:shapesfinder}. Instead of the outer edges of face groups (see Section~\sectionref{sub:coplanarfaces}), the intersecctions between the faces and the clipping planes are used. The resulting shapes represent the cross-sections of the model. Additionally, the \jsclipper{} library is used to create 2D polygons, which are used in the next step.
+Using the intersections stored in each plane, shapes can be created. This is done using the \emph{ShapesFinder}, which is described in Section~\sectionref{sub:shapesfinder}. Instead of the outer edges of face groups (see Section~\sectionref{sub:coplanarfaces}), the intersections between the faces and the clipping planes are used. The resulting shapes represent the cross-sections of the model. Additionally, the {\jsclipper} library is used to create 2D polygons, which are used in the next step.
 
 \subsection{Adding Shafts / Mehr Umschreibender Title}
 
@@ -694,7 +694,7 @@ In order to assemble the stacked plates, we connect them with shafts (Figure~\re
 
 \subsubsection{First Pass / Mehr Umschreibender Title}
 
-Instead of the actual shapes, the corresponding polygons are used, which enable working with the \jsclipper{}. These are organized in layers, matching the clipping planes. Each layer contains a list of polygons, since there can be multiple shapes in one layer. We have to iterate over both lists, the inner and the outer, as shown in Listing~\ref{lst:findshafts}.
+Instead of the actual shapes, the corresponding polygons are used, which enable working with the {\jsclipper}. These are organized in layers, matching the clipping planes. Each layer contains a list of polygons, since there can be multiple shapes in one layer. We have to iterate over both lists, the inner and the outer, as shown in Listing~\ref{lst:findshafts}.
 
 When processing a new polygon, we first mark that it has not been added to any shaft yet. Now, we iterate over all shaft candidates. If the current level (the layer) is bigger than the shaft's last added polygon's level plus one, there was no polygon from the last layer added to the shaft. Since we do not want shafts to create "bridges" spanning between unconnected layers, the shaft is marked as completed. If that is not he case, we try to add the polygon to the shaft.
 
