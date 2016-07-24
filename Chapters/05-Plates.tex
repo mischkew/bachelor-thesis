@@ -51,7 +51,7 @@ The result of these calculations is a list of shapes, which contain one or multi
     \label{fig:coplanar}
 \end{figure}
 
-By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by {\meshlib}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel{\textregistered}~Core{\texttrademark}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
+By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. An example mesh and the resulting planar shapes are shown in Figure~\ref{fig:coplanar}. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by {\meshlib}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel{\textregistered}~Core{\texttrademark}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
 
 \begin{figure}
   \centering
@@ -157,9 +157,9 @@ traverseAdjacentFaces: (...) ->
 \label{lst:traverseadjacent}
 \end{listing}
 
-This is implemented as a \emph{tail recursion}. First, the length of the queue is checked. If there a no more edges waiting to be processed, we can jump out of the recursion and continue searching for new groups. Otherwise, we first get the normal of the face from which we came. Next, we extract the new face from the edge and get the face's normal as well. After checking the faces' coplanarity, we signal that there may be more elements in the queue by calling \mintinline{coffeescript}{recur}.
+This is implemented as a \emph{tail recursion}. First, the length of the queue is checked. If there a no more edges waiting to be processed, we can jump out of the recursion and continue searching for new groups. Otherwise, we first get the normal of the face from which we came. Next, we extract the new face from the edge and get the face's normal as well. Afterwards, we check the faces' coplanarity.
 
-Listing \ref{lst:coplanarcheck} shows the coplanarity check. \mintinline{coffeescript}{isAngleZero} calculates the angle between the normals and compares it to zero. This is done even if the new face was already visited. If the faces are not coplanar, the edge is added to the group's outer edges. This list is used in the \emph{ShapesFinder} when merging the faces to one shape. In case of coplanarity, we now check if the face was visited. If it was not, it is added to the face group. Additionally, an entry is added to the \mintinline{coffeescript}{faceToFaceGroup} lookup table and the face is marked as visited. After fetching the face's edges, they are pushed into the queue. The algorithm is visualized in Figure~\ref{fig:coplanar_algorithm}.
+Listing \ref{lst:coplanarcheck} shows the coplanarity check. \emph{isAngleZero} calculates the angle between the normals and compares it to zero. This is done even if the new face was already visited. If the faces are not coplanar, the edge is added to the group's outer edges. This list is used in the \emph{ShapesFinder} when merging the faces to one shape. In case of coplanarity, we now check if the face was visited. If it was not, it is added to the face group. Additionally, an entry is added to the \emph{faceToFaceGroup} lookup table and the face is marked as visited. After fetching the face's edges, they are pushed into the queue. The algorithm is visualized in Figure~\ref{fig:coplanar_algorithm}.
 
 \begin{listing}
 \begin{minted}[
@@ -211,9 +211,9 @@ else
   \label{fig:coplanar_algorithm}
 \end{figure}
 
-After all faces have been processed and assigned a group, the \mintinline{coffeescript}{faceGroups}, \mintinline{coffeescript}{faceGroupNormals} and \mintinline{coffeescript}{outerEdgeGroups} are injected into the face-vertex mesh, along with the \mintinline{coffeescript}{faceToFaceGroup} lookup table.
+After all faces have been processed and assigned a group, the \emph{face\-Groups}, \emph{faceGroupNormals} and \emph{outerEdgeGroups} are injected into the face-vertex mesh, along with the \emph{faceToFaceGroup} lookup table.
 
-\subsection{Shape Finder}\label{sub:shapesfinder}
+\subsection{Shapes Finder}\label{sub:shapesfinder}
 
 The shape finder creates shapes from the outer edge loops of the found coplanar faces. The outer edge loop is a set of edges in the format [vertex\_index\_1, vertex\_index\_2]. This is converted into a set of continuous edge loops of the form [vertex\_index\_1, vertex\_index\_2, ..., vertex\_index\_n, vertex\_index\_1].
 
@@ -388,7 +388,7 @@ checkPlateThickness: (shape1, shape2) ->
 \label{lst:checkplatethickness}
 \end{listing}
 
-\subsection{Creating Plates}
+\subsection{Plates Are Created by Intersecting the Shapes}
 
 The plate creation uses the shapes' 2D representation, which is calculated when creating the shape. The vertices are rotated around the origin so that they have the same x-value. We use the shape's normal to build a rotation matrix, which is applied to a clone of each vertex. This rotation matrix is stored in the shape, while each of the shape's \emph{edgeLoops} contains the corresponding rotated vertices. Since the rotation is performed deterministically, we can use the 2D representation to perform operations like inctersection and union on shapes.
 
@@ -410,11 +410,11 @@ return plates
 \label{lst:faceintersect}
 \end{listing}
 
-The intersection between the shapes is done using a customized branch\footnote{\url{https://github.com/platener/jsclipper}} of the {\jsclipper} library, which adds floating poing coordinates support, as well as automatic data type conversion. After parsing them into the library's polygon class (see Section~\sectionref{sec:datasructures}), they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. To obtain the vertices in 3D space, we use the previously calculated rotation matrix. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
+The intersection between the shapes is done using a customized branch\footnote{\url{https://github.com/platener/jsclipper}} of the {\jsclipper} library, which adds floating point coordinates support, as well as automatic data type conversion. After parsing them into the library's polygon class (see Section~\sectionref{sec:datastructures}), they can be easily clipped, resulting in a list of intersections which can be parsed back into shapes. To obtain the vertices in 3D space, we use the previously calculated rotation matrix. The plate creation is based on the previously selected base shape. While the calculated intersection is used as the shape of the plate, the thickness is computed by subtracting the base shape's z-value from the other shape's z-value. Additionally, the base shape's z-value is used as plane constant.
 
-\section{Extruding Plates}\label{sec:extrudedplates}
+\section{Extruding Plates Only Requires One Shape}\label{sec:extrudedplates}
 
-The extrusion of plates is a simpler approach in terms of calculation, which is shown in Listing~\ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded in the opposite direction of the face's normal. The plane constant of the plates base plane is the same as the z-value of the shapes x-y-representation. We compare the face's area to a threshold, which filters plates which would be to small to fabricate. Afterwards, the new plate is created.
+The extrusion of plates is a simpler approach in terms of calculation, which is shown in Listing~\ref{lst:extrude}. The selected plate thickness has to be inverted, due to the plate being extruded in the opposite direction of the face's normal. The plane constant of the plates base plane is the same as the z-value of the shape's 2D representation. We compare the face's area to a threshold, which filters plates which would be to small to fabricate. Afterwards, the new plate is created.
 
 \begin{listing}
 \begin{minted}[
@@ -454,9 +454,9 @@ A 3D block can not be represented by one single plate if it is thicker than a pl
 So if two plates are parallel we compare their plane constants which specify the distance to the origin. In case the plane constants hint at overlap the actual \emph{EdgeLoops} are compared to identify intersections. In case they overlap one of the plates gets deleted.
 
 
-\section{Stacking Plates}\label{sec:stackedplates}
+\section{Stacking Plates Is Similar to 3D Printing}\label{sec:stackedplates}
 
-As an alternative approach, plates can be stacked. An example is shown in Figure~\ref{fig:stackedbunny}. By putting multiple plates on top of each other, the model is approximated. In order to achieve this, the model is sliced in regular intervals, with plates being created based on the cross sections. In order to enable easy assembly, the plates are connected with shafts. These are additional plates, which are perpendicular to the other plates and help to align them.
+As an alternative approach, plates can be stacked. An example is shown in Figure~\ref{fig:stackedbunny}. By putting multiple plates on top of each other, the model is approximated. In order to achieve this, the model is sliced in regular intervals, with plates being created based on the cross sections. This technique is similar to 3D printing, since it puts multiple layers of material on top of each other. In order to enable easy assembly, the plates are connected with shafts. These are additional plates, which are perpendicular to the other plates and help to align them.
 
 \begin{figure}
     \centering
@@ -494,7 +494,7 @@ findStackedPlates: (model, shapes) ->
 \label{lst:stackedmain}
 \end{listing}
 
-\subsection{Rotating the Model}
+\subsection{Rotating the Model Optimizes The Results}
 
 In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. A good rotation results in fewer plates which are preferably all connected. Figure~\ref{fig:stackingorientations} shows how different rotations yield in different results. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing~\ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
 
@@ -531,7 +531,7 @@ findRotation: (shapes) ->
 \label{lst:findrotation}
 \end{listing}
 
-\subsection{Finding the Clipping Planes}
+\subsection{The Clipping Planes Are Created in Regular Intervals}
 
 Due to the model being rotated, it can be sliced using planes parallel to the x-y-plane. In order to calculate these, the model's bounding box is calculated first. Using the minimal and maximal z-value, planes are creates with an distance equal to the selected plate thickness. These planes are constructed from a {\threejs} plane object and a (initially empty) list of edges located in this plane. The planes are displaced by half the plate thickness. Thus, the sampling happens in the middle of the plates, which is an approximation which works for most applications. The plane creation is shown in Listing~\ref{lst:clippingplanes}.
 
@@ -555,9 +555,9 @@ getClippingPlanes: ->
 \label{lst:clippingplanes}
 \end{listing}
 
-\subsection{Intersecting the Model's Faces with the Clipping Planes}
+\subsection{The Model's Faces are Intersected with the Clipping Planes}
 
-Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing~\ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing~\ref{lst:findplane}. Starting at the median plane (\mintinline{coffeescript}{@planes.length // 2}), we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
+Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing~\ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing~\ref{lst:findplane}. Starting at the median plane (\emph{@planes.length // 2}), we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
 
 \begin{listing}
 \begin{minted}[
@@ -677,11 +677,11 @@ checkAdjacentPlanes: (face, index) ->
 \label{lst:checkadjacent}
 \end{listing}
 
-\subsection{Creating Shapes/ Mehr Umschreibender Title}
+\subsection{The ShapesFinder Is Used to Create the Cross-Sections}
 
-Using the intersections stored in each plane, shapes can be created. This is done using the \emph{ShapesFinder}, which is described in Section~\sectionref{sub:shapesfinder}. Instead of the outer edges of face groups (see Section~\sectionref{sub:coplanarfaces}), the intersections between the faces and the clipping planes are used. The resulting shapes represent the cross-sections of the model. Additionally, the {\jsclipper} library is used to create 2D polygons, which are used in the next step.
+Using the intersections stored in each plane, shapes can be created. This is done using the \emph{ShapesFinder}, which is described in Section~\sectionref{sub:shapesfinder}. Instead of the outer edges of face groups (see Section~\sectionref{sub:coplanarfaces}), the intersections between the faces and the clipping planes are used. The resulting shapes represent the cross-sections of the model. Additionally, the \jsclipper{} library is used to create 2D polygons, which are used in the next step.
 
-\subsection{Adding Shafts / Mehr Umschreibender Title}
+\subsection{Shafts Are Added to Ease Assembly}
 
 In order to assemble the stacked plates, we connect them with shafts (Figure~\ref{fig:shafts}). Our approach for this: if two shapes which are located in adjacent planes intersect, they have to be connected by at least one shaft. The shaft finding algorithm has three steps: First, we iterate over all shapes and connect as many as possible. Next, we fix shapes which are not yet connected. Afterwards, we clean up shafts which are only connected to one shape. The shaft object contains a list of the polygon it connects, as well as the intersection of all these polygons.
 
@@ -692,7 +692,7 @@ In order to assemble the stacked plates, we connect them with shafts (Figure~\re
     \label{fig:shafts}
 \end{figure}
 
-\subsubsection{First Pass / Mehr Umschreibender Title}
+\subsubsection{Adjacent Layers Are Intersected to Add Shafts}
 
 Instead of the actual shapes, the corresponding polygons are used, which enable working with the {\jsclipper}. These are organized in layers, matching the clipping planes. Each layer contains a list of polygons, since there can be multiple shapes in one layer. We have to iterate over both lists, the inner and the outer, as shown in Listing~\ref{lst:findshafts}.
 
@@ -771,11 +771,11 @@ tryAddingPolygonToShaftCandidate: (
 
 If the polygon can not be added to any of the shafts, we create a new one - if the polygon is big enough (Listing~\ref{lst:findshafts}). Additionally, the shaft is overlapped "backwards", up to three layers. This improves stability in the assembled model.
 
-\subsubsection{Fixing unconnected plates}
+\subsubsection{Unconnected Plates Are Connected by Expanding Shafts}
 
 In some cases, not all polygons - and thus not all plates - are connected to the others yet. Additionally, shafts should be expanded in both directions as far as possible. A fix is shown in Listing~\ref{lst:fixunconnected}.
 
-Each polygon is checked how well it is connected to other polygons. If it is connected to both a polygon below and above (\mintinline{coffeescript}{connection.isConnected} is true), we do not have to connect it further. Otherwise, the shafts connecting it from above and below are checked. We try to expand these to connect more polygons in the given direction. If this succeeds, handling for this polygon is completed. Otherwise, we create a new shaft at this polygon and try to expand it in both directions.
+Each polygon is checked how well it is connected to other polygons. If it is connected to both a polygon below and above (\emph{connection.isConnected} is true), we do not have to connect it further. Otherwise, the shafts connecting it from above and below are checked. We try to expand these to connect more polygons in the given direction. If this succeeds, handling for this polygon is completed. Otherwise, we create a new shaft at this polygon and try to expand it in both directions.
 
 \begin{listing}
 \begin{minted}[
@@ -822,7 +822,7 @@ fixUnconnectedPlates: (shaftCandidates) ->
 \label{lst:fixunconnected}
 \end{listing}
 
-\subsubsection{Cleaning up shafts / Mehr Umschreibender Title}
+\subsubsection{Unused Shafts Are Removed Again}
 
 As a result of this method, polygons which are not adjacent to any other polygon get assigned an own shaft. Since this does not improve the models stability, these are removed again, as shown in Listing~\ref{lst:cleanupshafts}.
 
@@ -843,7 +843,7 @@ cleanUpShafts: (shafts) ->
 \label{lst:cleanupshafts}
 \end{listing}
 
-\subsection{Creating plates/ Mehr Umschreibender Title}
+\subsection{The Shafts Are Clipped From the Polygons While Creating Plates}
 
 After the shafts are found, their cross section is cut from the connected polygons. Next, these polygons are parsed into shapes and plates. Additionally, the shafts' contours are calculated, with additional plates being created from them. Together, all plates are returned.
 

@@ -5,15 +5,15 @@
 \chapter{Assembly}\label{ch:assembly}
 %************************************************
 
-Assembling the laser cut models is not trivial. Since multiple plates may be very similar to each other, it is not always clear which have to be put together. Thus, we decided to add assembly instructions, which allow the user to assemble the model hassle-free. Section~\sectionref{sub:assemblyplates} describes how these instructions are added to plates which were found either inherently or by extruding. The assembly instructions for stacked plates are discussed in Section~\sectionref{sub:assemblystacked}.
+Assembling the laser cut plates to form the desired object is not trivial. Since multiple plates may be very similar to each other, it is not always clear which have to be put together. Thus, we decided to add assembly instructions, which allow the user to assemble the model hassle-free. Section~\sectionref{sub:assemblyplates} describes how these instructions are added to plates which were found either inherently or by extruding. The assembly instructions for stacked plates are discussed in Section~\sectionref{sub:assemblystacked}.
 
-\section{What we currently have (not good solution)/ Umschreibender Title}
+\section{Added Numbers Help Arranging Plates}
 
-This section describes the currently used methods for adding assembly instructions. While these do simplify assembly, they are not optimal. Ideas for improvement are discussed in Section~\sectionref{sec:assemblyimprovements}.
+This section describes the currently used methods for adding assembly instructions. While these simplify assembly, they are not optimal. Ideas for improvement are discussed in Section~\sectionref{sec:assemblyimprovements}.
 
-\subsection{Plate Method/ Mehr Umschreibender Title}\label{sub:assemblyplates}
+\subsection{Plates Connected With Finger Joins Are Annotated on Each Edge}\label{sub:assemblyplates}
 
-Plates created by the \emph{Plate method} \fabmethod are connected by finger joints. In order to show which plates have to be put together, the corresponding edges are annotated accordingly.
+Plates created by the \emph{PlateMethod} are connected by finger joints. In order to show which plates have to be put together, the corresponding edges are annotated accordingly.
 
 \begin{figure}
     \centering
@@ -22,7 +22,7 @@ Plates created by the \emph{Plate method} \fabmethod are connected by finger joi
     \label{fig:assemblyplates}
 \end{figure}
 
-These annotations are created for each edge separately, by calling the \mintinline{coffeescript}{addInstruction} function for each. This function is shown in Listing~\ref{lst:addinstructions}. The connection data is passed by setting this property beforehand. Thus, the nodes (which contain the plates) and the connection parameters can be extracted. Using these, the instructions are built for both plates.
+These annotations are created for each edge separately, by calling the \emph{addInstruction} function for each. This function is shown in Listing~\ref{lst:addinstructions}. The connection data is passed by setting this property beforehand. Thus, the nodes (which contain the plates) and the connection parameters can be extracted. Using these, the instructions are built for both plates.
 
 \begin{listing}
 \begin{minted}[
@@ -37,7 +37,7 @@ addInstructions: ->
 \label{lst:addinstructions}
 \end{listing}
 
-Listing~\ref{lst:buildinstruction} shows how this is done. First, we ensure that the data for the direction and the intersection line is valid. The intersection line tells us where to place the annotation, with the direction being the direction from the intersection line to the plate. This helps with placing the annotation on the plate instead of placing it directly on the edge (with half of it not actually being located on the plate). The index of the connection is the number we want to annotate the edge with. Thus, we build a text box containing this number. Afterwards, the box is moved onto the intersection line. Using the direction, we can place it on the plate. Lastly, the created text box is added to the node.
+Listing~\ref{lst:buildinstruction} shows how this is done. First, we ensure that the data for the direction and the intersection line is valid. The intersection line tells us where to place the annotation, with the direction being the direction from the intersection line towards plate. This helps to place the annotation on the plate instead of placing it directly on the edge (with half of it not actually being located on the plate). The index of the connection is the number we want to annotate the edge with. Thus, we build a text box containing this number. Afterwards, the box is moved onto the intersection line. Using the direction, we can place it on the plate. Lastly, the created text box is added to the node.
 
 \begin{listing}
 \begin{minted}[
@@ -56,9 +56,9 @@ buildInstruction: (node, direction) ->
 \label{lst:buildinstruction}
 \end{listing}
 
-\subsection{Stacked-method/ Mehr Umschreibender Title}\label{sub:assemblystacked}
+\subsection{Stacked Plates Are Enumerated}\label{sub:assemblystacked}
 
-The annotations added to stacked plates differ from the ones discussed above. Since the shafts already simplify the assembly of the model, we just enumerate the layers of plates. Sorting the plates by the number written on them tells the user how to assemble them. Figure~\ref{fig:assemblystacked} shows a side view of how the plates are annotated (In reality, the annotations are placed on the flat side of the plate).
+The annotations added to stacked plates differ from the ones discussed above. Since the shafts already simplify the assembly of the model, we just enumerate the layers of plates. Sorting the plates by the number written on them tells the user how to assemble them. Figure~\ref{fig:assemblystacked} shows a side view of how the plates are annotated (In reality, the annotations are placed on the main side of the plate). While iterating over all layers and all plates contained in these layers, we add an annotation to each plate.
 
 \begin{figure}
     \centering
@@ -67,33 +67,10 @@ The annotations added to stacked plates differ from the ones discussed above. Si
     \label{fig:assemblystacked}
 \end{figure}
 
-While iterating over all layers and all plates contained in these layers, we add an annotation to each plate. This is shown in Listing~\ref{lst:buildinstructionstacked}.
-
-\begin{listing}
-\begin{minted}[
-linenos,breaklines
-]{coffeescript}
-buildInstructionsForStackedPlates: (plates) ->
-  if plates.length > 0
-    levels = @groupPlanesIntoLevels plates
-    polygons = @createPolygons levels
-    levels.forEach((level, index) =>
-      level.forEach((plate, indexInLevel) =>
-        # add engraving of current level
-        thisIndex =
-          @buildInstructionBox((index + 1) + "." + (indexInLevel + 1))
-        plate.assemblyInstruction.add(thisIndex)
-      )
-    )
-\end{minted}
-\caption{Building the assembly instructions for stacked plates.}
-\label{lst:buildinstructionstacked}
-\end{listing}
-
 \section{Possible Improvements}\label{sec:assemblyimprovements}
-\subsection{Idea 1: Images Showing if Plate is Horizontal or Vertical etc/ Mehr Umschreibender Title}
+\subsection{Icons Can Show the Orientation of Plates}
 
-In addition to the annotations described in Section~\sectionref{sub:assemblyplates}, we propose adding icons which tell the user where the plate is located. Thus, the distinction between horizontal and vertical plates is made easy. The proposed icons are shown in Figure~\ref{fig:assemblyicons}. In addition to the arrow, which signalizes the arrangement of vertical plates, two icons describing horizontal plates are shown. These are based on the mathematical symbols indicating if an vector is pointing into or out of a diagram. All three symbols tell the user where - from the plates perspective - the top side of the model is located. \note{add better direction icons}
+In addition to the annotations described in Section~\sectionref{sub:assemblyplates}, we propose adding icons which tell the user where the plate is located. Thus, the distinction between horizontal and vertical plates is made easy. The proposed icons are shown in Figure~\ref{fig:assemblyicons}. In addition to the arrow, which signalizes the arrangement of vertical plates, two icons describing horizontal plates are shown. These are based on the mathematical symbols indicating if an vector is pointing into or out of a diagram. All three symbols tell the user where - from the plates perspective - the top side of the model is located.
 
 \begin{figure}
   \centering
@@ -119,7 +96,7 @@ In addition to the annotations described in Section~\sectionref{sub:assemblyplat
   \label{fig:assemblyicons}
 \end{figure}
 
-\subsection{Idea 2: Large Number in the Middle of the Plate}
+\subsection{Annotating Plates Only Once Reduces Cutting Time}
 
 Engraving the annotations onto plates usually takes longer than the actual cutting process. In Order to reduce this time, we propose to not annotate each edge individually. Instead, each plate should be engraved with a number, which clearly identifies it. Coupled with assembly instructions shown on screen, this still enables fast assembly, while reducing cutting time.
 
