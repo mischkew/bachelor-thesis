@@ -84,7 +84,7 @@ To find the prisms all shapes have to be checked for parallelism. The comparison
 The surface normals $\vec{n}$ are sorted into buckets to reduce the amount of comparisons. Treating slightly different normals as equal considering a given threshold $\phi$ each bucket covers this angle. Therefore to check for similarity only normals within a bucket and the surrounding ones have to be considered: The angle between two normals is always greater $\phi$ if their buckets are not neighbors. The corresponding bucket for a normal is determined by two values $\alpha$ and $\beta$. Their calculation is explained below.
 
 \begin{equation*}
-    \vec{n} = \colvec{3}{x}{y}{z}
+    \vec{n} = (x, y, z)
 \end{equation*}
 
 
@@ -108,19 +108,19 @@ _normalInHemisphere: (normal) ->
 
 \begin{figure}
     \includegraphics[width=0.9\columnwidth]{Images/PrismCl-Rings.png}
-    \caption{rings visualised from side}
+    \caption{Rings visualised from side}
     \label{fig:rings_FromSide}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=0.9\columnwidth]{Images/PrismCl-RingsFromTop.png}
-    \caption{rings visualised from top}
+    \caption{Rings visualised from top}
     \label{fig:rings_FromTop}
 \end{figure}
 
 \begin{figure}
     \includegraphics[width=0.4\columnwidth]{Images/PrismCl-RingAngle.png}
-    \caption{angle of a normal which is used for sorting it into a ring}
+    \caption{Angle of a normal which is used for sorting it into a ring}
     \label{fig:ringAngle}
 \end{figure}
 
@@ -170,7 +170,7 @@ Figure~\ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 
 \begin{figure}
     \includegraphics[width=0.5\columnwidth]{Images/PrismCl-MiddleZ.png}
-    \caption{geometric visualization of the z value in the middle of a ring}
+    \caption{Geometric visualization of the z value in the middle of a ring}
     \label{fig:middleZ}
 \end{figure}
 
@@ -204,18 +204,18 @@ Figure~\ref{fig:middleZ} implies the calculation of the corresponding middle $z$
 \end{equation}
 
 
-Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure~\ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure~\ref{fig:projection} and leads to this calculation:
+Each ring is seperated into buckets which cover the threshold angle $\phi$ as shown in Figure~\ref{fig:PrismCl-buckets}. Therefore the onto the xy-plane projected angle $\gamma$ needs to be calculated which differs from ring to ring. This is shown in Figure~\ref{fig:projection} and leads to the following calculation.
 
 \begin{figure}
     \includegraphics[width=0.7\columnwidth]{Images/PrismCl-buckets.png}
-    \caption{buckets in a ring span the projected angle $\protect\gamma$ of the angle $\protect\phi$}
+    \caption{Buckets in a ring span the angle~$\phi$}. Its projection is the angle~ $\gamma$.
     \label{fig:PrismCl-buckets}
 \end{figure}
 
 
 \begin{figure}
     \includegraphics[width=1.0\columnwidth]{Images/PrismCl-Projection.png}
-    \caption{projection of the angle $\protect\phi$}
+    \caption{Projection of the angle $\protect\phi$}
     \label{fig:projection}
 \end{figure}
 
@@ -228,7 +228,7 @@ $ \vec{a}_{I_{Ring}}' $ is the projection of $\vec{a}_{I_{Ring}} $:
     \vec{a}_{I_{Ring}}' = (x_{a}, 0)
 \end{equation}
 
-$ \vec{b}_{I_{Ring}} $ spans the threshold angle $\phi$ with $ \vec{a}_{I_{Ring}} $ and has the same $z$ value $z_{I_{Ring}}$:
+$ \vec{b}_{I_{Ring}} $ spans the threshold angle $\phi$ with $ \vec{a}_{I_{Ring}} $ and has the same $z$~value $z_{I_{Ring}}$:
 
 \begin{equation}
     \vec{b}_{I_{Ring}} = (x_{b}, y_{b}, z_{I_{Ring}}) \qquad with | \vec{b}_{I_{Ring}}| = 1
@@ -316,7 +316,7 @@ The \emph{PrismClassifier} works on \emph{shapes} from the \emph{ClassifierGraph
 
 \begin{figure}
 \includegraphics[width=1.0\columnwidth]{Images/04-prismClassifier.png}
-\caption{class diagram of the PrismClassifier}
+\caption{Class diagram of the PrismClassifier}
 \label{fig:prismClassifierDiagram}
 \end{figure}
 
@@ -346,7 +346,7 @@ run: ->
 
 Listing~\ref{lst:PrismClassifierRun} shows the implementation of the \emph{PrismClassifier} run method:
 
-At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 $  ( = 8.6\textdegree, previously labeled $\phi$) so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
+At first the normal buckets are initialised with an angle threshold as described in section \emph{Bucket System}. These values are stored in the global config with \emph{\_angleThreshold} $ = 0.15 = 8.6\degree $, previously labeled $\phi$, so shapes with an angle  of 8.6\textdegree \hspace{1pt} will be considered parallel.
 
 Then all shapes are put into the corresponding buckets. This is done by iterating over all shapes and passing them to the bucket system which handles the classification on its own.
 
@@ -364,22 +364,22 @@ The constructor saves the angle threshold, instantiates the rings as a javascrip
 It provides two functions used by the classifier: \\
 \emph{push} and \emph{getShapesToCheckAndDeleteThisOne}.
 
-\emph{push} takes a \emph{shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{shape} into the corresponding bucket.
+\emph{push} takes a \emph{Shape} and puts it in the corresponding ring. At first it transforms its normal into the hemisphere. Then the ring index $ I_{Ring} $ is calculated. If the ring is not initialised yet it gets created and \emph{ring.push(shape)} is called to sort the \emph{Shape} into the corresponding bucket.
 
-\emph{getShapesToCheckAndDeleteThisOne} takes a shape and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all shapes lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath.
+\emph{getShapesToCheckAndDeleteThisOne} takes a \emph{Shape} and removes it from the bucket system because it will be checked for all possible prisms by the classifier and should not be returned as a potential parallel shape in another pass. Then it returns an array of all \emph{Shapes} lying in the same and the surrounding buckets: It requests the corresponding buckets from the ring with the shape's ring index $ I_{Ring} $ and the ring above and beneath.
 
 While determining the surrounding rings following special cases need to be considered:
 
 First: The ring with the maximum index $I_{MaxRing}$ is only adjacent to the ring underneath, because it is the highest ring on top of the hemisphere. It is not separated into different buckets and serves as a single bucket which is adjacent to all buckets in the ring underneath.
 
-Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Let's take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket 180° away.
+Second: The ring with index 0 "is adjacent to itself" because the unit sphere got transformed into a hemisphere. Therefore the buckets 180° around have to be taken into account for parallelism checks. Take two normals with the same x, y coordinates and a negated z value that span an angle smaller $ \phi $: $\vec{n_{1}} = (x, y, z)$ and $\vec{n_{2}} = (x, y, -z)$ with $z > 0$. Consequently $\vec{n_{1}}$ naturally lies in ring 0 and $\vec{n_{2}}$ gets negated to fit into the hemisphere. The negated normal is $\vec{n_{2}}' = (-x, -y, z) $ and lies also in ring 0 but in the opposite bucket 180° away.
 
 
 \paragraph{Ring}
 
 A \emph{Ring} contains buckets as a javascript map and is initialized with an index $ I_{Ring} $ and the angle threshold $ \phi$. With these the angle $ \gamma $ and the maximum bucket index $ I_{MaxBucket} $ are calculated as described in Section~\sectionref{sec:PrismBucketSystem}. It provides the methods \emph{push}, \emph{get}, \emph{getAndSurrounding}, \emph{getAll}, \emph{delete} and \emph{getSize}.
 
-The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given shape is removed from the ring and \emph{getSize} returns the amount of shapes that lie in that ring.
+The method \emph{push} sorts a given shape into the corresponding bucket, \emph{get} returns all shapes of a bucket with a given index, \emph{getAndSurrounding} returns the same and additionaly the two neighboring buckets while \emph{getAll} returns all shapes that lie in that ring. With \emph{delete} a given \emph{Shape} is removed from the ring and \emph{getSize} returns the amount of \emph{Shapes} that lie in that ring.
 
 
 \paragraph{MaxRing} The \emph{MaxRing} is only instanced once and is the ring with index $ I_{RingMax} $. It provides the same methods as a \emph{Ring} but with adapted behaviour.
@@ -391,7 +391,7 @@ A \emph{Prism} contains two parallel shapes that span a prism. In future work th
 \subsubsection{Future Work}
 \label{sec:PrismFutureWork}
 
-\paragraph{Planes} \emph{Planes} from the \emph{PlaneClassifier} should be taken into account in addition to the shapes. Ideally the \emph{PlaneClassifier} detects noisy planes that are not represented as shapes. Therefore a better approximation of the original model could be achieved.
+\paragraph{Planes} \emph{Planes} from the \emph{PlaneClassifier} should be taken into account in addition to the shapes. Ideally the \emph{PlaneClassifier} detects noisy planes that are not represented as \emph{Shapes}. Therefore a better approximation of the original model could be achieved.
 
 \paragraph{Lateral Surface} The lateral surface of the prism has yet to be identified and added to the prism structure. This is needed for further operations and more specific classifications of the prism. For example for classifying a cube the surrounding sides have to be known.
 
