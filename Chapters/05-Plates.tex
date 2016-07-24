@@ -15,23 +15,44 @@ The concept of stacking plates is described in Section~\sectionref{sec:stackedpl
 
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\columnwidth]{Images/plates_inherentplates.png}
-    \caption{Finding inherent plates.}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_inherentplates_1.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_inherentplates_2.png}
+    \end{subfigure}
+    \caption{Finding inherent plates (Side view). The left image shows the hollow original model (grey), the right image shows the found plates (grey).The corner areas (white) are not found.}
     \label{fig:inhplates}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\columnwidth]{Images/plates_extrudedplates.png}
-    \caption{Finding extruded plates.}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_extrudedplates_1.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_extrudedplates_2.png}
+    \end{subfigure}
+    \caption{Finding extruded plates (Side view). The left image shows the filled original model, the right image shows the found plates (grey).The corner areas (dark grey) are found twice, while the center area (white) is not found.}
     \label{fig:extplates}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\columnwidth]{Images/plates_stackedplates.png}
-    \caption{Finding stacked plates.}
-    \label{fig:staplates}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_stackedplates_1.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/plates_stackedplates_2.png}
+    \end{subfigure}
+    \caption{Finding stacked plates (Side view). The left image shows the filled original model, the right image shows the found plates.}
+    \label{fig:extplates}
 \end{figure}
 
 \section{Plates Are Generated from Planar Shapes}
@@ -687,8 +708,8 @@ In order to assemble the stacked plates, we connect them with shafts (Figure~\re
 
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\columnwidth]{Images/plates_shafts.png}
-    \caption{Connecting plates with shafts.}
+    \includegraphics[width=0.5\columnwidth]{Images/plates_shafts.png}
+    \caption{Side view of stacked plates (grey) connected by shafts (black).}
     \label{fig:shafts}
 \end{figure}
 
