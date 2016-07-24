@@ -31,19 +31,22 @@ then these applications can only be used in a browser. Our
 backend package can be run in {\nodejs} and does not require a
 browser environment.
 
-The plugins package and the client package are not part of
-the {\convertify} framework. These packages are implemented
-by an application like {\platener}, which is based on
-{\convertify}. The plugins package provides an exchangeable
-set of features. A plugin interacts with the scene and its
-{\threedmodel}s via lifecycle events. In {\platener} the
-\name{PlatenerPipeline} plugin provides all computation
-logic to transform a face-vertex mesh of a 3D~model into
-laser cuttable {\svgfile}. We elaborate on plugins in
-Section~\sectionref{sec:plugin-system}. The client package gives
-the look and feel of the application. It contains frontend
-components which produce HTML elements and it wires up the
-{\userinterface} with the computation logic.
+{\convertify} expects the plugins package and the client
+package to exist, but both packages are not part of the
+{\convertify} framework. These packages are implemented by
+an application like {\platener} that uses {\convertify}. The
+plugins package provides an exchangeable set of features.
+Such features are for example analysis algorithms or
+visualizations of input {\threedmodel}s. A plugin interacts
+with the scene and its {\threedmodel}s via lifecycle events.
+In {\platener} the \name{PlatenerPipeline} plugin provides
+all computation logic to transform a face-vertex mesh of a
+3D~model into laser cuttable {\svgfile}. We elaborate on
+plugins in Section~\sectionref{sec:plugin-system}. The
+client package gives the look and feel of the application.
+It contains frontend components which produce HTML elements
+and it wires up the {\userinterface} with the computation
+logic.
 
 \begin{figure}[h]
   \centering
@@ -74,9 +77,10 @@ plugins.
 \subsubsection{{\threedmodel}s Are Managed in a Flat Scene
   Graph}
 
-We use a flat scene graph. A flat scene graph has only one
-level of hierarchy. Such a graph is sufficient because the
-loaded {\stlfile}s do not represent nested models.
+We use a flat scene graph to manage loaded {\stlfile}s. A
+flat scene graph has only one level of hierarchy. Such a
+graph is sufficient because the {\stlfile}s do not represent
+nested models.
 
 We implement the flat scene graph using \class{Nodes}.
 \class{Nodes} are abstract objects which represent an entity
@@ -209,8 +213,7 @@ that contains visualizations for the WebGL scene or
 algorithmic computation units. Therefore, it provides a set
 of methods which can be called upon emitted system events.
 We refer to these callbacks as \class{PluginHooks} or simply
-hooks. We will look at the details of plugins and plugin
-communication in the next section.
+hooks.
 
 \subsection{{\convertify} Provides a Plugin System}
 \label{sec:plugin-system}
@@ -465,22 +468,22 @@ context of an application.
 \subsection{{\convertify} Is a Cross-platform Isomorphic Framework}
 \label{sec:convertify-is-isomorphic}
 
-{\convertify} is a cross-platform framework. Cross-platform
-{\javascript} code runs seamlessly in multiple browsers
-being aware of their different implementations and APIs.
+{\convertify} is a cross-platform framework. {\javascript}
+code does not run seamlessly in multiple browsers out of the
+box. The code has to be aware of their different
+implementations and APIs.
 %This allows {\convertify} to run on almost any device.
 To enable cross-platform {\javascript} support we use
 polyfills and libraries that are cross-platform as well.
 
-A polyfill is \enquote{a piece of code or plugin that
-  provides technology that [we] expect the browser to
+Legacy {\javascript} engines do not support data structures
+like \class{Map}, \class{Set} or \class{Promise}. We provide
+these features with the
+\name{es6-shim}\footnote{\url{https://github.com/paulmillr/es6-shim}}
+polyfill. A polyfill is \enquote{a piece of code or plugin
+  that provides technology that [we] expect the browser to
   support
   natively}\footnote{\url{https://remysharp.com/2010/10/08/what-is-a-polyfill}}.
-For example legacy {\javascript} engines do not support data
-structures like \class{Map}, \class{Set} or
-\class{Promise}. We provide these features with the
-\name{es6-shim}\footnote{\url{https://github.com/paulmillr/es6-shim}}
-polyfill.
 
 Using libraries that have cross-platform support themselves enables us
 to maintain {\convertify} as a cross-platform framework. Such
@@ -533,7 +536,7 @@ that is completely decoupled from any {\userinterface} code.
 \label{sec:variety-of-applications}
 
 Based on {\brickify}'s groundwork and our improvements to
-their system, we provide a set of common functionality which
+the system, we provide a set of common functionality which
 is useful for any web based 3D application. We focus on
 3D-Models as primary data representation. We enable users to
 perform customization to these models in real-time. The
