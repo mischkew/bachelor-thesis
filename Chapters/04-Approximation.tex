@@ -114,30 +114,30 @@ The result is an approximation of the input with fewer vertices and faces while 
 
 For each welding application a new instance of \emph{VertexWelding} is created with the desired welding distance. Then, the data can be preprocessed before the actual welding which provides the best possible result. Each vertex is then replaced by the \emph{VertexWelding} vertices. The points can be merged without preprocessing in case it is not needed, e.g. while using very small welding distances. Both preprocessing and replacement are explained in the following section \emph{Implementation}.
 
-\emph{VertexWelding} provides five functions:
+% \emph{VertexWelding} provides five functions:
 
-\subsubsection*{preProcessModel}
+% \subsubsection*{preProcessModel}
 
-preprocesses the given meshlib model.
+% preprocesses the given meshlib model.
 
-\subsubsection*{preProcessVertices}
+% \subsubsection*{preProcessVertices}
 
-preprocesses the given array of vertices. A Vertex may be any object containing \emph{x}, \emph{y} and \emph{z} values.
+% preprocesses the given array of vertices. A Vertex may be any object containing \emph{x}, \emph{y} and \emph{z} values.
 
-\subsubsection*{preProcessVertex}
+% \subsubsection*{preProcessVertex}
 
-preprocesses the given vertex which may be any object containing \emph{x}, \emph{y} and \emph{z} values.
+% preprocesses the given vertex which may be any object containing \emph{x}, \emph{y} and \emph{z} values.
 
-\subsubsection*{getCorrespondingVertex}
+% \subsubsection*{getCorrespondingVertex}
 
-returns a new vertex based on the given one. This function is called for replacing each point of an object.
+% returns a new vertex based on the given one. This function is called for replacing each point of an object.
 
-\subsubsection*{replaceVerticesAndDeleteNonTriangularFaces}
+% \subsubsection*{replaceVerticesAndDeleteNonTriangularFaces}
 
-handles the welding process for the given meshlib model: It replaces all vertices and deletes triangles that are not needed any more.
+% handles the welding process for the given meshlib model: It replaces all vertices and deletes triangles that are not needed any more.
 
 
-So a set of vertices is welded by calling \emph{preprocessVertices}, iterating over all points and replacing them with the vertex from \emph{getCorrespondingVertex} or just replacing them without preprocessing.
+% So a set of vertices is welded by calling \emph{preprocessVertices}, iterating over all points and replacing them with the vertex from \emph{getCorrespondingVertex} or just replacing them without preprocessing.
 
 
 \subsubsection{Implementation}
@@ -277,7 +277,7 @@ In addition all sorts of surface modification like engravings and small attachme
 
 \subsubsection{Process}
 
-The pipeline step clones the model due to our clonable state approach so the original model can be accessed at any point in time. The clonable state approach is described in Chapter~\sectionref{ch:architecture} Architecture.
+The pipeline step clones the model due to our clonable state approach so the original model can be accessed at any point in time. The clonable state approach is described in Chapter~\sectionref{ch:architecture} Architecture. Then the welding distance is calculated and the mesh gets simplified. Finally the 3D~model is setup for the following pipelinge steps.
 
 
 \paragraph{Welding Distance}
@@ -324,11 +324,11 @@ For instance, this may occur during curve creation as described in Chapter~\sect
 
 \subsection{Alternative Methods for Vertex Welding}
 
-There are different ways of implementing vertex welding. The three other appropiate approaches known in computer graphics are sorting vertices with an octree, via hashing or via binary space partitioning.
+There are different ways of implementing vertex welding. Three other appropiate approaches known in computer graphics are sorting vertices with an octree, via hashing or via binary space partitioning.
 
 We chose our approach because it serves the simplification step with welding the complete {\threedmodel} as well as reusing it in later processing steps whenever we want to weld a data set. Therefore we do not have to implement different welding methods for various usages. Other implementations may not be applicable, may not serve all usages or will not bring any significant time improvement.
 
-However, the welding can be split into different methods in future work if a runtime improvement is needed. Concretely the pipeline step \emph{simplification} could use an octree to speed up the model simplification and the remaining welding operations will be done with the current implementation.
+However, the welding can be split into different methods in future work if a runtime improvement is needed. Concretely the pipeline step \emph{Simplification} could use an octree to speed up the model simplification and the remaining welding operations will be done with the current implementation.
 
 \paragraph{Octree}
 
@@ -336,7 +336,7 @@ The space is discretised into blocks which dimensions equal the welding distance
 
 This would perform slightly faster for complete mesh simplification and slightly slower for fragmental welding of small vertex sets. Due to the vertex arrangement of most objects the number of comparisons would be lower and consequential the runtime too. On the opposite it performs slower for welding steps that take only a small amount of vertices: Most of them have to be compared so the space discretisation does not bring any advantages.
 
-The implementation of a octree based welding is a bit more complex than the current implementation. We did not chose the octree variant since the current implementation runs in adequate runtime, was faster to code and easier to test.
+The implementation of an octree based welding is a bit more complex than the current implementation. We did not chose the octree variant since the current implementation runs in adequate runtime, was faster to code and easier to test.
 
 \paragraph{Hashing}
 
