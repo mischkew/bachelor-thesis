@@ -371,14 +371,14 @@ joints, the edge visualization will also show the finger joints
     \label{fig:corrupt:shapes}
   \end{subfigure}
   \begin{subfigure}[b]{0.3222\textwidth}
-    \includegraphics[width=\textwidth]{03-architecture-box-shapes-with-fingers}
-    \caption{Corrupted shapes of a box, showing the finger joints.}
-    \label{fig:corrupt:shapes-fingers}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3222\textwidth}
     \includegraphics[width=\textwidth]{03-architecture-box-fingers}
     \caption{A box with finger joints.}
     \label{fig:corrupt:fingers}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3222\textwidth}
+    \includegraphics[width=\textwidth]{03-architecture-box-shapes-with-fingers}
+    \caption{Corrupted shapes of a box, showing the finger joints.}
+    \label{fig:corrupt:shapes-fingers}
   \end{subfigure}
   \caption{Modifications to shallow copies of the data
     corrupt the visualizations.}
@@ -432,14 +432,18 @@ joints, the edge visualization will also show the finger joints
 \end{figure}
 
 {\platener} is divided into the code packages {\convertify},
-plugins and client. Figure~\ref{fig:package-diagram}
-shows the detailed package diagram. Each package takes over a set of distinct
-responsibilities. The {\convertify} package is the framework,
-described above. The plugins package provides an exchangeable
-set of features for the WebGL scene. The client package gives
-the look and feel of {\platener}. It provides user interfaces for the
-web application in the frontend package and a command line interface
-in the backend package.
+plugins and client. Figure~\ref{fig:package-diagram} shows
+the detailed package diagram. Compared to
+Figure~\ref{fig:platener-package-diagram-overview}, the
+client package is now divided into two sub packages.
+
+Each package takes over a set of distinct responsibilities.
+The {\convertify} package is the framework, described above.
+The plugins package provides an exchangeable set of features
+for the WebGL scene. The client package gives the look and
+feel of {\platener}. It provides user interfaces for the web
+application in the frontend package and a command line
+interface in the backend package.
 
 The {\convertify} code package was described in detail in
 Section~\sectionref{sec:framework-convertify}.

@@ -5,11 +5,14 @@
 \label{sec:cg-web}
 % ************************************************
 
-In this section we give a brief overview of graphics programming
-fundamentals in general and in web environments. These fundamentals
-are the concepts of {\threedmodel} data representation in
-Section~\sectionref{sub:model-representation} and render loops and scene
-graphs in Section~\sectionref{sub:render-and-graph}.
+In this section we give a brief overview of graphics
+programming fundamentals in general and in web environments.
+Knowledge about fundamentals helps to understand the
+presented work of this thesis. These fundamentals are
+concepts of {\threedmodel} data representation in
+Section~\sectionref{sub:model-representation} and render
+loops and scene graphs in
+Section~\sectionref{sub:render-and-graph}.
 
 \subsection{3d~Model Representation}
 \label{sub:model-representation}
@@ -17,17 +20,17 @@ graphs in Section~\sectionref{sub:render-and-graph}.
 This section explains the mesh data structure and the {\stlfile}
 format that is used to represent {\threedmodel}s on disk.
 
-The model geometry is represented by a set of connected
-polygons, approximating the model surface. These connected
-polygons form a mesh. Figure~\ref{fig:term-mesh:mesh} shows
-a mesh. We use triangles as polygons, because they
-benefit from hardware acceleration. A triangle in the mesh
-is called face. Figure~\ref{fig:term-mesh:face} illustrates
-the terminology. Each face is described by a list of three
-points in 3D~space. Such a point is called vertex. A single
-vertex is described by three floating point numbers for the
-x-, y- and z-coordinates. An edge is the line between two
-connected vertices \cite[p.~3]{intro-cg}.
+The model geometry is represented by a set of points in
+3D~space. Such a point is called vertex. A single vertex is
+described by three floating point numbers for the x-, y- and
+z-coordinates. The vertices of the model are connected into
+triangles. Each triangle consists of exactly three vertices,
+where different triangles can share up to two vertices.
+These connected triangles form a mesh.
+Figure~\ref{fig:term-mesh:mesh} shows a mesh. A triangle in
+the mesh is called face. The line between two connected
+vertices is called edge \cite[p.~3]{intro-cg}.
+Figure~\ref{fig:term-mesh:face} illustrates the terminology.
 
 \begin{figure}[h]
   \centering
@@ -98,15 +101,16 @@ endsolid name
 
 % Reconstructing the original {\threedmodel} from an
 % {\stlfile} does not always result in an one-to-one solution.
-The vertices are stored as floating point numbers. Two faces
-that share the same vertex refer to that vertex by
-floating point numbers as well. Due to rounding errors the
-same vertex can be represented by slightly different
-floating point numbers. Without a look-up table, in which
-vertices are referred to by a unique index, vertices cannot
-be distinguished fail-safe. We have to assume that two
-overlapping points represent an identical vertex. We use the
-library
+The vertices are stored as floating point numbers. We stated
+above that two different faces can share the same vertex. In
+the STL format the data of shared vertices is duplicated.
+Due to rounding errors the same vertex can be represented by
+slightly different floating point numbers. Without a look-up
+table, in which vertices are referred to by a unique index,
+vertices cannot be distinguished fail-safe. We have to
+assume that two points with equal coordinates represent an
+identical vertex. Equality is thereby determined by a
+threshold. We use the library
 {\meshlib}\footnote{\url{https://github.com/brickify/meshlib}}
 to create an indexed face-vertex mesh from the possibly
 ambiguous {\stlfile}. The face-vertex mesh is converted to a
@@ -116,9 +120,7 @@ geometry we can render a {\threedmodel} in {\convertify}.
 To support a variety of {\threedprinter} optimized models,
 we use the {\stlfile} format. We import the files with the
 {\meshlib} library. The imported face-vertex mesh structure
-is then converted for usage with {\threejs}. The section
-below explains how the {\threejs} representation is
-displayed on the screen.
+is then converted for usage with {\threejs}.
 
 \subsection{Render Loop and Scene Graphs}
 \label{sub:render-and-graph}
@@ -135,7 +137,7 @@ displayed on the screen~\cite[p.~2]{intro-cg}. A
 an interactive experience rather than a single static image.
 The render loop pattern consists of three steps: processing
 input, updating the {\threedmodel} representation and
-rendering~\cite{gamedev-gameloop}.
+rendering of the scenen~\cite{gamedev-gameloop}.
 Figure~\ref{fig:render-loop} shows an exemplary flow.
 
 \begin{figure}[h]
@@ -145,19 +147,19 @@ Figure~\ref{fig:render-loop} shows an exemplary flow.
   \label{fig:render-loop}
 \end{figure}
 
-Each object is part of a scene. A scene is the visual space,
-in which the rendered objects can be seen. We use
-representations of objects which are organized in a
-hierarchical tree data structure. We refer to this
-hierarchical structure as scene graph~\cite{scene-graph}. A
-simple scene graph is depicted in
-Figure~\ref{fig:scene-graph}. The graph contains a box as
+{\threedmodel} representations can be part of a scene. A
+scene is the visual space, in which the rendered
+{\threedmodel} can be seen. We use representations of models
+which are organized in a hierarchical tree data structure.
+We refer to this hierarchical structure as scene
+graph~\cite{scene-graph}. A simple scene graph is depicted
+in Figure~\ref{fig:scene-graph}. The graph contains a box as
 single root node. The sides of the box are children of the
 root node. With this abstraction transformations are applied
 to parts of the model only, without necessarily touching
-each face or vertex. Every object that is recognized by
+each face or vertex. Every model that is recognized by
 {\convertify} is part of a scene graph. Finally, the
-vertices of an object in the scene graph are rendered to the
+vertices of a model in the scene graph are rendered to the
 screen.
 
 \begin{figure}[H]
