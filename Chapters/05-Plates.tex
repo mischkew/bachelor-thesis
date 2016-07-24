@@ -52,7 +52,7 @@ The concept of stacking plates is described in Section~\sectionref{sec:stackedpl
       \includegraphics[width=\textwidth]{Images/plates_stackedplates_2.png}
     \end{subfigure}
     \caption{Finding stacked plates (Side view). The left image shows the filled original model, the right image shows the found plates.}
-    \label{fig:extplates}
+    \label{fig:staplates}
 \end{figure}
 
 \section{Plates Are Generated from Planar Shapes}
@@ -65,14 +65,21 @@ The result of these calculations is a list of shapes, which contain one or multi
 
 \subsection{Coplanar Faces Are Grouped Based on Their Normal}\label{sub:coplanarfaces}
 
+By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. An example mesh and the resulting planar shapes are shown in Figure~\ref{fig:coplanar}. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by {\meshlib}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel{\textregistered}~Core{\texttrademark}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
+
 \begin{figure}
     \centering
-    \includegraphics[width=1.0\columnwidth]{Images/plates_coplanar.png}
-    \caption{Finding inherent surfaces.}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/testBox_plain.png}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.4\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{Images/testBox_colored.png}
+    \end{subfigure}
+    \caption{Finding inherent surfaces. The left image shows the original mesh, the right image shows the found planar shapes.}
     \label{fig:coplanar}
 \end{figure}
-
-By definition, faces are called coplanar if they lie in the same plane. For our purposes, we extend this by the requirement that the face have to be directly connected as well. This allows grouping them into planar shapes. An example mesh and the resulting planar shapes are shown in Figure~\ref{fig:coplanar}. The algorithm for finding coplanar faces requires the models to be stored as a face-vertex mesh. This is calculated by {\meshlib}, the library used for importing models. In a face-vertex mesh, each vertex and each face is assigned an index. Three lookup tables are created: These contain the faces, vertices and face normals of the mesh separately. Figure~\ref{fig:facevertexmesh} shows an annotated mesh and the resulting lookup tables. The face lookup table contains the face indices and the indices of the vertices which compose the faces. Searching these in the vertex lookup table yields the coordinates of the vertices. The entries in the normal lookup table correspond with those in the face lookup table. For example, the normal of the face with the index~1 is located at index~1 in the normal lookup table. Face-vertex meshes enable faster adjacency checks than normal meshes, since vertex equality checks can be done by comparing the vertex indices. In fact, the \emph{CoplanarFaces} step's computation time was reduced from 736~ms to 18~ms when processing a mesh with 2400 faces\footnote{This was measured on a Intel{\textregistered}~Core{\texttrademark}~i5-2400~CPU with 8~GB of RAM, running Windows~8.1~Pro and Node v0.12.7.} by using a face-vertex mesh based implementation.
 
 \begin{figure}
   \centering
