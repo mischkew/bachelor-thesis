@@ -23,7 +23,7 @@ The concept of stacking plates is described in Section~\sectionref{sec:stackedpl
       \centering
       \includegraphics[width=\textwidth]{Images/plates_inherentplates_2.png}
     \end{subfigure}
-    \caption{Finding inherent plates (Side view). The left image shows the hollow original model (grey), the right image shows the found plates (grey).The corner areas (white) are not found.}
+    \caption{Finding inherent plates (Side view). The left image shows the hollow original model (grey), the right image shows the found plates (grey). The corner areas (white) are not found.}
     \label{fig:inhplates}
 \end{figure}
 
@@ -249,9 +249,7 @@ To do so the \emph{mergeEdges} function is called until no edge segments can be 
 
 The resulting sets of continues edge loops are converted into \class{shapes} (see Listing~\ref{lst:createShape}). Therefore from each edge loop the last vertex is removed because it is the same as the first and our \class{edgeLoops} do not need this redundancy. Afterwards all vertex indices are mapped to there corresponding coordinated because we thus for our further calculations. This vertex sets are used to create \class{edgeLoops}.
 
-With the resulting \class{edgeLoops} we try to create a \class{shape}. \note{TO DO: explain InvalidNormalError?}
-
-\note{TO DO: figures?}
+With the resulting \class{edgeLoops} we create a \class{shape}.
 
 \begin{listing}
 \begin{minted}[
@@ -331,18 +329,12 @@ createShape: (shape, groupIndex, faceVertexMesh) ->
     newEdgeLoop = new EdgeLoop(edgeLoop)
     newEdgeLoops.push newEdgeLoop
 
-  try
-    shape = new Shape(
-      newEdgeLoops,
-      faceVertexMesh.faceGroupNormals[groupIndex],
-      faceVertexMesh,
-      groupIndex
-    )
-  catch error
-    if error.name is "InvalidNormalError"
-      shape = new Shape(newEdgeLoops, new THREE.Vector3(0, 0, 1))
-      shape.isCorrupted = true
-    else throw error
+  shape = new Shape(
+    newEdgeLoops,
+    faceVertexMesh.faceGroupNormals[groupIndex],
+    faceVertexMesh,
+    groupIndex
+  )
   { removalCount, shouldBeDeleted } =
    PointOnLineRemover.removeUnnecessaryVerticesInShape shape
   @_removedVerticesCount += removalCount
@@ -524,7 +516,7 @@ findStackedPlates: (model, shapes) ->
 
 \subsection{Rotating the Model Optimizes The Results}
 
-In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. A good rotation results in fewer plates which are preferably all connected. Figure~\ref{fig:stackingorientations} shows how different rotations yield in different results. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing~\ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
+In order to find a good rotation, the model's biggest surface is aligned to the x-y-plane. A good rotation results in fewer plates which are preferably all connected. Figure~\ref{fig:stackingorientations} shows how different rotations yield different results. While the approach of stacking plates doesn't require information about the model's coplanar surfaces, this optimization does. By iteration over them, the biggest surface's rotation matrix can be found (see Listing~\ref{lst:findrotation}). This matrix can be used for transforming all vertices so that the chosen surface is parallel to the x-y-plane.
 
 \begin{figure}
   \centering
@@ -585,7 +577,7 @@ getClippingPlanes: ->
 
 \subsection{The Model's Faces are Intersected with the Clipping Planes}
 
-Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing~\ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing~\ref{lst:findplane}. Starting at the median plane (\emph{@planes.length // 2}), we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
+Clipping each face with each plane would be very slow. Thus, we first find one plane which clips the face and check the adjacent planes afterwards (see Listing~\ref{lst:clipfaceplanes}). I order to quickly find this plane, binary search is used, as shown in Listing~\ref{lst:findplane}. Starting at the median plane, whose index is calculated with \emph{@planes.length // 2}, we search the planes until one plane clipping the face is found or it is certain that no plane clips the face.
 
 \begin{listing}
 \begin{minted}[

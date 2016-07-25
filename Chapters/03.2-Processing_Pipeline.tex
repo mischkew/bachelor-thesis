@@ -256,6 +256,7 @@ Each plate is labelled with numbers for each connection to another plate. These 
 
 
 \item Calibration
+\label{sec:calibration}
 
 \emph{Calibration} is done specificly for the used laser cutter. It offsets all outlines of all plates by half the laser cutter’s kerf. Thus we incorporate that the plates will be smaller by a tenth of a millimeter after cutting. This is necessary so we can assemble all plates without using glue or skrew.
 
@@ -288,14 +289,13 @@ Each shape is transformed into a \emph{labelledShape}. \emph{LabelledShapes} are
 \item GeometryClassification
 
 \emph{GeometryClassification} looks for several types of primitive shapes within the model. Such shapes can be converted by considering its specific characteristics. This achieves a more appropriate conversion.
-\end{itemize}
 
 
 \item ZipGenerator
 
 The \emph{ZipGenerator} writes all previously generated SVG files into a ZIP file. Additionally, it collects meta data from the pipeline state and stores it as a JSON file. The meta data can be used by third party applications to reconstruct the internal data representation.
 
-
+\end{itemize}
 
 
 

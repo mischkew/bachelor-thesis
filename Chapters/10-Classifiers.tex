@@ -23,7 +23,7 @@ On the basis each of these minimal sets a candidate shape is generated and teste
 Based on this score the best model is saved or overwritten after several candidate attempts.
 \section{Primitives}
 In order to classify primitives, a minimum number of points has to be defined to enable a shape reconstruction.
-\subsection{Plane}
+\subsection{Plane Classifier}
 The minimal set for a plane consists of three points \{p1, p2, p3\} because three points uniquely identify a plane.\\
 Once a plane candidate has been found it is necessary to check its plausibility. The deviations of the plane normal to the according point normals of p1, p2 and p3 should be less than an angle $\alpha$, currently set to 0.1 .\\
 \*\\
@@ -57,7 +57,7 @@ C
 The least squares solution is the following plane equation: \\
 $z = Ax + By + C$.
 
-\subsection{Cylinder}
+\subsection{Cylinder Classifier}
 The minimal set for a cylinder consists of two points \{$p_1, p_2$\}. In Figure~\ref{fig:cylinder} the reconstruction process is sketched. Those randomly picked points are assumed to lie on the shell of the cylinder. If they are not actually lying on the shell then later there will not be enough candidates to support the cylinder which means it will be discarded. The axis can be calculated by calculating the cross product of their normals $n_1$ and $n_2$. Based on the axis a projection plane is formed which is perpendicular to the axis. The two lines $l_1 = p_1 + x*n_1$ and $l_2 = p_2 + x*n_2$ are projected onto this plane and should have an intersection. If they do not intersect the candidate is invalid. Otherwise, the intersection point is marked as the center of the cylinder-candidate. The radius is the mean value of the distance of both points to the center on the axis.
 \begin{figure}[!ht]
     \centering
@@ -71,7 +71,7 @@ After a valid candidate has been formed we have to check the plausibility. For t
 
 
 
-\subsection{Prism}
+\subsection{Prism Classifier}
 \label{ch:classifiers-prism}
 
 A Prism is a base element for many other primitives which are characterized by two parallel shapes. Therefore a prism datastructure contains two shapes and the lateral surface as a set of primitives which are usually faces or shapes.
